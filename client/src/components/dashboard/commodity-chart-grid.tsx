@@ -74,6 +74,17 @@ interface CommodityChartCardProps {
 }
 
 function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCardProps) {
+  // AI Model color mapping
+  const getModelColor = (modelName: string) => {
+    const colors: Record<string, string> = {
+      'Claude': '#10B981',
+      'ChatGPT': '#3B82F6', 
+      'Deepseek': '#8B5CF6',
+      'Gemini': '#F59E0B'
+    };
+    return colors[modelName] || '#6B7280';
+  };
+
   const { data: chartData, isLoading } = useQuery<ChartDataPoint[]>({
     queryKey: ["/api/commodities", commodity.id, "chart", 365], // 1 year of data
   });
@@ -198,7 +209,20 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                   }}
                 />
                 
-                {/* Hide prediction lines in mini view for cleaner look */}
+                {/* AI Model Prediction Lines - subtle for mini view */}
+                {aiModels.map(model => (
+                  <Line
+                    key={model.id}
+                    type="monotone"
+                    dataKey={model.name}
+                    stroke={getModelColor(model.name)}
+                    strokeWidth={1}
+                    strokeDasharray="2 2"
+                    dot={false}
+                    connectNulls={true}
+                    strokeOpacity={0.7}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
