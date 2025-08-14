@@ -123,6 +123,21 @@ export type DashboardStats = {
   avgAccuracy: number;
 };
 
+export type ChartDataPoint = {
+  date: string;
+  actualPrice: number;
+  predictions: Record<string, number>;
+};
+
+export type TimePeriod = "1m" | "5m" | "15m" | "30m" | "1h" | "2h" | "5h" | "1d" | "5d" | "1w" | "1mo" | "3mo" | "6mo" | "1y" | "2y" | "5y" | "10y" | "ytd" | "max";
+
+export type LatestPrice = {
+  price: number;
+  change?: number;
+  changePercent?: number;
+  timestamp: string;
+};
+
 export type LeagueTableEntry = {
   rank: number;
   aiModel: AiModel;
@@ -131,8 +146,4 @@ export type LeagueTableEntry = {
   trend: number;
 };
 
-export type ChartDataPoint = {
-  date: string;
-  actualPrice?: number;
-  predictions: Record<string, number>; // aiModelId -> predicted price
-};
+

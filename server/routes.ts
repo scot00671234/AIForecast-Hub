@@ -69,6 +69,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Detailed Chart Data with Real Yahoo Finance Integration
+  app.get("/api/commodities/:id/detailed-chart", async (req, res) => {
+    try {
+      const commodityId = req.params.id;
+      const period = req.query.period as string || "1mo";
+      
+      // Get commodity to access Yahoo symbol
+      const commodity = await storage.getCommodity(commodityId);
+      if (!commodity) {
+        return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      if (commodity.yahooSymbol) {
+        // Fetch real-time data from Yahoo Finance
+        const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+        
+        // Combine with AI predictions
+        const chartData = await storage.getChartData(commodityId, period === "1d" ? 1 : period === "5d" ? 5 : 30);
+        
+        // Map real-time data to chart format
+        const enhancedData = realTimeData.map((item: any) => {
+          const date = new Date(item.date).toLocaleDateString();
+          const prediction = chartData.find(c => new Date(c.date).toLocaleDateString() === date);
+          
+          return {
+            date,
+            actualPrice: item.price,
+            predictions: prediction?.predictions || {}
+          };
+        });
+
+        res.json(enhancedData);
+      } else {
+        // Fallback to stored data
+        const chartData = await storage.getChartData(commodityId, 30);
+        res.json(chartData);
+      }
+    } catch (error) {
+      console.error("Error fetching detailed chart data:", error);
+      res.status(500).json({ message: "Failed to fetch detailed chart data" });
+    }
+  });
+
+  // Latest Price with Real-time Data
+  app.get("/api/commodities/:id/latest-price", async (req, res) => {
+    try {
+      const commodityId = req.params.id;
+      const commodity = await storage.getCommodity(commodityId);
+      
+      if (!commodity) {
+        return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      if (commodity.yahooSymbol) {
+        // Get real-time price from Yahoo Finance
+        const priceData = await yahooFinanceService.getCurrentPrice(commodity.yahooSymbol);
+        
+        if (priceData) {
+          res.json({
+            price: priceData.price,
+            change: priceData.change,
+            changePercent: priceData.changePercent,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          // Fallback to latest stored price
+          const latestPrice = await storage.getLatestPrice(commodityId);
+          res.json(latestPrice || { price: 0, timestamp: new Date().toISOString() });
+        }
+      } else {
+        // Use stored data
+        const latestPrice = await storage.getLatestPrice(commodityId);
+        res.json(latestPrice || { price: 0, timestamp: new Date().toISOString() });
+      }
+    } catch (error) {
+      console.error("Error fetching latest price:", error);
+      res.status(500).json({ message: "Failed to fetch latest price" });
+    }
+  });
+
+  // Real-time Data Endpoint
+  app.get("/api/commodities/:id/realtime", async (req, res) => {
+    try {
+      const commodityId = req.params.id;
+      const period = req.query.period as string || "1d";
+      
+      const commodity = await storage.getCommodity(commodityId);
+      if (!commodity?.yahooSymbol) {
+        return res.status(404).json({ message: "Yahoo symbol not available" });
+      }
+
+      // Trigger real-time data update
+      await yahooFinanceService.updateCommodityPrices(commodityId);
+      
+      // Return updated chart data
+      const chartData = await storage.getChartData(commodityId, period === "1d" ? 1 : 30);
+      res.json(chartData);
+    } catch (error) {
+      console.error("Error fetching real-time data:", error);
+      res.status(500).json({ message: "Failed to fetch real-time data" });
+    }
+  });
+
   // Market Alerts
   app.get("/api/alerts", async (req, res) => {
     try {

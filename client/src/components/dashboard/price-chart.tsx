@@ -4,11 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import type { ChartDataPoint, Commodity, AiModel } from "@shared/schema";
+import { Expand } from "lucide-react";
+import EnhancedChartDialog from "./enhanced-chart-dialog";
+import type { ChartDataPoint, Commodity, AiModel, LatestPrice } from "@shared/schema";
 
 export default function PriceChart() {
   const [selectedDays, setSelectedDays] = useState(7);
   const [selectedCommodityId, setSelectedCommodityId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: commodities } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
@@ -27,7 +30,7 @@ export default function PriceChart() {
     enabled: !!activeCommodityId,
   });
 
-  const { data: latestPrice } = useQuery({
+  const { data: latestPrice } = useQuery<LatestPrice>({
     queryKey: ["/api/commodities", activeCommodityId, "latest-price"],
     enabled: !!activeCommodityId,
   });
@@ -115,12 +118,25 @@ export default function PriceChart() {
                 {days}D
               </Button>
             ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDialogOpen(true)}
+              className="btn-minimal micro-transition"
+              title="Expand chart with detailed analysis"
+            >
+              <Expand className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </CardHeader>
       
       <CardContent className="p-8">
-        <div className="h-80 w-full">
+        <div 
+          className="h-80 w-full cursor-pointer hover:bg-muted/30 rounded-lg transition-colors" 
+          onClick={() => setDialogOpen(true)}
+          title="Click to expand chart"
+        >
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={formattedData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -173,6 +189,16 @@ export default function PriceChart() {
         
 
       </CardContent>
+      
+      {/* Enhanced Chart Dialog */}
+      {selectedCommodity && aiModels && (
+        <EnhancedChartDialog
+          isOpen={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          commodity={selectedCommodity}
+          aiModels={aiModels}
+        />
+      )}
     </Card>
   );
 }

@@ -7,6 +7,8 @@ interface YahooFinanceResponse {
       meta: {
         symbol: string;
         regularMarketPrice: number;
+        regularMarketChange?: number;
+        regularMarketChangePercent?: number;
         currency: string;
       };
       timestamp: number[];
@@ -39,11 +41,11 @@ class YahooFinanceService {
     this.lastRequestTime = Date.now();
   }
 
-  async fetchHistoricalData(yahooSymbol: string, period = "7d"): Promise<YahooFinanceResponse | null> {
+  async fetchHistoricalData(yahooSymbol: string, period = "7d", interval = "1d"): Promise<YahooFinanceResponse | null> {
     await this.enforceRateLimit();
 
     try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?range=${period}&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?range=${period}&interval=${interval}`;
       
       const response = await fetch(url, {
         headers: {
@@ -109,14 +111,60 @@ class YahooFinanceService {
     }
   }
 
-  async getCurrentPrice(yahooSymbol: string): Promise<number | null> {
+  async getCurrentPrice(yahooSymbol: string): Promise<{ price: number; change?: number; changePercent?: number } | null> {
     const data = await this.fetchHistoricalData(yahooSymbol, "1d");
     
-    if (data?.chart?.result?.[0]?.meta?.regularMarketPrice) {
-      return data.chart.result[0].meta.regularMarketPrice;
+    if (data?.chart?.result?.[0]?.meta) {
+      const meta = data.chart.result[0].meta;
+      return {
+        price: meta.regularMarketPrice,
+        change: meta.regularMarketChange || 0,
+        changePercent: meta.regularMarketChangePercent || 0
+      };
     }
     
     return null;
+  }
+
+  async fetchDetailedHistoricalData(yahooSymbol: string, period: string): Promise<any[]> {
+    await this.enforceRateLimit();
+
+    const intervalMap: Record<string, string> = {
+      "1d": "5m",
+      "5d": "15m", 
+      "1w": "30m",
+      "1mo": "1h",
+      "3mo": "1d",
+      "6mo": "1d",
+      "1y": "1d",
+      "2y": "1wk",
+      "5y": "1mo",
+    };
+
+    const interval = intervalMap[period] || "1d";
+
+    try {
+      const data = await this.fetchHistoricalData(yahooSymbol, period, interval);
+      
+      if (data?.chart?.result?.[0]) {
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp || [];
+        const quotes = result.indicators?.quote?.[0];
+        
+        if (quotes?.close) {
+          return timestamps.map((timestamp: number, i: number) => ({
+            date: new Date(timestamp * 1000).toISOString(),
+            price: quotes.close[i],
+            volume: quotes.volume?.[i] || 0,
+          })).filter(item => item.price && !isNaN(item.price));
+        }
+      }
+      
+      return [];
+    } catch (error) {
+      console.error(`Error fetching detailed data for ${yahooSymbol}:`, error);
+      return [];
+    }
   }
 }
 
