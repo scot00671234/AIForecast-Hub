@@ -60,6 +60,22 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     }).format(price);
   };
 
+  const formattedData = chartData?.map(point => ({
+    date: new Date(point.date).toLocaleDateString("en-US", { 
+      month: "short", 
+      day: "numeric",
+      year: selectedPeriod.includes('y') ? "2-digit" : undefined
+    }),
+    actualPrice: point.actualPrice,
+    ...Object.keys(point.predictions).reduce((acc, modelId) => {
+      const model = aiModels.find(m => m.id === modelId);
+      if (model) {
+        acc[model.name] = point.predictions[modelId];
+      }
+      return acc;
+    }, {} as Record<string, number>)
+  })) || [];
+
   const formatChange = (change: number) => {
     const isPositive = change >= 0;
     return (
@@ -72,23 +88,46 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      const actualPrice = payload.find((p: any) => p.dataKey === 'actualPrice');
+      const predictions = payload.filter((p: any) => p.dataKey !== 'actualPrice');
+      
       return (
         <div className="bg-background/95 border border-border rounded-lg p-4 shadow-lg backdrop-blur-sm">
           <p className="font-semibold text-foreground mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between space-x-4">
-              <div className="flex items-center space-x-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: entry.color }}
-                />
-                <span className="text-sm text-muted-foreground">{entry.name}</span>
+          
+          {actualPrice && (
+            <div className="mb-3 pb-2 border-b border-border">
+              <div className="flex items-center justify-between space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-foreground" />
+                  <span className="text-sm font-medium text-foreground">Actual (Yahoo Finance)</span>
+                </div>
+                <span className="font-bold text-foreground">
+                  {formatPrice(actualPrice.value)}
+                </span>
               </div>
-              <span className="font-medium text-foreground">
-                {formatPrice(entry.value)}
-              </span>
             </div>
-          ))}
+          )}
+
+          {predictions.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground mb-2">AI Predictions:</p>
+              {predictions.map((entry: any, index: number) => (
+                <div key={index} className="flex items-center justify-between space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-sm text-muted-foreground">{entry.name}</span>
+                  </div>
+                  <span className="font-medium text-foreground">
+                    {formatPrice(entry.value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }

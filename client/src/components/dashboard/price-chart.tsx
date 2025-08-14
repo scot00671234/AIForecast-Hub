@@ -157,16 +157,32 @@ export default function PriceChart() {
                   backdropFilter: 'blur(8px)',
                 }}
                 labelStyle={{ color: 'var(--foreground)' }}
+                formatter={(value: any, name: string) => {
+                  if (name === 'Actual Price') {
+                    return [`$${value?.toFixed(2)}`, 'Actual (Yahoo Finance)'];
+                  }
+                  return [`$${value?.toFixed(2)}`, `${name} Prediction`];
+                }}
               />
               <Legend />
               
-              {/* Actual Price Line */}
+              {/* Actual Price Line with Enhanced Dots */}
               <Line
                 type="monotone"
                 dataKey="actualPrice"
                 stroke="var(--foreground)"
                 strokeWidth={3}
-                dot={{ fill: 'var(--foreground)', strokeWidth: 2, r: 4 }}
+                dot={{ 
+                  fill: 'var(--foreground)', 
+                  strokeWidth: 2, 
+                  r: 4,
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: 'var(--primary)',
+                  stroke: 'var(--primary-foreground)',
+                  strokeWidth: 3,
+                }}
                 name="Actual Price"
               />
               
