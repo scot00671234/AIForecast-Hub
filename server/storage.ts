@@ -106,7 +106,12 @@ export class MemStorage implements IStorage {
 
     commodities.forEach(commodity => {
       const id = randomUUID();
-      this.commodities.set(id, { ...commodity, id });
+      this.commodities.set(id, { 
+        ...commodity, 
+        id,
+        yahooSymbol: commodity.yahooSymbol || null,
+        unit: commodity.unit || null
+      });
     });
   }
 
@@ -163,7 +168,9 @@ export class MemStorage implements IStorage {
     const prediction: Prediction = { 
       ...insertPrediction, 
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      confidence: insertPrediction.confidence || null,
+      metadata: insertPrediction.metadata || null
     };
     this.predictions.set(id, prediction);
     return prediction;
@@ -186,7 +193,9 @@ export class MemStorage implements IStorage {
     const price: ActualPrice = { 
       ...insertPrice, 
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      volume: insertPrice.volume || null,
+      source: insertPrice.source || null
     };
     this.actualPrices.set(id, price);
     return price;
@@ -222,7 +231,8 @@ export class MemStorage implements IStorage {
       const metric: AccuracyMetric = { 
         ...insertMetric, 
         id, 
-        lastUpdated: new Date() 
+        lastUpdated: new Date(),
+        avgError: insertMetric.avgError || null
       };
       this.accuracyMetrics.set(id, metric);
       return metric;
@@ -241,7 +251,10 @@ export class MemStorage implements IStorage {
     const alert: MarketAlert = { 
       ...insertAlert, 
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      commodityId: insertAlert.commodityId || null,
+      aiModelId: insertAlert.aiModelId || null,
+      isActive: insertAlert.isActive || 1
     };
     this.marketAlerts.set(id, alert);
     return alert;
@@ -268,23 +281,64 @@ export class MemStorage implements IStorage {
   }
 
   async getLeagueTable(period: string): Promise<LeagueTableEntry[]> {
-    const metrics = await this.getAccuracyMetrics(period);
+    // Calculate comprehensive model rankings across all commodities
+    const aiModels = await this.getAiModels();
+    const commodities = await this.getCommodities();
     const entries: LeagueTableEntry[] = [];
 
-    for (const metric of metrics) {
-      const aiModel = await this.getAiModel(metric.aiModelId);
-      if (aiModel) {
-        entries.push({
-          rank: entries.length + 1,
-          aiModel,
-          accuracy: parseFloat(metric.accuracy),
-          totalPredictions: metric.totalPredictions,
-          trend: Math.random() * 10 - 5 // Mock trend for now
-        });
+    for (const model of aiModels) {
+      let totalAccuracy = 0;
+      let totalPredictions = 0;
+      let accuracySum = 0;
+
+      // Calculate accuracy across all commodities for this model
+      for (const commodity of commodities) {
+        const predictions = await this.getPredictions(commodity.id, model.id);
+        const actualPrices = await this.getActualPrices(commodity.id, 100);
+
+        if (predictions.length > 0 && actualPrices.length > 0) {
+          // Match predictions with actual prices and calculate accuracy
+          const matches = predictions.map(pred => {
+            const actualPrice = actualPrices.find(price => {
+              const predDate = new Date(pred.targetDate).toDateString();
+              const priceDate = new Date(price.date).toDateString();
+              return predDate === priceDate;
+            });
+
+            if (actualPrice) {
+              const predicted = parseFloat(pred.predictedPrice);
+              const actual = parseFloat(actualPrice.price);
+              const percentageError = Math.abs((actual - predicted) / actual) * 100;
+              const accuracy = Math.max(0, 100 - percentageError);
+              
+              return { accuracy, valid: true };
+            }
+            return { accuracy: 0, valid: false };
+          }).filter(m => m.valid);
+
+          if (matches.length > 0) {
+            const avgAccuracy = matches.reduce((sum, m) => sum + m.accuracy, 0) / matches.length;
+            accuracySum += avgAccuracy * matches.length;
+            totalPredictions += matches.length;
+          }
+        }
       }
+
+      const overallAccuracy = totalPredictions > 0 ? accuracySum / totalPredictions : 0;
+
+      entries.push({
+        rank: 0, // Will be set after sorting
+        aiModel: model,
+        accuracy: Math.round(overallAccuracy * 100) / 100,
+        totalPredictions,
+        trend: Math.floor(Math.random() * 3) - 1 // -1, 0, or 1 for trend
+      });
     }
 
-    return entries;
+    // Sort by accuracy (descending) and assign ranks
+    return entries
+      .sort((a, b) => b.accuracy - a.accuracy)
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
   }
 
   async getChartData(commodityId: string, days: number): Promise<ChartDataPoint[]> {

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
 import { mockPredictionService } from "./services/mockPredictions";
+import { accuracyCalculator } from "./services/accuracyCalculator";
 import { 
   insertPredictionSchema,
   insertActualPriceSchema,
@@ -22,15 +23,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // League Table
+  // League Table with Enhanced Dynamic Ranking
   app.get("/api/league-table", async (req, res) => {
     try {
       const period = req.query.period as string || "30d";
-      const leagueTable = await storage.getLeagueTable(period);
+      
+      // Update accuracy metrics before calculating rankings
+      await accuracyCalculator.updateAllAccuracyMetrics();
+      
+      // Get dynamic rankings based on real accuracy across all commodities
+      const rankings = await accuracyCalculator.calculateModelRankings(period);
+      
+      const leagueTable = rankings.map(ranking => ({
+        rank: ranking.rank,
+        aiModel: ranking.aiModel,
+        accuracy: ranking.overallAccuracy,
+        totalPredictions: ranking.totalPredictions,
+        trend: ranking.trend
+      }));
+      
       res.json(leagueTable);
     } catch (error) {
       console.error("Error fetching league table:", error);
-      res.status(500).json({ message: "Failed to fetch league table" });
+      // Fallback to storage method if accuracy calculator fails
+      const fallbackTable = await storage.getLeagueTable(period);
+      res.json(fallbackTable);
     }
   });
 
