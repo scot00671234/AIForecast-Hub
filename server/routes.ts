@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
+import { mockPredictionService } from "./services/mockPredictions";
 import { 
   insertPredictionSchema,
   insertActualPriceSchema,
@@ -155,6 +156,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch accuracy metrics" });
     }
   });
+
+  // AI Predictions for All Commodities
+  app.get("/api/predictions/all", async (req, res) => {
+    try {
+      const commodities = await storage.getCommodities();
+      const allPredictions: any[] = [];
+
+      for (const commodity of commodities) {
+        let predictions = mockPredictionService.getPredictionsForCommodity(commodity.id);
+        
+        if (!predictions) {
+          // Generate predictions if they don't exist
+          predictions = mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
+        }
+
+        const currentPrice = mockPredictionService.getCurrentPrice(commodity.id) || 0;
+        const priceChange = mockPredictionService.getPriceChange(commodity.id);
+
+        allPredictions.push({
+          commodity,
+          currentPrice,
+          priceChange,
+          chartData: predictions.predictions.slice(-30) // Last 30 days for charts
+        });
+      }
+
+      res.json(allPredictions);
+    } catch (error) {
+      console.error("Error fetching all predictions:", error);
+      res.status(500).json({ message: "Failed to fetch predictions" });
+    }
+  });
+
+  // Initialize prediction data on startup
+  const initializePredictions = async () => {
+    try {
+      const commodities = await storage.getCommodities();
+      for (const commodity of commodities) {
+        if (!mockPredictionService.getPredictionsForCommodity(commodity.id)) {
+          mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
+        }
+      }
+      console.log(`Initialized predictions for ${commodities.length} commodities`);
+    } catch (error) {
+      console.error("Error initializing predictions:", error);
+    }
+  };
+
+  // Initialize predictions
+  await initializePredictions();
 
   const httpServer = createServer(app);
   return httpServer;

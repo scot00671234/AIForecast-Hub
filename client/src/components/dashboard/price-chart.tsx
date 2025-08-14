@@ -171,22 +171,7 @@ export default function PriceChart() {
           </ResponsiveContainer>
         </div>
         
-        {/* Chart Legend */}
-        <div className="mt-6 flex flex-wrap gap-4 justify-center" data-testid="chart-legend">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-foreground rounded-full"></div>
-            <span className="text-sm text-muted-foreground">Actual Price</span>
-          </div>
-          {aiModels?.map(model => (
-            <div key={model.id} className="flex items-center space-x-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: model.color }}
-              ></div>
-              <span className="text-sm text-muted-foreground">{model.name}</span>
-            </div>
-          ))}
-        </div>
+
       </CardContent>
     </Card>
   );

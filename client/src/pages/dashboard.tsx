@@ -1,14 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { ChartLineIcon, MoonIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import LeagueTable from "@/components/dashboard/league-table";
-import CommoditySelector from "@/components/dashboard/commodity-selector";
-import PriceChart from "@/components/dashboard/price-chart";
-import RecentActivity from "@/components/dashboard/recent-activity";
-import MarketAlerts from "@/components/dashboard/market-alerts";
-import AccuracyMetrics from "@/components/dashboard/accuracy-metrics";
+import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 
 export default function Dashboard() {
   const { theme, setTheme } = useTheme();
@@ -29,21 +24,7 @@ export default function Dashboard() {
               <h1 className="text-xl font-semibold tracking-tight text-foreground">AIForecast Hub</h1>
             </div>
             
-            {/* Minimal Navigation */}
-            <div className="hidden md:flex items-center space-x-12">
-              <a href="#" className="text-sm font-medium text-foreground micro-transition hover:text-primary" data-testid="nav-dashboard">
-                Dashboard
-              </a>
-              <a href="#" className="text-sm font-medium text-muted-foreground micro-transition hover:text-foreground" data-testid="nav-commodities">
-                Commodities
-              </a>
-              <a href="#" className="text-sm font-medium text-muted-foreground micro-transition hover:text-foreground" data-testid="nav-analytics">
-                Analytics
-              </a>
-              <a href="#" className="text-sm font-medium text-muted-foreground micro-transition hover:text-foreground" data-testid="nav-api">
-                API
-              </a>
-            </div>
+
             
             {/* Minimal Theme Toggle */}
             <Button
@@ -79,25 +60,13 @@ export default function Dashboard() {
           <StatsOverview />
         </section>
 
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Primary Content Area */}
-          <div className="lg:col-span-2 space-y-12">
-            <LeagueTable />
-            <PriceChart />
-          </div>
-
-          {/* Clean Sidebar */}
-          <div className="space-y-12">
-            <CommoditySelector />
-            <RecentActivity />
-          </div>
+        <div className="space-y-16">
+          {/* League Table */}
+          <LeagueTable />
+          
+          {/* All Commodities View */}
+          <AllCommoditiesView />
         </div>
-
-        {/* Bottom Section */}
-        <section className="mt-16 grid md:grid-cols-2 gap-12">
-          <AccuracyMetrics />
-          <MarketAlerts />
-        </section>
       </main>
 
       {/* Minimal Footer */}
