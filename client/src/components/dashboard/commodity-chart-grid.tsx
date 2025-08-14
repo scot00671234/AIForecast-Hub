@@ -123,17 +123,44 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const actualPrice = payload.find((p: any) => p.dataKey === 'actualPrice');
+      const predictions = payload.filter((p: any) => p.dataKey !== 'actualPrice');
       
       return (
-        <div className="bg-background/95 backdrop-blur border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium text-foreground mb-1">{label}</p>
+        <div className="bg-background/95 backdrop-blur border border-border rounded-lg p-3 shadow-lg min-w-[200px]">
+          <p className="font-semibold text-foreground mb-2">{label}</p>
+          
           {actualPrice && (
-            <p className="text-sm">
-              <span className="text-muted-foreground">Actual: </span>
-              <span className="font-semibold text-foreground">
-                ${actualPrice.value?.toFixed(2)}
-              </span>
-            </p>
+            <div className="mb-2 pb-2 border-b border-border">
+              <div className="flex items-center justify-between space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-foreground" />
+                  <span className="text-sm font-medium text-foreground">Actual (Yahoo Finance)</span>
+                </div>
+                <span className="font-bold text-foreground">
+                  ${actualPrice.value?.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {predictions.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground mb-1">AI Predictions:</p>
+              {predictions.map((entry: any, index: number) => (
+                <div key={index} className="flex items-center justify-between space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-sm text-muted-foreground">{entry.name}</span>
+                  </div>
+                  <span className="font-medium text-foreground">
+                    ${entry.value?.toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       );
@@ -171,56 +198,85 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
       
       <CardContent className="pt-0">
         {isLoading ? (
-          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-32 w-full" />
         ) : (
-          <div className="h-20">
+          <div className="h-32 bg-background/50 rounded-md border border-border/50 overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                {/* Very subtle grid */}
-                <CartesianGrid strokeDasharray="1 1" stroke="currentColor" className="opacity-5" />
+              <LineChart data={formattedData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
+                {/* Professional grid */}
+                <CartesianGrid 
+                  strokeDasharray="1 1" 
+                  stroke="hsl(var(--border))" 
+                  opacity={0.2}
+                  horizontal={true}
+                  vertical={false}
+                />
                 
-                {/* Hide X-axis for cleaner mini view */}
+                {/* X-axis with minimal labels */}
                 <XAxis 
                   dataKey="date" 
                   axisLine={false}
                   tickLine={false}
-                  tick={false}
-                  height={0}
+                  tick={{ 
+                    fill: "hsl(var(--muted-foreground))", 
+                    fontSize: 9, 
+                    fontWeight: 400 
+                  }}
+                  height={20}
+                  interval="preserveStartEnd"
                 />
+                
+                {/* Y-axis on right */}
                 <YAxis 
-                  hide
+                  orientation="right"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ 
+                    fill: "hsl(var(--muted-foreground))", 
+                    fontSize: 9, 
+                    fontWeight: 400 
+                  }}
+                  tickFormatter={(value) => `$${Number(value).toFixed(1)}`}
                   domain={['dataMin - 1', 'dataMax + 1']}
+                  width={30}
                 />
+                
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Main price trend line - clean and smooth */}
+                {/* Main price trend line with dots */}
                 <Line
                   type="monotone"
                   dataKey="actualPrice"
-                  stroke={isPositive ? "#22c55e" : "#ef4444"}
-                  strokeWidth={1.5}
-                  dot={false}
+                  stroke="#1f2937"
+                  strokeWidth={2}
+                  dot={{ fill: "#1f2937", strokeWidth: 1, r: 2 }}
                   connectNulls={true}
                   activeDot={{ 
                     r: 3, 
-                    fill: isPositive ? "#22c55e" : "#ef4444",
+                    fill: "#1f2937",
                     stroke: "white",
                     strokeWidth: 1
                   }}
                 />
                 
-                {/* AI Model Prediction Lines - subtle for mini view */}
+                {/* AI Model Prediction Lines with dots */}
                 {aiModels.map(model => (
                   <Line
                     key={model.id}
                     type="monotone"
                     dataKey={model.name}
                     stroke={getModelColor(model.name)}
-                    strokeWidth={1}
-                    strokeDasharray="2 2"
-                    dot={false}
+                    strokeWidth={1.5}
+                    strokeDasharray="3 3"
+                    dot={{ fill: getModelColor(model.name), strokeWidth: 1, r: 1.5 }}
                     connectNulls={true}
-                    strokeOpacity={0.7}
+                    strokeOpacity={0.8}
+                    activeDot={{ 
+                      r: 2, 
+                      fill: getModelColor(model.name),
+                      stroke: "white",
+                      strokeWidth: 1
+                    }}
                   />
                 ))}
               </LineChart>
@@ -228,9 +284,9 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
           </div>
         )}
         
-        <div className="mt-3 pt-3 border-t border-border">
+        <div className="mt-2 pt-2 border-t border-border">
           <p className="text-xs text-muted-foreground text-center">
-            1 Year View • Click to view detailed analysis
+            1 Year View with AI Predictions • Click for full analysis
           </p>
         </div>
       </CardContent>
