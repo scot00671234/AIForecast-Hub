@@ -60,21 +60,24 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     }).format(price);
   };
 
-  const formattedData = chartData?.map(point => ({
-    date: new Date(point.date).toLocaleDateString("en-US", { 
-      month: "short", 
-      day: "numeric",
-      year: selectedPeriod.includes('y') ? "2-digit" : undefined
-    }),
-    actualPrice: point.actualPrice,
-    ...Object.keys(point.predictions).reduce((acc, modelId) => {
-      const model = aiModels.find(m => m.id === modelId);
-      if (model) {
-        acc[model.name] = point.predictions[modelId];
-      }
-      return acc;
-    }, {} as Record<string, number>)
-  })) || [];
+  const formattedData = chartData?.map(point => {
+    const dataPoint: any = {
+      date: point.date, // Use the date as-is since the API already formats it
+      actualPrice: point.actualPrice,
+    };
+    
+    // Add predictions using model names as keys for Recharts
+    if (point.predictions && aiModels) {
+      Object.keys(point.predictions).forEach(modelId => {
+        const model = aiModels.find(m => m.id === modelId);
+        if (model) {
+          dataPoint[model.name] = point.predictions[modelId];
+        }
+      });
+    }
+    
+    return dataPoint;
+  }) || [];
 
   const formatChange = (change: number) => {
     const isPositive = change >= 0;
@@ -242,7 +245,8 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(value) => `$${value}`}
+                        tickFormatter={(value) => `$${value.toFixed(2)}`}
+                        domain={['dataMin - 5', 'dataMax + 5']}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Legend />
@@ -262,7 +266,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                         <Line
                           key={model.id}
                           type="monotone"
-                          dataKey={`predictions.${model.id}`}
+                          dataKey={model.name}
                           stroke={aiModelColors[model.name as keyof typeof aiModelColors] || model.color}
                           strokeWidth={2}
                           strokeDasharray="5 5"
