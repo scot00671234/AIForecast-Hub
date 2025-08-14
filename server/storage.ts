@@ -147,17 +147,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
-    let query = db.select().from(predictions);
-    
-    const conditions = [];
-    if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
-    if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+    try {
+      let baseQuery = db.select().from(predictions);
+      
+      const conditions = [];
+      if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+      if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+      
+      if (conditions.length > 0) {
+        baseQuery = baseQuery.where(and(...conditions));
+      }
+      
+      return await baseQuery.orderBy(desc(predictions.createdAt));
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+      return [];
     }
-    
-    return await query.orderBy(desc(predictions.createdAt));
   }
 
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
@@ -166,15 +171,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
-    let query = db.select().from(actualPrices)
-      .where(eq(actualPrices.commodityId, commodityId))
-      .orderBy(desc(actualPrices.date));
-    
-    if (limit) {
-      query = query.limit(limit);
+    try {
+      let query = db.select().from(actualPrices)
+        .where(eq(actualPrices.commodityId, commodityId))
+        .orderBy(desc(actualPrices.date));
+      
+      if (limit) {
+        query = query.limit(limit);
+      }
+      
+      return await query;
+    } catch (error) {
+      console.error('Error fetching actual prices:', error);
+      return [];
     }
-    
-    return await query;
   }
 
   async createActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {

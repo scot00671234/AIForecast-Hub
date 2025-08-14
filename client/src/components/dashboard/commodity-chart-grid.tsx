@@ -143,7 +143,12 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
           </div>
           {latestPrice && (
             <div className="text-right">
-              <p className="text-lg font-bold">${latestPrice.price}</p>
+              <p className="text-lg font-bold">{new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(latestPrice.price)}</p>
               <div className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                 {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                 {isPositive ? '+' : ''}{change.percentage.toFixed(2)}%
@@ -168,7 +173,10 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                   tick={{ fontSize: 10 }}
                   height={20}
                 />
-                <YAxis hide />
+                <YAxis 
+                  hide
+                  domain={['dataMin - 1', 'dataMax + 1']}
+                />
                 <Tooltip content={<CustomTooltip />} />
                 
                 {/* Actual Price Line with visible dots showing values */}
@@ -180,7 +188,7 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                   dot={{ 
                     fill: 'var(--foreground)', 
                     strokeWidth: 2, 
-                    r: 3,
+                    r: 2,
                   }}
                   activeDot={{ 
                     r: 5, 
