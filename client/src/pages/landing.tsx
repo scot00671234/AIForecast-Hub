@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { ChevronRightIcon, BarChart3Icon, TrendingUpIcon, ZapIcon } from "lucide-react";
 import { ThemeToggle } from "../components/theme-toggle";
-import heroBackground from "@assets/image_1755198621502.png";
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -48,25 +47,14 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <main 
-        className="relative overflow-hidden min-h-screen"
-        style={{
-          backgroundImage: `url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"></div>
-
-        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 pt-32 pb-20 text-center">
+      <main className="relative overflow-hidden min-h-screen">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 pt-32 pb-20 text-center">
           <div>
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white mb-8 leading-tight animate-fade-in drop-shadow-lg">
+            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-8 leading-tight animate-fade-in">
               Compare AI
-              <span className="block text-primary drop-shadow-lg">Prediction Accuracy</span>
+              <span className="block text-primary">Prediction Accuracy</span>
             </h1>
-            <p className="text-xl lg:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow">
+            <p className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
               Track and analyze how well Claude, ChatGPT, and Deepseek predict commodity prices. 
               Real-time data, comprehensive analytics, and performance insights.
             </p>
