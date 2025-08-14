@@ -47,10 +47,47 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <main className="relative">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 pt-32 pb-20 text-center">
-          <div className="animate-fade-in">
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-8 leading-tight">
+      <main className="relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-30 dark:opacity-20">
+          <svg className="w-full h-full" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Grid pattern */}
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-muted-foreground/20"/>
+              </pattern>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.1"/>
+                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+            
+            {/* Abstract data visualization elements */}
+            <g className="text-primary/20">
+              {/* Chart lines */}
+              <path d="M100 400 Q200 300 300 350 T500 320 T700 280 T900 250" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5,5"/>
+              <path d="M100 450 Q200 380 300 420 T500 390 T700 360 T900 330" 
+                    fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3,3"/>
+              
+              {/* Data points */}
+              <circle cx="300" cy="350" r="4" fill="currentColor"/>
+              <circle cx="500" cy="320" r="4" fill="currentColor"/>
+              <circle cx="700" cy="280" r="4" fill="currentColor"/>
+              <circle cx="900" cy="250" r="4" fill="currentColor"/>
+              
+              {/* Floating elements */}
+              <rect x="150" y="200" width="60" height="40" rx="8" fill="url(#gradient1)" stroke="currentColor" strokeWidth="1"/>
+              <rect x="800" y="150" width="80" height="50" rx="10" fill="url(#gradient1)" stroke="currentColor" strokeWidth="1"/>
+              <circle cx="1000" cy="400" r="30" fill="url(#gradient1)" stroke="currentColor" strokeWidth="1"/>
+            </g>
+          </svg>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto px-6 lg:px-8 pt-32 pb-20 text-center">
+          <div>
+            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-8 leading-tight animate-fade-in">
               Compare AI
               <span className="block text-primary">Prediction Accuracy</span>
             </h1>
@@ -73,13 +110,13 @@ export default function Landing() {
           </div>
 
           {/* Feature Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mt-24 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <div className="grid md:grid-cols-3 gap-8 mt-24 animate-fade-in-delayed" style={{ animationDelay: "0.2s" }}>
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <Card 
                   key={feature.title}
-                  className="glass-card hover-lift smooth-transition"
+                  className="glass-card hover-lift smooth-transition animate-fade-in-delayed"
                   style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                   data-testid={`feature-${index}`}
                 >
