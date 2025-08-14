@@ -222,84 +222,115 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
               </div>
             ) : (
               <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-                {/* Chart Toolbar */}
-                <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-muted/30">
+                {/* TradingView-style Chart Header */}
+                <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border">
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <div className="w-3 h-0.5 bg-black"></div>
+                        <div className="w-4 h-0.5 bg-foreground"></div>
                         <span className="text-sm font-medium">Actual Price</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="w-3 h-0.5 bg-[#10B981] border-dashed border-t-2 border-[#10B981]"></div>
+                        <div className="w-4 h-0.5 bg-[#10B981] opacity-80" style={{borderTop: '2px dashed #10B981'}}></div>
                         <span className="text-sm text-muted-foreground">Claude</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="w-3 h-0.5 bg-[#3B82F6] border-dashed border-t-2 border-[#3B82F6]"></div>
+                        <div className="w-4 h-0.5 bg-[#3B82F6] opacity-80" style={{borderTop: '2px dashed #3B82F6'}}></div>
                         <span className="text-sm text-muted-foreground">ChatGPT</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="w-3 h-0.5 bg-[#8B5CF6] border-dashed border-t-2 border-[#8B5CF6]"></div>
+                        <div className="w-4 h-0.5 bg-[#8B5CF6] opacity-80" style={{borderTop: '2px dashed #8B5CF6'}}></div>
                         <span className="text-sm text-muted-foreground">Deepseek</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Data from Yahoo Finance • Updated {new Date().toLocaleTimeString()}
+                  
+                  <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <span>Yahoo Finance</span>
+                    </div>
+                    <span className="text-xs">•</span>
+                    <span>Real-time</span>
                   </div>
                 </div>
                 
-                <div className="h-[500px] w-full p-6">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.2} />
-                      <XAxis 
-                        dataKey="date" 
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
-                        tick={{fill: "hsl(var(--muted-foreground))"}}
-                      />
-                      <YAxis 
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
-                        tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
-                        domain={['dataMin - 5', 'dataMax + 5']}
-                        tick={{fill: "hsl(var(--muted-foreground))"}}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      
-                      {/* Actual Price Line */}
-                      <Line
-                        type="monotone"
-                        dataKey="actualPrice"
-                        stroke="#000000"
-                        strokeWidth={3}
-                        dot={{ fill: "#000000", strokeWidth: 2, r: 4 }}
-                        name="Actual Price"
-                        connectNulls={false}
-                      />
-                      
-                      {/* AI Model Prediction Lines */}
-                      {aiModels?.map(model => (
-                        <Line
-                          key={model.id}
-                          type="monotone"
-                          dataKey={model.name}
-                          stroke={aiModelColors[model.name as keyof typeof aiModelColors] || "#999999"}
-                          strokeWidth={2}
-                          strokeDasharray="5 5"
-                          dot={{ fill: aiModelColors[model.name as keyof typeof aiModelColors] || "#999999", strokeWidth: 2, r: 3 }}
-                          name={`${model.name} Prediction`}
-                          connectNulls={false}
+                <div className="h-[500px] w-full bg-background border border-border rounded-lg overflow-hidden">
+                  <div className="h-full w-full relative">
+                    {/* TradingView-style price axis background */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background"></div>
+                    
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={formattedData} margin={{ top: 10, right: 60, left: 10, bottom: 30 }}>
+                        {/* Subtle professional grid */}
+                        <CartesianGrid 
+                          strokeDasharray="1 1" 
+                          stroke="hsl(var(--border))" 
+                          opacity={0.3}
+                          horizontal={true}
+                          vertical={false}
                         />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
+                        
+                        {/* X-axis with professional styling */}
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ 
+                            fill: "hsl(var(--muted-foreground))", 
+                            fontSize: 11, 
+                            fontWeight: 500 
+                          }}
+                          height={30}
+                          interval="preserveStartEnd"
+                        />
+                        
+                        {/* Y-axis positioned on right like TradingView */}
+                        <YAxis 
+                          orientation="right"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ 
+                            fill: "hsl(var(--muted-foreground))", 
+                            fontSize: 11, 
+                            fontWeight: 500 
+                          }}
+                          tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
+                          domain={['dataMin - 2', 'dataMax + 2']}
+                          width={60}
+                        />
+                        
+                        <Tooltip content={<CustomTooltip />} />
+                        
+                        {/* Actual Price Line - bold and prominent */}
+                        <Line
+                          type="monotone"
+                          dataKey="actualPrice"
+                          stroke="#1f2937"
+                          strokeWidth={2.5}
+                          dot={false}
+                          name="Actual Price"
+                          connectNulls={true}
+                        />
+                        
+                        {/* AI Model Prediction Lines - subtle and dashed */}
+                        {aiModels?.map(model => (
+                          <Line
+                            key={model.id}
+                            type="monotone"
+                            dataKey={model.name}
+                            stroke={aiModelColors[model.name as keyof typeof aiModelColors] || "#999999"}
+                            strokeWidth={1.5}
+                            strokeDasharray="4 4"
+                            dot={false}
+                            name={`${model.name} Prediction`}
+                            connectNulls={true}
+                            strokeOpacity={0.8}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             )}
