@@ -30,7 +30,12 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1mo");
 
   const { data: chartData, isLoading: chartLoading } = useQuery<ChartDataPoint[]>({
-    queryKey: ["/api/commodities", commodity.id, "detailed-chart", selectedPeriod],
+    queryKey: [`/api/commodities/${commodity.id}/detailed-chart`, selectedPeriod],
+    queryFn: async () => {
+      const response = await fetch(`/api/commodities/${commodity.id}/detailed-chart?period=${selectedPeriod}`);
+      if (!response.ok) throw new Error('Failed to fetch chart data');
+      return response.json();
+    },
     enabled: isOpen && !!commodity.id,
   });
 
@@ -62,7 +67,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
   const formattedData = chartData?.map(point => {
     const dataPoint: any = {
-      date: point.date, // Use the date as-is since the API already formats it
+      date: point.date,
       actualPrice: point.actualPrice,
     };
     
@@ -78,6 +83,15 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     
     return dataPoint;
   }) || [];
+
+  // Debug logging
+  console.log('Chart Debug:', {
+    chartDataLength: chartData?.length,
+    formattedDataLength: formattedData.length,
+    aiModelsCount: aiModels?.length,
+    firstDataPoint: formattedData[0],
+    aiModelNames: aiModels?.map(m => m.name)
+  });
 
   const formatChange = (change: number) => {
     const isPositive = change >= 0;
@@ -245,7 +259,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(value) => `$${value.toFixed(2)}`}
+                        tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
                         domain={['dataMin - 5', 'dataMax + 5']}
                       />
                       <Tooltip content={<CustomTooltip />} />
@@ -255,10 +269,11 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                       <Line
                         type="monotone"
                         dataKey="actualPrice"
-                        stroke="hsl(var(--foreground))"
+                        stroke="#000000"
                         strokeWidth={3}
-                        dot={{ fill: "hsl(var(--foreground))", strokeWidth: 2, r: 4 }}
+                        dot={{ fill: "#000000", strokeWidth: 2, r: 4 }}
                         name="Actual Price"
+                        connectNulls={false}
                       />
                       
                       {/* AI Model Prediction Lines */}
@@ -267,11 +282,12 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                           key={model.id}
                           type="monotone"
                           dataKey={model.name}
-                          stroke={aiModelColors[model.name as keyof typeof aiModelColors] || model.color}
+                          stroke={aiModelColors[model.name as keyof typeof aiModelColors] || "#999999"}
                           strokeWidth={2}
                           strokeDasharray="5 5"
-                          dot={{ fill: aiModelColors[model.name as keyof typeof aiModelColors] || model.color, strokeWidth: 2, r: 3 }}
+                          dot={{ fill: aiModelColors[model.name as keyof typeof aiModelColors] || "#999999", strokeWidth: 2, r: 3 }}
                           name={`${model.name} Prediction`}
+                          connectNulls={false}
                         />
                       ))}
                     </LineChart>
