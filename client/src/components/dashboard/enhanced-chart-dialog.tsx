@@ -251,51 +251,47 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                 
                 <div className="h-[500px] w-full p-6">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.2} />
+                    <LineChart data={formattedData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                      {/* Very minimal grid */}
+                      <CartesianGrid strokeDasharray="1 1" stroke="currentColor" className="opacity-5" />
+                      
+                      {/* Hide axes for clean sparkline look */}
                       <XAxis 
                         dataKey="date" 
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={11}
+                        axisLine={false}
                         tickLine={false}
-                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
-                        tick={{fill: "hsl(var(--muted-foreground))"}}
+                        tick={false}
+                        height={0}
                       />
                       <YAxis 
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
-                        tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
+                        hide
                         domain={['dataMin - 5', 'dataMax + 5']}
-                        tick={{fill: "hsl(var(--muted-foreground))"}}
                       />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
                       
-                      {/* Actual Price Line */}
+                      {/* Actual Price Line - clean and thin */}
                       <Line
                         type="monotone"
                         dataKey="actualPrice"
-                        stroke="#000000"
-                        strokeWidth={3}
-                        dot={{ fill: "#000000", strokeWidth: 2, r: 4 }}
+                        stroke="#22c55e"
+                        strokeWidth={2}
+                        dot={false}
                         name="Actual Price"
-                        connectNulls={false}
+                        connectNulls={true}
                       />
                       
-                      {/* AI Model Prediction Lines */}
+                      {/* AI Model Prediction Lines - very subtle */}
                       {aiModels?.map(model => (
                         <Line
                           key={model.id}
                           type="monotone"
                           dataKey={model.name}
                           stroke={aiModelColors[model.name as keyof typeof aiModelColors] || "#999999"}
-                          strokeWidth={2}
-                          strokeDasharray="5 5"
-                          dot={{ fill: aiModelColors[model.name as keyof typeof aiModelColors] || "#999999", strokeWidth: 2, r: 3 }}
-                          name={`${model.name} Prediction`}
-                          connectNulls={false}
+                          strokeWidth={1}
+                          strokeDasharray="2 2"
+                          dot={false}
+                          name={`${model.name}`}
+                          connectNulls={true}
+                          strokeOpacity={0.6}
                         />
                       ))}
                     </LineChart>
