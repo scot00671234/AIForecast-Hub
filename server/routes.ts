@@ -75,10 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chart Data
-  app.get("/api/commodities/:id/chart", async (req, res) => {
+  app.get("/api/commodities/:id/chart/:days", async (req, res) => {
     try {
       const commodityId = req.params.id;
-      const days = parseInt(req.query.days as string) || 7;
+      const days = parseInt(req.params.days) || 7;
       const chartData = await storage.getChartData(commodityId, days);
       res.json(chartData);
     } catch (error) {
