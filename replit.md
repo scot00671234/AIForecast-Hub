@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application that tracks and analyzes AI model predictions for commodity prices. The platform allows users to compare the accuracy of different AI models (Claude, ChatGPT, Deepseek) in predicting hard and soft commodity prices. It features real-time price tracking from Yahoo Finance, interactive charts, league tables, and performance analytics with a modern glass-morphism UI.
+This is a full-stack web application that tracks and analyzes AI model predictions for commodity prices. The platform features a clean landing page with "click to continue" functionality and a comprehensive dashboard that allows users to compare the accuracy of different AI models (Claude, ChatGPT, Deepseek) in predicting hard and soft commodity prices. It includes real-time price tracking from Yahoo Finance, interactive charts, league tables, and performance analytics with an ultra-minimal design aesthetic inspired by Apple/Vercel.
 
 ## User Preferences
 
@@ -13,11 +13,12 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Architecture
 - **Framework**: React with TypeScript using Vite for fast development and building
 - **UI Library**: shadcn/ui components built on top of Radix UI primitives for accessibility
-- **Styling**: Tailwind CSS with custom design system featuring glass-morphism effects and dark/light themes
+- **Styling**: Tailwind CSS with ultra-minimal design system featuring subtle glass-morphism effects and seamless dark/light theme switching
 - **State Management**: TanStack React Query for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
+- **Routing**: Wouter for lightweight client-side routing with landing page and dashboard routes
 - **Charts**: Recharts for interactive data visualizations
 - **Forms**: React Hook Form with Zod validation for type-safe form handling
+- **Theme System**: Custom theme toggle component with smooth transitions and persistent storage
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js server
