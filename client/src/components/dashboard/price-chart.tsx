@@ -62,49 +62,54 @@ export default function PriceChart() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card glass-shadow smooth-transition">
-        <CardHeader className="border-b border-border/50">
+      <Card className="glass-card hover-lift smooth-transition">
+        <CardHeader className="border-b border-border-subtle pb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <Skeleton className="h-6 w-64 mb-2" />
-              <Skeleton className="h-4 w-32" />
+            <div className="space-y-3">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-40" />
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-12" />
               ))}
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          <Skeleton className="h-80 w-full" />
+        <CardContent className="p-8">
+          <Skeleton className="h-80 w-full rounded-xl" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="glass-card glass-shadow smooth-transition" data-testid="price-chart">
-      <CardHeader className="border-b border-border/50">
+    <Card className="glass-card hover-lift smooth-transition" data-testid="price-chart">
+      <CardHeader className="border-b border-border-subtle pb-6">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-semibold text-foreground">
-              {selectedCommodity?.name || "Commodity"} ({selectedCommodity?.symbol}) - Predictions vs Actual
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">
+              {selectedCommodity?.name || "Commodity"} Price Tracking
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Current Price: <span className="font-semibold text-green-600 dark:text-green-400" data-testid="current-price">
-                ${latestPrice?.price || "N/A"}
-              </span>
+            <p className="text-sm text-muted-foreground font-medium">
+              <span className="font-mono text-xs">{selectedCommodity?.symbol}</span> 
+              {latestPrice?.price && (
+                <span className="ml-3">
+                  Current: <span className="font-semibold text-primary" data-testid="current-price">
+                    ${latestPrice.price}
+                  </span>
+                </span>
+              )}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {[7, 30, 90].map(days => (
               <Button
                 key={days}
-                variant={selectedDays === days ? "default" : "outline"}
+                variant={selectedDays === days ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setSelectedDays(days)}
-                className={`${selectedDays === days ? "" : "glass-card"} smooth-transition`}
+                className={`${selectedDays === days ? "bg-primary text-white" : "btn-minimal"} micro-transition`}
                 data-testid={`button-days-${days}`}
               >
                 {days}D
@@ -114,7 +119,7 @@ export default function PriceChart() {
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
+      <CardContent className="p-8">
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={formattedData}>

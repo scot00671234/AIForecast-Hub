@@ -61,32 +61,32 @@ export default function RecentActivity() {
   };
 
   return (
-    <Card className="glass-card glass-shadow smooth-transition" data-testid="recent-activity">
-      <CardHeader className="border-b border-border/50">
-        <CardTitle className="text-xl font-semibold text-foreground">
+    <Card className="glass-card hover-lift smooth-transition" data-testid="recent-activity">
+      <CardHeader className="border-b border-border-subtle pb-6">
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
           Recent Activity
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4 custom-scrollbar max-h-64 overflow-y-auto">
+      <CardContent className="p-8">
+        <div className="space-y-6 custom-scrollbar max-h-64 overflow-y-auto">
           {activities?.map((activity, index) => (
             <div 
               key={activity.id} 
-              className="flex items-start space-x-3 animate-fade-in"
+              className="flex items-start space-x-4 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
               data-testid={`activity-${index}`}
             >
-              <div className={`flex-shrink-0 w-2 h-2 ${getModelColor(activity.model)} rounded-full mt-2`}></div>
+              <div className={`flex-shrink-0 w-2 h-2 ${getModelColor(activity.model)} rounded-full mt-3`}></div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-foreground">
-                  <span className="font-medium" data-testid={`activity-model-${index}`}>
+                <p className="text-sm text-foreground leading-relaxed">
+                  <span className="font-semibold" data-testid={`activity-model-${index}`}>
                     {activity.model}
                   </span> predicted{" "}
-                  <span className="font-medium text-primary" data-testid={`activity-commodity-${index}`}>
+                  <span className="font-semibold text-primary" data-testid={`activity-commodity-${index}`}>
                     {activity.commodity}
                   </span>
                 </p>
-                <p className="text-xs text-muted-foreground" data-testid={`activity-timestamp-${index}`}>
+                <p className="text-xs text-muted-foreground font-medium mt-1" data-testid={`activity-timestamp-${index}`}>
                   {formatTimestamp(activity.timestamp)}
                 </p>
               </div>
@@ -94,7 +94,7 @@ export default function RecentActivity() {
           ))}
           
           {(!activities || activities.length === 0) && (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <p className="text-muted-foreground text-sm">No recent activity</p>
             </div>
           )}

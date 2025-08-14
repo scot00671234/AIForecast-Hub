@@ -81,32 +81,32 @@ export default function MarketAlerts() {
   };
 
   return (
-    <Card className="glass-card glass-shadow smooth-transition" data-testid="market-alerts">
-      <CardHeader className="border-b border-border/50">
-        <CardTitle className="text-xl font-semibold text-foreground">
+    <Card className="glass-card hover-lift smooth-transition" data-testid="market-alerts">
+      <CardHeader className="border-b border-border-subtle pb-6">
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
           Market Alerts
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4 custom-scrollbar max-h-80 overflow-y-auto">
+      <CardContent className="p-8">
+        <div className="space-y-6 custom-scrollbar max-h-80 overflow-y-auto">
           {alerts?.map((alert, index) => (
             <div 
               key={alert.id} 
-              className={`flex items-start space-x-3 p-3 rounded-lg border smooth-transition ${getAlertBgClass(alert.severity)}`}
+              className={`flex items-start space-x-4 p-4 rounded-xl border micro-transition hover-lift ${getAlertBgClass(alert.severity)}`}
               style={{ animationDelay: `${index * 0.1}s` }}
               data-testid={`alert-${index}`}
             >
-              <div className="mt-0.5">
+              <div className="mt-1">
                 {getAlertIcon(alert.severity)}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground" data-testid={`alert-title-${index}`}>
+                <p className="text-sm font-semibold text-foreground leading-relaxed" data-testid={`alert-title-${index}`}>
                   {alert.title}
                 </p>
-                <p className="text-xs text-muted-foreground" data-testid={`alert-description-${index}`}>
+                <p className="text-xs text-muted-foreground font-medium mt-1" data-testid={`alert-description-${index}`}>
                   {alert.description}
                 </p>
-                <p className={`text-xs mt-1 ${getAlertTextColor(alert.severity)}`} data-testid={`alert-timestamp-${index}`}>
+                <p className={`text-xs mt-2 font-medium ${getAlertTextColor(alert.severity)}`} data-testid={`alert-timestamp-${index}`}>
                   {formatTimestamp(alert.createdAt)}
                 </p>
               </div>
@@ -114,7 +114,7 @@ export default function MarketAlerts() {
           ))}
           
           {(!alerts || alerts.length === 0) && (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <p className="text-muted-foreground text-sm">No active alerts</p>
             </div>
           )}

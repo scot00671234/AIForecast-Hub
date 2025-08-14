@@ -46,14 +46,14 @@ export default function LeagueTable() {
   }
 
   return (
-    <Card className="glass-card glass-shadow smooth-transition" data-testid="league-table">
-      <CardHeader className="border-b border-border/50">
+    <Card className="glass-card hover-lift smooth-transition" data-testid="league-table">
+      <CardHeader className="border-b border-border-subtle pb-6">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold text-foreground">
-            AI Model League Table
+          <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">
+            Model Rankings
           </CardTitle>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-36 glass-card" data-testid="select-period">
+            <SelectTrigger className="w-36 btn-minimal" data-testid="select-period">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -67,49 +67,46 @@ export default function LeagueTable() {
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-8">
+        <div className="space-y-6">
           {leagueTable?.map((entry, index) => {
-            const gradientClasses = [
-              "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-700/50",
-              "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-700/50",
-              "bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-purple-200/50 dark:border-purple-700/50"
-            ];
-
-            const rankColors = [
-              { bg: "bg-gradient-to-tr from-green-500 to-emerald-600", text: "text-green-600 dark:text-green-400" },
-              { bg: "bg-gradient-to-tr from-blue-500 to-indigo-600", text: "text-blue-600 dark:text-blue-400" },
-              { bg: "bg-gradient-to-tr from-purple-500 to-violet-600", text: "text-purple-600 dark:text-purple-400" }
-            ];
-
-            const colorScheme = rankColors[index] || rankColors[2];
-            const cardClass = gradientClasses[index] || gradientClasses[2];
+            const isFirst = index === 0;
+            const isSecond = index === 1;
+            const isThird = index === 2;
 
             return (
               <div 
                 key={entry.aiModel.id} 
-                className={`flex items-center justify-between p-4 rounded-xl border smooth-transition hover:scale-[1.02] ${cardClass}`}
+                className={`flex items-center justify-between p-6 rounded-xl border micro-transition hover-lift
+                  ${isFirst ? 'elevated-surface border-primary/20' : 
+                    isSecond ? 'elevated-surface border-border-prominent' : 
+                    'premium-surface border-border-subtle'}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
                 data-testid={`league-entry-${entry.rank}`}
               >
-                <div className="flex items-center space-x-4">
-                  <div className={`flex items-center justify-center w-8 h-8 ${colorScheme.bg} rounded-lg text-white font-bold text-sm`}>
+                <div className="flex items-center space-x-6">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-xl font-bold text-sm
+                    ${isFirst ? 'bg-primary text-white' : 
+                      isSecond ? 'bg-muted text-foreground' : 
+                      'bg-muted text-muted-foreground'}`}>
                     {entry.rank}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground" data-testid={`model-name-${entry.rank}`}>
+                    <h3 className="font-semibold text-foreground text-lg" data-testid={`model-name-${entry.rank}`}>
                       {entry.aiModel.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground font-medium">
                       {entry.aiModel.provider}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-lg font-bold ${colorScheme.text}`} data-testid={`accuracy-${entry.rank}`}>
+                  <div className={`text-2xl font-semibold tracking-tight
+                    ${isFirst ? 'text-primary' : 'text-foreground'}`} 
+                    data-testid={`accuracy-${entry.rank}`}>
                     {entry.accuracy.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-muted-foreground" data-testid={`predictions-${entry.rank}`}>
+                  <div className="text-sm text-muted-foreground font-medium" data-testid={`predictions-${entry.rank}`}>
                     {entry.totalPredictions.toLocaleString()} predictions
                   </div>
                 </div>

@@ -4,68 +4,98 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(222.2, 84%, 4.9%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(222.2, 84%, 4.9%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(222.2, 84%, 4.9%);
-  --primary: hsl(210, 100%, 56%);
+  /* Light Theme - Inspired by minimalist aesthetic */
+  --background: hsl(0, 0%, 99%);
+  --foreground: hsl(0, 0%, 8%);
+  --card: hsl(0, 0%, 97%);
+  --card-foreground: hsl(0, 0%, 8%);
+  --popover: hsl(0, 0%, 97%);
+  --popover-foreground: hsl(0, 0%, 8%);
+  --primary: hsl(210, 100%, 50%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(210, 40%, 95%);
-  --secondary-foreground: hsl(222.2, 84%, 4.9%);
-  --muted: hsl(210, 40%, 96%);
-  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
-  --accent: hsl(210, 40%, 96%);
-  --accent-foreground: hsl(222.2, 84%, 4.9%);
+  --secondary: hsl(0, 0%, 95%);
+  --secondary-foreground: hsl(0, 0%, 8%);
+  --muted: hsl(0, 0%, 95%);
+  --muted-foreground: hsl(0, 0%, 55%);
+  --accent: hsl(0, 0%, 95%);
+  --accent-foreground: hsl(0, 0%, 8%);
   --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(210, 40%, 98%);
-  --border: hsl(214.3, 31.8%, 91.4%);
-  --input: hsl(214.3, 31.8%, 91.4%);
-  --ring: hsl(210, 100%, 56%);
-  --chart-1: hsl(12, 76%, 61%);
-  --chart-2: hsl(173, 58%, 39%);
-  --chart-3: hsl(197, 37%, 24%);
-  --chart-4: hsl(43, 74%, 66%);
-  --chart-5: hsl(27, 87%, 67%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 88%);
+  --input: hsl(0, 0%, 88%);
+  --ring: hsl(210, 100%, 50%);
+  --chart-1: hsl(210, 100%, 50%);
+  --chart-2: hsl(142, 76%, 36%);
+  --chart-3: hsl(280, 65%, 60%);
+  --chart-4: hsl(25, 95%, 53%);
+  --chart-5: hsl(340, 75%, 55%);
   --radius: 0.75rem;
   
-  /* Glass morphism colors */
-  --glass-light: hsla(0, 0%, 100%, 0.7);
-  --glass-dark: hsla(0, 0%, 0%, 0.7);
-  --glass-border-light: hsla(0, 0%, 100%, 0.2);
-  --glass-border-dark: hsla(0, 0%, 0%, 0.2);
+  /* Minimal Glass Effect - Light */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
   
-  /* Gradient backgrounds */
-  --bg-gradient-light: linear-gradient(135deg, hsl(220, 24%, 96%) 0%, hsl(212, 100%, 97%) 50%, hsl(233, 100%, 96%) 100%);
-  --bg-gradient-dark: linear-gradient(135deg, hsl(0, 0%, 0%) 0%, hsl(220, 13%, 9%) 50%, hsl(215, 25%, 11%) 100%);
+  /* Backgrounds */
+  --bg-primary: hsl(0, 0%, 99%);
+  --bg-secondary: hsl(0, 0%, 97%);
+  --bg-tertiary: hsl(0, 0%, 95%);
+  
+  /* Text Colors */
+  --text-primary: hsl(0, 0%, 8%);
+  --text-secondary: hsl(0, 0%, 35%);
+  --text-muted: hsl(0, 0%, 55%);
+  
+  /* Borders */
+  --border-subtle: hsl(0, 0%, 88%);
+  --border-prominent: hsl(0, 0%, 82%);
 }
 
 .dark {
-  --background: hsl(0, 0%, 0%);
-  --foreground: hsl(210, 40%, 98%);
-  --card: hsl(222.2, 84%, 4.9%);
-  --card-foreground: hsl(210, 40%, 98%);
-  --popover: hsl(222.2, 84%, 4.9%);
-  --popover-foreground: hsl(210, 40%, 98%);
-  --primary: hsl(210, 100%, 56%);
+  /* Dark Theme - Deep black inspired by Vercel aesthetic */
+  --background: hsl(0, 0%, 2%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 4%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(0, 0%, 4%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(210, 100%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(217.2, 32.6%, 17.5%);
-  --secondary-foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217.2, 32.6%, 17.5%);
-  --muted-foreground: hsl(215, 20.2%, 65.1%);
-  --accent: hsl(217.2, 32.6%, 17.5%);
-  --accent-foreground: hsl(210, 40%, 98%);
+  --secondary: hsl(0, 0%, 8%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 8%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: hsl(0, 0%, 8%);
+  --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217.2, 32.6%, 17.5%);
-  --input: hsl(217.2, 32.6%, 17.5%);
-  --ring: hsl(210, 100%, 56%);
-  --chart-1: hsl(220, 70%, 50%);
-  --chart-2: hsl(160, 60%, 45%);
-  --chart-3: hsl(30, 80%, 55%);
-  --chart-4: hsl(280, 65%, 60%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 12%);
+  --input: hsl(0, 0%, 12%);
+  --ring: hsl(210, 100%, 60%);
+  --chart-1: hsl(210, 100%, 60%);
+  --chart-2: hsl(142, 76%, 36%);
+  --chart-3: hsl(280, 65%, 60%);
+  --chart-4: hsl(25, 95%, 53%);
   --chart-5: hsl(340, 75%, 55%);
+  
+  /* Minimal Glass Effect - Dark */
+  --glass-bg: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+  /* Backgrounds */
+  --bg-primary: hsl(0, 0%, 2%);
+  --bg-secondary: hsl(0, 0%, 4%);
+  --bg-tertiary: hsl(0, 0%, 8%);
+  
+  /* Text Colors */
+  --text-primary: hsl(0, 0%, 98%);
+  --text-secondary: hsl(0, 0%, 65%);
+  --text-muted: hsl(0, 0%, 45%);
+  
+  /* Borders */
+  --border-subtle: hsl(0, 0%, 12%);
+  --border-prominent: hsl(0, 0%, 18%);
 }
 
 @layer base {
@@ -78,53 +108,106 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     font-optical-sizing: auto;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  
+  /* Enhanced Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* Glass morphism card */
+  /* Minimal Glass Card - Inspired by Vercel aesthetic */
   .glass-card {
-    @apply backdrop-blur-lg border;
-    background: var(--glass-light);
-    border-color: var(--glass-border-light);
-  }
-  
-  .dark .glass-card {
-    background: var(--glass-dark);
-    border-color: var(--glass-border-dark);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    @apply rounded-xl;
   }
 
-  /* Gradient background */
-  .gradient-bg {
-    background: var(--bg-gradient-light);
-  }
-  
-  .dark .gradient-bg {
-    background: var(--bg-gradient-dark);
-  }
-  
-  /* Enhanced shadows */
-  .glass-shadow {
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  }
-  
-  .dark .glass-shadow {
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  /* Ultra-minimal background */
+  .minimal-bg {
+    background: var(--bg-primary);
   }
 
-  /* Smooth transitions */
+  /* Elevated surface */
+  .elevated-surface {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Premium card surface */
+  .premium-surface {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-prominent);
+  }
+
+  /* Subtle hover effect */
+  .hover-lift {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  }
+  
+  .dark .hover-lift:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Minimal button styles */
+  .btn-minimal {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+  
+  .btn-minimal:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
+  /* Premium navigation */
+  .nav-minimal {
+    @apply backdrop-blur-md;
+    background: rgba(var(--bg-primary-rgb), 0.8);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Geometric logo shape */
+  .logo-triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 17px solid var(--primary);
+  }
+
+  /* Enhanced transitions */
   .smooth-transition {
-    @apply transition-all duration-300 ease-in-out;
+    @apply transition-all duration-300 ease-out;
   }
   
-  /* Custom scrollbar */
+  .micro-transition {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  /* Ultra-clean scrollbar */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+    scrollbar-color: var(--border-subtle) transparent;
   }
   
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -132,9 +215,26 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground));
-    border-radius: 20px;
-    border: transparent;
+    background: var(--border-subtle);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--border-prominent);
+  }
+
+  /* Minimal focus states */
+  .focus-minimal:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+
+  /* Typography enhancements */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 

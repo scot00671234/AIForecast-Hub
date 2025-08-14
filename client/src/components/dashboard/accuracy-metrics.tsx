@@ -63,14 +63,14 @@ export default function AccuracyMetrics() {
   };
 
   return (
-    <Card className="glass-card glass-shadow smooth-transition" data-testid="accuracy-metrics">
-      <CardHeader className="border-b border-border/50">
-        <CardTitle className="text-lg font-semibold text-foreground">
-          Model Performance Breakdown
+    <Card className="glass-card hover-lift smooth-transition" data-testid="accuracy-metrics">
+      <CardHeader className="border-b border-border-subtle pb-6">
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
+          Performance Breakdown
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-8">
+        <div className="space-y-8">
           {metrics?.map((metric, index) => {
             const modelName = getModelName(metric.aiModelId);
             const modelColor = getModelColor(metric.aiModelId);
@@ -79,16 +79,16 @@ export default function AccuracyMetrics() {
             return (
               <div 
                 key={metric.id} 
-                className="space-y-2 animate-fade-in"
+                className="space-y-4 animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
                 data-testid={`metric-${modelName.toLowerCase()}`}
               >
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-foreground font-medium" data-testid={`metric-name-${index}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-foreground font-semibold text-lg" data-testid={`metric-name-${index}`}>
                     {modelName}
                   </span>
                   <span 
-                    className="font-medium"
+                    className="font-semibold text-xl"
                     style={{ color: modelColor }}
                     data-testid={`metric-accuracy-${index}`}
                   >
@@ -97,12 +97,12 @@ export default function AccuracyMetrics() {
                 </div>
                 <Progress 
                   value={accuracy} 
-                  className="w-full h-2"
+                  className="w-full h-3"
                   style={{ 
                     '--progress-background': modelColor 
                   } as React.CSSProperties}
                 />
-                <div className="text-xs text-muted-foreground" data-testid={`metric-categories-${index}`}>
+                <div className="text-sm text-muted-foreground font-medium" data-testid={`metric-categories-${index}`}>
                   Best at: {getBestCategories(metric.aiModelId)}
                 </div>
               </div>
@@ -110,7 +110,7 @@ export default function AccuracyMetrics() {
           })}
           
           {(!metrics || metrics.length === 0) && (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <p className="text-muted-foreground text-sm">No performance data available</p>
             </div>
           )}
