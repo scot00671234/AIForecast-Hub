@@ -75,7 +75,7 @@ interface CommodityChartCardProps {
 
 function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCardProps) {
   const { data: chartData, isLoading } = useQuery<ChartDataPoint[]>({
-    queryKey: ["/api/commodities", commodity.id, "chart", 7],
+    queryKey: ["/api/commodities", commodity.id, "chart", 365], // 1 year of data
   });
 
   const { data: latestPrice } = useQuery<LatestPrice>({
@@ -84,8 +84,8 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
 
   const formattedData = chartData?.map(point => ({
     date: new Date(point.date).toLocaleDateString("en-US", { 
-      month: "short", 
-      day: "numeric" 
+      month: "short",
+      year: "2-digit"
     }),
     actualPrice: point.actualPrice,
     ...Object.keys(point.predictions).reduce((acc, modelId) => {
@@ -160,18 +160,21 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
       
       <CardContent className="pt-0">
         {isLoading ? (
-          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-24 w-full" />
         ) : (
-          <div className="h-32">
+          <div className="h-24">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
+              <LineChart data={formattedData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {/* Minimal grid for 1-year view */}
+                <CartesianGrid strokeDasharray="2 2" className="opacity-10" />
+                
+                {/* Hide X-axis for cleaner mini view */}
                 <XAxis 
                   dataKey="date" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  height={20}
+                  tick={false}
+                  height={0}
                 />
                 <YAxis 
                   hide
@@ -179,36 +182,33 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                 />
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Actual Price Line with visible dots showing values */}
+                {/* Main price trend line - clean and bold */}
                 <Line
                   type="monotone"
                   dataKey="actualPrice"
                   stroke="var(--foreground)"
-                  strokeWidth={2}
-                  dot={{ 
-                    fill: 'var(--foreground)', 
-                    strokeWidth: 2, 
-                    r: 2,
-                  }}
+                  strokeWidth={2.5}
+                  dot={false}
                   activeDot={{ 
-                    r: 5, 
+                    r: 4, 
                     fill: 'var(--primary)',
                     stroke: 'var(--primary-foreground)',
                     strokeWidth: 2
                   }}
                 />
                 
-                {/* AI Model Prediction Lines */}
+                {/* AI Model Prediction Lines - subtle for mini view */}
                 {aiModels.map(model => (
                   <Line
                     key={model.id}
                     type="monotone"
                     dataKey={model.name}
                     stroke={model.color}
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
+                    strokeWidth={1}
+                    strokeDasharray="2 2"
                     dot={false}
-                    activeDot={{ r: 3, fill: model.color }}
+                    activeDot={{ r: 2, fill: model.color }}
+                    strokeOpacity={0.6}
                   />
                 ))}
               </LineChart>
@@ -218,7 +218,7 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
         
         <div className="mt-3 pt-3 border-t border-border">
           <p className="text-xs text-muted-foreground text-center">
-            Click to view detailed analysis
+            1 Year View • Click to view detailed analysis
           </p>
         </div>
       </CardContent>
