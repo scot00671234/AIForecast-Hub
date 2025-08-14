@@ -84,14 +84,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     return dataPoint;
   }) || [];
 
-  // Debug logging
-  console.log('Chart Debug:', {
-    chartDataLength: chartData?.length,
-    formattedDataLength: formattedData.length,
-    aiModelsCount: aiModels?.length,
-    firstDataPoint: formattedData[0],
-    aiModelNames: aiModels?.map(m => m.name)
-  });
+
 
   const formatChange = (change: number) => {
     const isPositive = change >= 0;
@@ -195,45 +188,31 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
           </div>
         </DialogHeader>
 
-        <div className="space-y-8 py-8">
-          {/* Time Period Selection */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-foreground">Time Period</h3>
-              <div className="text-sm text-muted-foreground">
-                Select timeframe for analysis
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-8">
-              {Object.entries(groupedPeriods).map(([group, periods]) => (
-                <div key={group} className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">{group} TERM</p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2">
-                    {periods.map(period => (
-                      <Button
-                        key={period.value}
-                        variant={selectedPeriod === period.value ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedPeriod(period.value)}
-                        className="micro-transition w-full justify-center font-medium"
-                      >
-                        {period.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Enhanced Chart */}
-          <div className="space-y-6">
+        <div className="space-y-6 py-8">
+          {/* Trading Platform Style Chart */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold text-foreground">Price Movement & AI Predictions</h3>
-              <div className="text-sm text-muted-foreground">
-                Interactive price analysis with AI model predictions
+              
+              {/* Integrated Time Period Controls */}
+              <div className="flex items-center space-x-1 bg-muted/50 rounded-lg p-1">
+                {TIME_PERIODS.map(period => (
+                  <Button
+                    key={period.value}
+                    variant={selectedPeriod === period.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setSelectedPeriod(period.value)}
+                    className={`
+                      h-7 px-3 text-xs font-medium transition-all duration-200
+                      ${selectedPeriod === period.value 
+                        ? "bg-primary text-primary-foreground shadow-sm" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/80"
+                      }
+                    `}
+                  >
+                    {period.label}
+                  </Button>
+                ))}
               </div>
             </div>
             {chartLoading ? (
@@ -242,25 +221,54 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                 <Skeleton className="h-[500px] w-full rounded-xl" />
               </div>
             ) : (
-              <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
-                <div className="h-[500px] w-full">
+              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                {/* Chart Toolbar */}
+                <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-muted/30">
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-0.5 bg-black"></div>
+                        <span className="text-sm font-medium">Actual Price</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-0.5 bg-[#10B981] border-dashed border-t-2 border-[#10B981]"></div>
+                        <span className="text-sm text-muted-foreground">Claude</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-0.5 bg-[#3B82F6] border-dashed border-t-2 border-[#3B82F6]"></div>
+                        <span className="text-sm text-muted-foreground">ChatGPT</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-0.5 bg-[#8B5CF6] border-dashed border-t-2 border-[#8B5CF6]"></div>
+                        <span className="text-sm text-muted-foreground">Deepseek</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Data from Yahoo Finance • Updated {new Date().toLocaleTimeString()}
+                  </div>
+                </div>
+                
+                <div className="h-[500px] w-full p-6">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" opacity={0.2} />
                       <XAxis 
                         dataKey="date" 
                         stroke="hsl(var(--muted-foreground))"
-                        fontSize={12}
+                        fontSize={11}
                         tickLine={false}
-                        axisLine={false}
+                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
+                        tick={{fill: "hsl(var(--muted-foreground))"}}
                       />
                       <YAxis 
                         stroke="hsl(var(--muted-foreground))"
-                        fontSize={12}
+                        fontSize={11}
                         tickLine={false}
-                        axisLine={false}
+                        axisLine={{stroke: "hsl(var(--border))", strokeWidth: 1}}
                         tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
                         domain={['dataMin - 5', 'dataMax + 5']}
+                        tick={{fill: "hsl(var(--muted-foreground))"}}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Legend />
@@ -297,22 +305,23 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
             )}
           </div>
 
-          {/* Market Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-foreground mb-2">Volatility</h4>
-              <p className="text-2xl font-bold text-primary">12.5%</p>
-              <p className="text-xs text-muted-foreground">Last 30 days</p>
+          {/* Market Insights - Trading Platform Style */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-card border border-border rounded-lg p-4 text-center">
+              <div className="text-xs text-muted-foreground mb-1">30D VOLATILITY</div>
+              <div className="text-lg font-bold text-orange-500">12.5%</div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-foreground mb-2">Volume</h4>
-              <p className="text-2xl font-bold text-primary">2.8M</p>
-              <p className="text-xs text-muted-foreground">Average daily</p>
+            <div className="bg-card border border-border rounded-lg p-4 text-center">
+              <div className="text-xs text-muted-foreground mb-1">AVG VOLUME</div>
+              <div className="text-lg font-bold text-blue-500">2.8M</div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-foreground mb-2">Prediction Accuracy</h4>
-              <p className="text-2xl font-bold text-primary">84.2%</p>
-              <p className="text-xs text-muted-foreground">Best performing model</p>
+            <div className="bg-card border border-border rounded-lg p-4 text-center">
+              <div className="text-xs text-muted-foreground mb-1">BEST MODEL</div>
+              <div className="text-lg font-bold text-green-500">Deepseek</div>
+            </div>
+            <div className="bg-card border border-border rounded-lg p-4 text-center">
+              <div className="text-xs text-muted-foreground mb-1">ACCURACY</div>
+              <div className="text-lg font-bold text-primary">84.2%</div>
             </div>
           </div>
         </div>
