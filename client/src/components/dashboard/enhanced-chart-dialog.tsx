@@ -142,24 +142,35 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto glass-card">
-        <DialogHeader className="border-b border-border-subtle pb-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto glass-card">
+        <DialogHeader className="border-b border-border-subtle pb-8">
+          <div className="flex items-start justify-between">
+            <div className="space-y-4">
               <DialogTitle className="text-3xl font-bold tracking-tight flex items-center space-x-3">
                 <Activity className="w-8 h-8 text-primary" />
                 <span>{commodity.name} Price Analysis</span>
               </DialogTitle>
-              <div className="flex items-center space-x-6">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{commodity.symbol}</span>
-                </p>
+              <div className="flex items-center space-x-8">
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-muted-foreground">Symbol:</span>
+                  <span className="font-mono text-sm bg-muted px-3 py-1 rounded-md font-medium">{commodity.symbol}</span>
+                </div>
                 {latestPrice && (
                   <div className="flex items-center space-x-4">
-                    <span className="text-2xl font-bold text-foreground">
-                      {formatPrice(latestPrice.price)}
-                    </span>
-                    {latestPrice.changePercent && formatChange(latestPrice.changePercent)}
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-foreground">
+                        {formatPrice(latestPrice.price)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Current Price</div>
+                    </div>
+                    {latestPrice.changePercent && (
+                      <div className="text-right">
+                        <div className="text-lg font-semibold">
+                          {formatChange(latestPrice.changePercent)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">24h Change</div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -167,22 +178,29 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-6">
+        <div className="space-y-8 py-8">
           {/* Time Period Selection */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Time Period</h3>
-            <div className="space-y-3">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-foreground">Time Period</h3>
+              <div className="text-sm text-muted-foreground">
+                Select timeframe for analysis
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-8">
               {Object.entries(groupedPeriods).map(([group, periods]) => (
-                <div key={group} className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{group} Term</p>
-                  <div className="flex flex-wrap gap-2">
+                <div key={group} className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-2">{group} TERM</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
                     {periods.map(period => (
                       <Button
                         key={period.value}
                         variant={selectedPeriod === period.value ? "default" : "outline"}
                         size="sm"
                         onClick={() => setSelectedPeriod(period.value)}
-                        className="micro-transition"
+                        className="micro-transition w-full justify-center font-medium"
                       >
                         {period.label}
                       </Button>
@@ -194,16 +212,21 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
           </div>
 
           {/* Enhanced Chart */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Price Movement & AI Predictions</h3>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-foreground">Price Movement & AI Predictions</h3>
+              <div className="text-sm text-muted-foreground">
+                Interactive price analysis with AI model predictions
+              </div>
+            </div>
             {chartLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-96 w-full rounded-xl" />
+              <div className="space-y-6">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-[500px] w-full rounded-xl" />
               </div>
             ) : (
-              <div className="bg-card border border-border rounded-xl p-6">
-                <div className="h-96 w-full">
+              <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
+                <div className="h-[500px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
