@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import LeagueTable from "@/components/dashboard/league-table";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
+import heroBackground from "@assets/image_1755198621502.png";
 
 export default function Dashboard() {
   const { theme, setTheme } = useTheme();
@@ -47,17 +48,34 @@ export default function Dashboard() {
       {/* Ultra-clean Main Content */}
       <main className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
         
-        {/* Hero Stats Section */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground mb-4">
-              AI Prediction Performance
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Real-time tracking of AI model accuracy in commodity price forecasting
-            </p>
+        {/* Hero Stats Section with Background */}
+        <section 
+          className="mb-16 relative overflow-hidden rounded-2xl"
+          style={{
+            backgroundImage: `url(@assets/image_1755198621502.png)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            minHeight: '400px'
+          }}
+        >
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+          
+          {/* Content */}
+          <div className="relative z-10 py-20">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6 drop-shadow-lg">
+                AI Prediction Performance
+              </h2>
+              <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow">
+                Real-time tracking of AI model accuracy in commodity price forecasting
+              </p>
+            </div>
+            <div className="px-8">
+              <StatsOverview />
+            </div>
           </div>
-          <StatsOverview />
         </section>
 
         <div className="space-y-16">
