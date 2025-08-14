@@ -28,10 +28,11 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful endpoints with proper error handling and request logging
 
 ### Data Layer
-- **Database**: PostgreSQL using Neon serverless database
+- **Database**: PostgreSQL using Neon serverless database (fully migrated from in-memory storage)
 - **ORM**: Drizzle ORM for type-safe database queries and migrations
 - **Schema**: Comprehensive schema covering AI models, commodities, predictions, actual prices, accuracy metrics, and market alerts
 - **Validation**: Zod schemas for runtime type validation across shared types
+- **Storage**: DatabaseStorage class implementing all CRUD operations with PostgreSQL persistence
 
 ### External Dependencies
 - **Yahoo Finance API**: Real-time commodity price data fetching with rate limiting

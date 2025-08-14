@@ -13,8 +13,16 @@ import {
   type InsertMarketAlert,
   type DashboardStats,
   type LeagueTableEntry,
-  type ChartDataPoint
+  type ChartDataPoint,
+  aiModels,
+  commodities,
+  predictions,
+  actualPrices,
+  accuracyMetrics,
+  marketAlerts
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -52,152 +60,125 @@ export interface IStorage {
   getChartData(commodityId: string, days: number): Promise<ChartDataPoint[]>;
 }
 
-export class MemStorage implements IStorage {
-  private aiModels: Map<string, AiModel>;
-  private commodities: Map<string, Commodity>;
-  private predictions: Map<string, Prediction>;
-  private actualPrices: Map<string, ActualPrice>;
-  private accuracyMetrics: Map<string, AccuracyMetric>;
-  private marketAlerts: Map<string, MarketAlert>;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.aiModels = new Map();
-    this.commodities = new Map();
-    this.predictions = new Map();
-    this.actualPrices = new Map();
-    this.accuracyMetrics = new Map();
-    this.marketAlerts = new Map();
-
+    // Database initialization will be handled by migrations
     this.initializeDefaultData();
   }
 
-  private initializeDefaultData() {
-    // Initialize AI Models
-    const models = [
-      { name: "Claude", provider: "Anthropic", color: "#10B981", isActive: 1 },
-      { name: "ChatGPT", provider: "OpenAI", color: "#3B82F6", isActive: 1 },
-      { name: "Deepseek", provider: "Deepseek AI", color: "#8B5CF6", isActive: 1 }
-    ];
+  private async initializeDefaultData() {
+    try {
+      // Check if data already exists
+      const existingModels = await db.select().from(aiModels).limit(1);
+      if (existingModels.length > 0) {
+        return; // Data already initialized
+      }
 
-    models.forEach(model => {
-      const id = randomUUID();
-      this.aiModels.set(id, { ...model, id });
-    });
+      // Initialize AI Models
+      const defaultModels = [
+        { name: "Claude", provider: "Anthropic", color: "#10B981", isActive: 1 },
+        { name: "ChatGPT", provider: "OpenAI", color: "#3B82F6", isActive: 1 },
+        { name: "Deepseek", provider: "Deepseek AI", color: "#8B5CF6", isActive: 1 }
+      ];
 
-    // Initialize Commodities
-    const commodities = [
-      // Hard Commodities
-      { name: "Crude Oil", symbol: "WTI", category: "hard", yahooSymbol: "CL=F", unit: "USD/barrel" },
-      { name: "Gold", symbol: "XAU", category: "hard", yahooSymbol: "GC=F", unit: "USD/oz" },
-      { name: "Natural Gas", symbol: "NG", category: "hard", yahooSymbol: "NG=F", unit: "USD/MMBtu" },
-      { name: "Copper", symbol: "HG", category: "hard", yahooSymbol: "HG=F", unit: "USD/lb" },
-      { name: "Silver", symbol: "XAG", category: "hard", yahooSymbol: "SI=F", unit: "USD/oz" },
-      { name: "Aluminum", symbol: "ALU", category: "hard", yahooSymbol: "ALI=F", unit: "USD/tonne" },
-      { name: "Platinum", symbol: "XPT", category: "hard", yahooSymbol: "PL=F", unit: "USD/oz" },
-      { name: "Palladium", symbol: "XPD", category: "hard", yahooSymbol: "PA=F", unit: "USD/oz" },
-      // Soft Commodities
-      { name: "Coffee", symbol: "KC", category: "soft", yahooSymbol: "KC=F", unit: "USD/lb" },
-      { name: "Sugar", symbol: "SB", category: "soft", yahooSymbol: "SB=F", unit: "USD/lb" },
-      { name: "Corn", symbol: "ZC", category: "soft", yahooSymbol: "ZC=F", unit: "USD/bushel" },
-      { name: "Soybeans", symbol: "ZS", category: "soft", yahooSymbol: "ZS=F", unit: "USD/bushel" },
-      { name: "Cotton", symbol: "CT", category: "soft", yahooSymbol: "CT=F", unit: "USD/lb" },
-      { name: "Wheat", symbol: "ZW", category: "soft", yahooSymbol: "ZW=F", unit: "USD/bushel" }
-    ];
+      await db.insert(aiModels).values(defaultModels);
 
-    commodities.forEach(commodity => {
-      const id = randomUUID();
-      this.commodities.set(id, { 
-        ...commodity, 
-        id,
-        yahooSymbol: commodity.yahooSymbol || null,
-        unit: commodity.unit || null
-      });
-    });
+      // Initialize Commodities
+      const defaultCommodities = [
+        // Hard Commodities
+        { name: "Crude Oil", symbol: "WTI", category: "hard", yahooSymbol: "CL=F", unit: "USD/barrel" },
+        { name: "Gold", symbol: "XAU", category: "hard", yahooSymbol: "GC=F", unit: "USD/oz" },
+        { name: "Natural Gas", symbol: "NG", category: "hard", yahooSymbol: "NG=F", unit: "USD/MMBtu" },
+        { name: "Copper", symbol: "HG", category: "hard", yahooSymbol: "HG=F", unit: "USD/lb" },
+        { name: "Silver", symbol: "XAG", category: "hard", yahooSymbol: "SI=F", unit: "USD/oz" },
+        { name: "Aluminum", symbol: "ALU", category: "hard", yahooSymbol: "ALI=F", unit: "USD/tonne" },
+        { name: "Platinum", symbol: "XPT", category: "hard", yahooSymbol: "PL=F", unit: "USD/oz" },
+        { name: "Palladium", symbol: "XPD", category: "hard", yahooSymbol: "PA=F", unit: "USD/oz" },
+        // Soft Commodities
+        { name: "Coffee", symbol: "KC", category: "soft", yahooSymbol: "KC=F", unit: "USD/lb" },
+        { name: "Sugar", symbol: "SB", category: "soft", yahooSymbol: "SB=F", unit: "USD/lb" },
+        { name: "Corn", symbol: "ZC", category: "soft", yahooSymbol: "ZC=F", unit: "USD/bushel" },
+        { name: "Soybeans", symbol: "ZS", category: "soft", yahooSymbol: "ZS=F", unit: "USD/bushel" },
+        { name: "Cotton", symbol: "CT", category: "soft", yahooSymbol: "CT=F", unit: "USD/lb" },
+        { name: "Wheat", symbol: "ZW", category: "soft", yahooSymbol: "ZW=F", unit: "USD/bushel" }
+      ];
+
+      await db.insert(commodities).values(defaultCommodities);
+      
+      console.log("Default data initialized successfully");
+    } catch (error) {
+      console.error("Error initializing default data:", error);
+    }
   }
 
   async getAiModels(): Promise<AiModel[]> {
-    return Array.from(this.aiModels.values()).filter(model => model.isActive === 1);
+    return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
   }
 
   async getAiModel(id: string): Promise<AiModel | undefined> {
-    return this.aiModels.get(id);
+    const [model] = await db.select().from(aiModels).where(eq(aiModels.id, id));
+    return model || undefined;
   }
 
   async createAiModel(insertModel: InsertAiModel): Promise<AiModel> {
-    const id = randomUUID();
-    const model: AiModel = { ...insertModel, id };
-    this.aiModels.set(id, model);
+    const [model] = await db.insert(aiModels).values(insertModel).returning();
     return model;
   }
 
   async getCommodities(): Promise<Commodity[]> {
-    return Array.from(this.commodities.values());
+    return await db.select().from(commodities);
   }
 
   async getCommodity(id: string): Promise<Commodity | undefined> {
-    return this.commodities.get(id);
+    const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
+    return commodity || undefined;
   }
 
   async getCommodityBySymbol(symbol: string): Promise<Commodity | undefined> {
-    return Array.from(this.commodities.values()).find(c => c.symbol === symbol || c.yahooSymbol === symbol);
+    const [commodity] = await db.select().from(commodities).where(
+      sql`${commodities.symbol} = ${symbol} OR ${commodities.yahooSymbol} = ${symbol}`
+    );
+    return commodity || undefined;
   }
 
   async createCommodity(insertCommodity: InsertCommodity): Promise<Commodity> {
-    const id = randomUUID();
-    const commodity: Commodity = { ...insertCommodity, id };
-    this.commodities.set(id, commodity);
+    const [commodity] = await db.insert(commodities).values(insertCommodity).returning();
     return commodity;
   }
 
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
-    let predictions = Array.from(this.predictions.values());
+    let query = db.select().from(predictions);
     
-    if (commodityId) {
-      predictions = predictions.filter(p => p.commodityId === commodityId);
+    const conditions = [];
+    if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+    if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
-    if (aiModelId) {
-      predictions = predictions.filter(p => p.aiModelId === aiModelId);
-    }
-    
-    return predictions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return await query.orderBy(desc(predictions.createdAt));
   }
 
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
-    const id = randomUUID();
-    const prediction: Prediction = { 
-      ...insertPrediction, 
-      id,
-      createdAt: new Date(),
-      confidence: insertPrediction.confidence || null,
-      metadata: insertPrediction.metadata || null
-    };
-    this.predictions.set(id, prediction);
+    const [prediction] = await db.insert(predictions).values(insertPrediction).returning();
     return prediction;
   }
 
   async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
-    let prices = Array.from(this.actualPrices.values())
-      .filter(p => p.commodityId === commodityId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    let query = db.select().from(actualPrices)
+      .where(eq(actualPrices.commodityId, commodityId))
+      .orderBy(desc(actualPrices.date));
     
     if (limit) {
-      prices = prices.slice(0, limit);
+      query = query.limit(limit);
     }
     
-    return prices;
+    return await query;
   }
 
   async createActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
-    const id = randomUUID();
-    const price: ActualPrice = { 
-      ...insertPrice, 
-      id,
-      createdAt: new Date(),
-      volume: insertPrice.volume || null,
-      source: insertPrice.source || null
-    };
-    this.actualPrices.set(id, price);
+    const [price] = await db.insert(actualPrices).values(insertPrice).returning();
     return price;
   }
 
@@ -207,75 +188,62 @@ export class MemStorage implements IStorage {
   }
 
   async getAccuracyMetrics(period: string): Promise<AccuracyMetric[]> {
-    return Array.from(this.accuracyMetrics.values())
-      .filter(m => m.period === period)
-      .sort((a, b) => parseFloat(b.accuracy) - parseFloat(a.accuracy));
+    return await db.select().from(accuracyMetrics)
+      .where(eq(accuracyMetrics.period, period))
+      .orderBy(desc(sql`CAST(${accuracyMetrics.accuracy} AS DECIMAL)`));
   }
 
   async updateAccuracyMetric(insertMetric: InsertAccuracyMetric): Promise<AccuracyMetric> {
-    const existing = Array.from(this.accuracyMetrics.values())
-      .find(m => m.aiModelId === insertMetric.aiModelId && 
-                 m.commodityId === insertMetric.commodityId && 
-                 m.period === insertMetric.period);
+    const [existing] = await db.select().from(accuracyMetrics)
+      .where(
+        and(
+          eq(accuracyMetrics.aiModelId, insertMetric.aiModelId),
+          eq(accuracyMetrics.commodityId, insertMetric.commodityId),
+          eq(accuracyMetrics.period, insertMetric.period)
+        )
+      )
+      .limit(1);
 
     if (existing) {
-      const updated: AccuracyMetric = { 
-        ...existing, 
-        ...insertMetric, 
-        lastUpdated: new Date() 
-      };
-      this.accuracyMetrics.set(existing.id, updated);
+      const [updated] = await db.update(accuracyMetrics)
+        .set({ ...insertMetric, lastUpdated: new Date() })
+        .where(eq(accuracyMetrics.id, existing.id))
+        .returning();
       return updated;
     } else {
-      const id = randomUUID();
-      const metric: AccuracyMetric = { 
-        ...insertMetric, 
-        id, 
-        lastUpdated: new Date(),
-        avgError: insertMetric.avgError || null
-      };
-      this.accuracyMetrics.set(id, metric);
+      const [metric] = await db.insert(accuracyMetrics).values(insertMetric).returning();
       return metric;
     }
   }
 
   async getActiveAlerts(): Promise<MarketAlert[]> {
-    return Array.from(this.marketAlerts.values())
-      .filter(a => a.isActive === 1)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 10);
+    return await db.select().from(marketAlerts)
+      .where(eq(marketAlerts.isActive, 1))
+      .orderBy(desc(marketAlerts.createdAt))
+      .limit(10);
   }
 
   async createAlert(insertAlert: InsertMarketAlert): Promise<MarketAlert> {
-    const id = randomUUID();
-    const alert: MarketAlert = { 
-      ...insertAlert, 
-      id,
-      createdAt: new Date(),
-      commodityId: insertAlert.commodityId || null,
-      aiModelId: insertAlert.aiModelId || null,
-      isActive: insertAlert.isActive || 1
-    };
-    this.marketAlerts.set(id, alert);
+    const [alert] = await db.insert(marketAlerts).values(insertAlert).returning();
     return alert;
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
-    const predictions = Array.from(this.predictions.values());
-    const accuracyMetrics = Array.from(this.accuracyMetrics.values()).filter(m => m.period === '30d');
-    const commodities = Array.from(this.commodities.values());
+    const allPredictions = await db.select().from(predictions);
+    const thirtyDayMetrics = await this.getAccuracyMetrics('30d');
+    const allCommodities = await this.getCommodities();
 
-    const topMetric = accuracyMetrics.sort((a, b) => parseFloat(b.accuracy) - parseFloat(a.accuracy))[0];
+    const topMetric = thirtyDayMetrics[0];
     const topModel = topMetric ? await this.getAiModel(topMetric.aiModelId) : null;
-    const avgAccuracy = accuracyMetrics.length > 0 
-      ? accuracyMetrics.reduce((sum, m) => sum + parseFloat(m.accuracy), 0) / accuracyMetrics.length
+    const avgAccuracy = thirtyDayMetrics.length > 0 
+      ? thirtyDayMetrics.reduce((sum, m) => sum + parseFloat(m.accuracy), 0) / thirtyDayMetrics.length
       : 0;
 
     return {
-      totalPredictions: predictions.length,
+      totalPredictions: allPredictions.length,
       topModel: topModel?.name || "N/A",
       topAccuracy: topMetric ? parseFloat(topMetric.accuracy) : 0,
-      activeCommodities: commodities.length,
+      activeCommodities: allCommodities.length,
       avgAccuracy
     };
   }
@@ -375,4 +343,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
