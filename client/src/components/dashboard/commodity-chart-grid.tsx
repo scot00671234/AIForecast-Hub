@@ -202,77 +202,63 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
         ) : (
           <div className="h-32 bg-background/50 rounded-md border border-border/50 overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
-                {/* Professional grid */}
+              <LineChart data={formattedData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {/* Very minimal grid for cleaner look */}
                 <CartesianGrid 
                   strokeDasharray="1 1" 
                   stroke="hsl(var(--border))" 
-                  opacity={0.2}
+                  opacity={0.1}
                   horizontal={true}
                   vertical={false}
                 />
                 
-                {/* X-axis with minimal labels */}
+                {/* Hide X-axis completely for cleaner view */}
                 <XAxis 
                   dataKey="date" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ 
-                    fill: "hsl(var(--muted-foreground))", 
-                    fontSize: 9, 
-                    fontWeight: 400 
-                  }}
-                  height={20}
-                  interval="preserveStartEnd"
+                  tick={false}
+                  height={0}
                 />
                 
-                {/* Y-axis on right */}
+                {/* Hide Y-axis completely for cleaner view */}
                 <YAxis 
-                  orientation="right"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ 
-                    fill: "hsl(var(--muted-foreground))", 
-                    fontSize: 9, 
-                    fontWeight: 400 
-                  }}
-                  tickFormatter={(value) => `$${Number(value).toFixed(1)}`}
-                  domain={['dataMin - 1', 'dataMax + 1']}
-                  width={30}
+                  hide
+                  domain={['dataMin - 2', 'dataMax + 2']}
                 />
                 
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Main price trend line with dots */}
+                {/* Main price trend line - cleaner without individual dots */}
                 <Line
                   type="monotone"
                   dataKey="actualPrice"
-                  stroke="#1f2937"
+                  stroke={isPositive ? "#22c55e" : "#ef4444"}
                   strokeWidth={2}
-                  dot={{ fill: "#1f2937", strokeWidth: 1, r: 2 }}
+                  dot={false}
                   connectNulls={true}
                   activeDot={{ 
-                    r: 3, 
-                    fill: "#1f2937",
+                    r: 4, 
+                    fill: isPositive ? "#22c55e" : "#ef4444",
                     stroke: "white",
-                    strokeWidth: 1
+                    strokeWidth: 2
                   }}
                 />
                 
-                {/* AI Model Prediction Lines with dots */}
+                {/* AI Model Prediction Lines - subtle without dots */}
                 {aiModels.map(model => (
                   <Line
                     key={model.id}
                     type="monotone"
                     dataKey={model.name}
                     stroke={getModelColor(model.name)}
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
-                    dot={{ fill: getModelColor(model.name), strokeWidth: 1, r: 1.5 }}
+                    strokeWidth={1.2}
+                    strokeDasharray="2 2"
+                    dot={false}
                     connectNulls={true}
-                    strokeOpacity={0.8}
+                    strokeOpacity={0.6}
                     activeDot={{ 
-                      r: 2, 
+                      r: 3, 
                       fill: getModelColor(model.name),
                       stroke: "white",
                       strokeWidth: 1
