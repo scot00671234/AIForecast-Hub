@@ -228,7 +228,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
               <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
                 <div className="h-[500px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <LineChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                       <XAxis 
                         dataKey="date" 
