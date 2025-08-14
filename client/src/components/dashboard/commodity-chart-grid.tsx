@@ -135,22 +135,22 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
       className="glass-card hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-[1.02]"
       onClick={onClick}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg font-semibold">{commodity.name}</CardTitle>
-            <p className="text-sm text-muted-foreground font-mono">{commodity.symbol}</p>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base font-semibold truncate">{commodity.name}</CardTitle>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{commodity.symbol}</p>
           </div>
           {latestPrice && (
-            <div className="text-right">
-              <p className="text-lg font-bold">{new Intl.NumberFormat('en-US', {
+            <div className="text-right ml-3 flex-shrink-0">
+              <p className="text-base font-bold leading-tight">{new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               }).format(latestPrice.price)}</p>
-              <div className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+              <div className={`flex items-center justify-end text-xs mt-0.5 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                {isPositive ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
                 {isPositive ? '+' : ''}{change.percentage.toFixed(2)}%
               </div>
             </div>
