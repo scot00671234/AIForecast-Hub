@@ -160,13 +160,13 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
       
       <CardContent className="pt-0">
         {isLoading ? (
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-20 w-full" />
         ) : (
-          <div className="h-24">
+          <div className="h-20">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                {/* Minimal grid for 1-year view */}
-                <CartesianGrid strokeDasharray="2 2" className="opacity-10" />
+              <LineChart data={formattedData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+                {/* Very subtle grid */}
+                <CartesianGrid strokeDasharray="1 1" stroke="currentColor" className="opacity-5" />
                 
                 {/* Hide X-axis for cleaner mini view */}
                 <XAxis 
@@ -182,35 +182,23 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                 />
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Main price trend line - clean and bold */}
+                {/* Main price trend line - clean and smooth */}
                 <Line
                   type="monotone"
                   dataKey="actualPrice"
-                  stroke="var(--foreground)"
-                  strokeWidth={2.5}
+                  stroke={isPositive ? "#22c55e" : "#ef4444"}
+                  strokeWidth={1.5}
                   dot={false}
+                  connectNulls={true}
                   activeDot={{ 
-                    r: 4, 
-                    fill: 'var(--primary)',
-                    stroke: 'var(--primary-foreground)',
-                    strokeWidth: 2
+                    r: 3, 
+                    fill: isPositive ? "#22c55e" : "#ef4444",
+                    stroke: "white",
+                    strokeWidth: 1
                   }}
                 />
                 
-                {/* AI Model Prediction Lines - subtle for mini view */}
-                {aiModels.map(model => (
-                  <Line
-                    key={model.id}
-                    type="monotone"
-                    dataKey={model.name}
-                    stroke={model.color}
-                    strokeWidth={1}
-                    strokeDasharray="2 2"
-                    dot={false}
-                    activeDot={{ r: 2, fill: model.color }}
-                    strokeOpacity={0.6}
-                  />
-                ))}
+                {/* Hide prediction lines in mini view for cleaner look */}
               </LineChart>
             </ResponsiveContainer>
           </div>
