@@ -6,6 +6,7 @@ import { mockPredictionService } from "./services/mockPredictions";
 import { accuracyCalculator } from "./services/accuracyCalculator";
 import { aiPredictionService } from "./services/aiPredictionService.js";
 import { predictionScheduler } from "./services/predictionScheduler.js";
+import { cachedPredictionService } from "./services/cachedPredictionService.js";
 import { 
   insertPredictionSchema,
   insertActualPriceSchema,
@@ -455,17 +456,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { commodityId } = req.body;
       
       if (commodityId) {
-        // Generate predictions for specific commodity
-        await aiPredictionService.generatePredictionsForCommodity(commodityId);
-        res.json({ success: true, message: `Predictions generated for commodity ${commodityId}` });
+        // Generate cached predictions for specific commodity
+        await cachedPredictionService.generateCachedPredictionsForCommodity(commodityId);
+        res.json({ success: true, message: `Cached predictions generated for commodity ${commodityId}` });
       } else {
-        // Generate predictions for all commodities
-        await aiPredictionService.generateAllPredictions();
-        res.json({ success: true, message: "Predictions generated for all commodities" });
+        // Generate cached predictions for all commodities
+        await cachedPredictionService.generateAllCachedPredictions();
+        res.json({ success: true, message: "Cached predictions generated for all commodities" });
       }
     } catch (error: any) {
-      console.error("Error generating AI predictions:", error);
-      res.status(500).json({ message: "Failed to generate AI predictions", error: error?.message || 'Unknown error' });
+      console.error("Error generating cached predictions:", error);
+      res.status(500).json({ message: "Failed to generate cached predictions", error: error?.message || 'Unknown error' });
     }
   });
 
@@ -563,8 +564,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/scheduler/run-commodity/:commodityId", async (req, res) => {
     try {
       const { commodityId } = req.params;
-      await predictionScheduler.runForCommodity(commodityId);
-      res.json({ success: true, message: `Predictions generated for commodity ${commodityId}` });
+      await cachedPredictionService.generateCachedPredictionsForCommodity(commodityId);
+      res.json({ success: true, message: `Cached predictions generated for commodity ${commodityId}` });
     } catch (error: any) {
       console.error("Error running commodity predictions:", error);
       res.status(500).json({ message: "Failed to run commodity predictions", error: error?.message || 'Unknown error' });
