@@ -13,25 +13,46 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen minimal-bg smooth-transition">
-      {/* Ultra-minimal Header */}
-      <header className="sticky top-0 z-50 nav-minimal smooth-transition">
-        <nav className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Geometric Logo */}
+    <div className="min-h-screen bg-background relative">
+      {/* Minimal geometric background pattern - same as landing */}
+      <div className="absolute inset-0 text-foreground pointer-events-none">
+        <svg className="w-full h-full object-cover opacity-20" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dashboardGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
+            </pattern>
+            <linearGradient id="dashboardFadeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{stopColor:"currentColor", stopOpacity:0.03}} />
+              <stop offset="50%" style={{stopColor:"currentColor", stopOpacity:0.01}} />
+              <stop offset="100%" style={{stopColor:"currentColor", stopOpacity:0.04}} />
+            </linearGradient>
+          </defs>
+          
+          <rect width="100%" height="100%" fill="url(#dashboardGrid)" />
+          <circle cx="150" cy="120" r="60" fill="url(#dashboardFadeGradient)" />
+          <circle cx="650" cy="480" r="80" fill="url(#dashboardFadeGradient)" />
+          <polygon points="200,300 250,200 300,300" fill="currentColor" opacity="0.02" />
+          <polygon points="500,150 580,100 560,200" fill="currentColor" opacity="0.02" />
+        </svg>
+      </div>
+
+      {/* Minimal Header - matching landing page */}
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
+        <div className="max-w-6xl mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="logo-triangle"></div>
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">AIForecast Hub</h1>
+              {/* Triangle logo - same as landing */}
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="text-lg font-medium text-foreground">
+                AIForecast Hub
+              </span>
             </div>
             
-
-            
-            {/* Minimal Theme Toggle */}
             <Button
               onClick={toggleTheme}
               variant="ghost"
               size="sm"
-              className="btn-minimal w-10 h-10 p-0"
+              className="w-10 h-10 p-0 hover:bg-background/60 dark:hover:bg-white/10 transition-colors"
               data-testid="button-theme-toggle"
             >
               {theme === "dark" ? (
@@ -41,26 +62,26 @@ export default function Dashboard() {
               )}
             </Button>
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* Ultra-clean Main Content */}
-      <main className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-6xl mx-auto px-8 py-16">
         
         {/* Hero Stats Section */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground mb-4">
+        <section className="mb-20">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6 tracking-wide">
               AI Prediction Performance
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
               Real-time tracking of AI model accuracy in commodity price forecasting
             </p>
           </div>
           <StatsOverview />
         </section>
 
-        <div className="space-y-16">
+        <div className="space-y-20">
           {/* League Table */}
           <LeagueTable />
           
@@ -69,41 +90,17 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="mt-24 border-t elevated-surface smooth-transition">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
-          <div className="grid md:grid-cols-4 gap-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="logo-triangle scale-75"></div>
-                <span className="font-semibold text-foreground">AIForecast Hub</span>
-              </div>
-              <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                Compare AI model predictions for commodity prices. Track accuracy, analyze performance, and make better trading decisions.
-              </p>
+      {/* Minimal Footer - matching landing page */}
+      <footer className="relative z-10 border-t border-border/50 mt-32">
+        <div className="max-w-6xl mx-auto px-8 py-16">
+          <div className="text-center space-y-6">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-medium text-foreground">AIForecast Hub</span>
             </div>
-            <div>
-              <h4 className="font-medium text-foreground mb-4">Product</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground micro-transition">API Access</a></li>
-                <li><a href="#" className="hover:text-foreground micro-transition">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground micro-transition">Data Export</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-foreground mb-4">Support</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground micro-transition">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground micro-transition">Contact Us</a></li>
-                <li><a href="#" className="hover:text-foreground micro-transition">Status Page</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t border-border-subtle flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">© 2024 AIForecast Hub. All rights reserved.</p>
-            <div className="flex items-center space-x-4">
-              <span className="text-xs text-muted-foreground">Data from Yahoo Finance</span>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2024 AIForecast Hub. Built with real-time Yahoo Finance data.
+            </p>
           </div>
         </div>
       </footer>
