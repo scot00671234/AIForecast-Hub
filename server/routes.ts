@@ -655,6 +655,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Prediction Generation Endpoints
+  app.post("/api/predictions/generate/:commodityId", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      await aiPredictionService.generatePredictionsForCommodity(commodityId);
+      res.json({ message: "AI predictions generated successfully", commodityId });
+    } catch (error) {
+      console.error("Error generating predictions:", error);
+      res.status(500).json({ message: "Failed to generate predictions" });
+    }
+  });
+
+  app.post("/api/predictions/generate-all", async (req, res) => {
+    try {
+      await aiPredictionService.generateWeeklyPredictions();
+      res.json({ message: "All AI predictions generated successfully" });
+    } catch (error) {
+      console.error("Error generating all predictions:", error);
+      res.status(500).json({ message: "Failed to generate all predictions" });
+    }
+  });
+
+  // Future Predictions Endpoint
+  app.get("/api/predictions/future/:commodityId", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      const days = parseInt(req.query.days as string) || 7;
+      const futurePredictions = await cachedPredictionService.getFuturePredictions(commodityId, days);
+      res.json(futurePredictions);
+    } catch (error) {
+      console.error("Error fetching future predictions:", error);
+      res.status(500).json({ message: "Failed to fetch future predictions" });
+    }
+  });
+
+  // AI Service Status
+  app.get("/api/ai-services/status", async (req, res) => {
+    try {
+      const status = await aiPredictionService.getServiceStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting AI service status:", error);
+      res.status(500).json({ message: "Failed to get AI service status" });
+    }
+  });
+
+  // Yahoo Finance Real-time Data
+  app.post("/api/yahoo-finance/update-all", async (req, res) => {
+    try {
+      await yahooFinanceIntegration.updateAllCommodityPrices();
+      res.json({ message: "All commodity prices updated from Yahoo Finance" });
+    } catch (error) {
+      console.error("Error updating all prices:", error);
+      res.status(500).json({ message: "Failed to update all commodity prices" });
+    }
+  });
+
+  app.post("/api/yahoo-finance/update/:commodityId", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
+      res.json({ message: `Commodity ${commodityId} prices updated from Yahoo Finance` });
+    } catch (error) {
+      console.error("Error updating commodity prices:", error);
+      res.status(500).json({ message: "Failed to update commodity prices" });
+    }
+  });
+
   // Initialize prediction data on startup
   const initializePredictions = async () => {
     try {

@@ -12,9 +12,9 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({
   user: 'runner',
-  host: 'localhost',
-  database: 'commoditydb', 
-  port: 5433,
+  host: '/run/postgresql',
+  database: 'commoditydb',
+  port: 5432,
   max: 10,
   idleTimeoutMillis: 10000,
   connectionTimeoutMillis: 30000,
@@ -23,6 +23,16 @@ export const pool = new Pool({
 // Add error handling for pool
 pool.on('error', (err) => {
   console.error('Database pool error:', err.message);
+});
+
+// Test database connection
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Database connection failed:', err.message);
+  } else {
+    console.log('Database connected successfully');
+    if (client) release();
+  }
 });
 
 export const db = drizzle(pool, { schema });

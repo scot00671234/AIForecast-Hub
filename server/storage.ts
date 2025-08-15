@@ -24,6 +24,7 @@ import {
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { fallbackStorage } from "./services/fallbackStorage";
 
 export interface IStorage {
   // AI Models
@@ -67,9 +68,22 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private isDbConnected = false;
+
   constructor() {
-    // Database initialization will be handled by migrations
+    this.testConnection();
     this.initializeDefaultData();
+  }
+
+  private async testConnection() {
+    try {
+      await db.select().from(aiModels).limit(1);
+      this.isDbConnected = true;
+      console.log("Database connection successful");
+    } catch (error) {
+      console.error("Database connection failed, using fallback storage:", error);
+      this.isDbConnected = false;
+    }
   }
 
   private async initializeDefaultData() {
@@ -118,7 +132,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAiModels(): Promise<AiModel[]> {
-    return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getAiModels();
+    }
+    try {
+      return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
+    } catch (error) {
+      console.error("Database error, using fallback:", error);
+      return await fallbackStorage.getAiModels();
+    }
   }
 
   async getAiModel(id: string): Promise<AiModel | undefined> {
@@ -132,12 +154,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCommodities(): Promise<Commodity[]> {
-    return await db.select().from(commodities);
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getCommodities();
+    }
+    try {
+      return await db.select().from(commodities);
+    } catch (error) {
+      console.error("Database error, using fallback:", error);
+      return await fallbackStorage.getCommodities();
+    }
   }
 
   async getCommodity(id: string): Promise<Commodity | undefined> {
-    const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
-    return commodity || undefined;
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getCommodity(id);
+    }
+    try {
+      const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
+      return commodity || undefined;
+    } catch (error) {
+      console.error("Database error, using fallback:", error);
+      return await fallbackStorage.getCommodity(id);
+    }
   }
 
   async getCommodityBySymbol(symbol: string): Promise<Commodity | undefined> {
@@ -183,6 +221,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getActualPrices(commodityId, limit);
+    }
     try {
       let query = db.select().from(actualPrices)
         .where(eq(actualPrices.commodityId, commodityId))
@@ -195,20 +236,36 @@ export class DatabaseStorage implements IStorage {
       return await query;
     } catch (error) {
       console.error('Error fetching actual prices:', error);
-      return [];
+      return await fallbackStorage.getActualPrices(commodityId, limit);
     }
   }
 
   async createActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
-    const [price] = await db.insert(actualPrices).values(insertPrice).returning();
-    return price;
+    if (!this.isDbConnected) {
+      return await fallbackStorage.createActualPrice(insertPrice);
+    }
+    try {
+      const [price] = await db.insert(actualPrices).values(insertPrice).returning();
+      return price;
+    } catch (error) {
+      console.error("Database error, using fallback:", error);
+      return await fallbackStorage.createActualPrice(insertPrice);
+    }
   }
 
 
 
   async getLatestPrice(commodityId: string): Promise<ActualPrice | undefined> {
-    const prices = await this.getActualPrices(commodityId, 1);
-    return prices[0];
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getLatestPrice(commodityId);
+    }
+    try {
+      const prices = await this.getActualPrices(commodityId, 1);
+      return prices[0];
+    } catch (error) {
+      console.error("Database error, using fallback:", error);
+      return await fallbackStorage.getLatestPrice(commodityId);
+    }
   }
 
   async getAccuracyMetrics(period: string): Promise<AccuracyMetric[]> {
@@ -253,6 +310,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
+    if (!this.isDbConnected) {
+      return await fallbackStorage.getDashboardStats();
+    }
+    try {
     const allPredictions = await db.select().from(predictions);
     const thirtyDayMetrics = await this.getAccuracyMetrics('30d');
     const allCommodities = await this.getCommodities();
@@ -268,8 +329,12 @@ export class DatabaseStorage implements IStorage {
       topModel: topModel?.name || "N/A",
       topAccuracy: topMetric ? parseFloat(topMetric.accuracy) : 0,
       activeCommodities: allCommodities.length,
-      avgAccuracy
+      avgAccuracy: Number(avgAccuracy.toFixed(2))
     };
+    } catch (error) {
+      console.error("Database error in getDashboardStats, using fallback:", error);
+      return await fallbackStorage.getDashboardStats();
+    }
   }
 
   async getLeagueTable(period: string): Promise<LeagueTableEntry[]> {
