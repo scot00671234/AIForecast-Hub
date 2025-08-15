@@ -152,33 +152,34 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto glass-card">
-        <DialogHeader className="border-b border-border-subtle pb-8">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-background border border-border/50 backdrop-blur-md">
+        <DialogHeader className="border-b border-border/30 pb-8">
           <div className="flex items-start justify-between">
             <div className="space-y-4">
-              <DialogTitle className="text-3xl font-bold tracking-tight flex items-center space-x-3">
-                <Activity className="w-8 h-8 text-primary" />
+              <DialogTitle className="text-2xl md:text-3xl font-normal tracking-wide flex items-center space-x-3">
+                {/* Triangle icon matching the logo */}
+                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-primary"></div>
                 <span>{commodity.name} Price Analysis</span>
               </DialogTitle>
               <div className="flex items-center space-x-8">
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-muted-foreground">Symbol:</span>
-                  <span className="font-mono text-sm bg-muted px-3 py-1 rounded-md font-medium">{commodity.symbol}</span>
+                  <span className="text-sm text-muted-foreground font-light">Symbol:</span>
+                  <span className="font-mono text-sm bg-muted/50 px-3 py-1 rounded-md font-medium border border-border/50">{commodity.symbol}</span>
                 </div>
                 {latestPrice && (
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-6">
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-foreground">
+                      <div className="text-2xl md:text-3xl font-normal text-foreground">
                         {formatPrice(latestPrice.price)}
                       </div>
-                      <div className="text-sm text-muted-foreground">Current Price</div>
+                      <div className="text-sm text-muted-foreground font-light">Current Price</div>
                     </div>
                     {latestPrice.changePercent && (
                       <div className="text-right">
-                        <div className="text-lg font-semibold">
+                        <div className="text-lg font-medium">
                           {formatChange(latestPrice.changePercent)}
                         </div>
-                        <div className="text-xs text-muted-foreground">24h Change</div>
+                        <div className="text-xs text-muted-foreground font-light">24h Change</div>
                       </div>
                     )}
                   </div>
@@ -190,12 +191,12 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
         <div className="space-y-6 py-8">
           {/* Trading Platform Style Chart */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-foreground">Price Movement & AI Predictions</h3>
+              <h3 className="text-lg font-medium text-foreground tracking-wide">Price Movement & AI Predictions</h3>
               
-              {/* Integrated Time Period Controls */}
-              <div className="flex items-center space-x-1 bg-muted/50 rounded-lg p-1">
+              {/* Minimal Time Period Controls */}
+              <div className="flex items-center space-x-1 bg-muted/30 rounded-lg p-1 border border-border/40">
                 {TIME_PERIODS.map(period => (
                   <Button
                     key={period.value}
@@ -203,10 +204,10 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                     size="sm"
                     onClick={() => setSelectedPeriod(period.value)}
                     className={`
-                      h-7 px-3 text-xs font-medium transition-all duration-200
+                      h-8 px-3 text-xs font-medium transition-all duration-200 rounded-md
                       ${selectedPeriod === period.value 
                         ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/60"
                       }
                     `}
                   >
@@ -221,9 +222,9 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                 <Skeleton className="h-[500px] w-full rounded-xl" />
               </div>
             ) : (
-              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-                {/* TradingView-style Chart Header */}
-                <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border">
+              <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm">
+                {/* Minimal Chart Header */}
+                <div className="flex items-center justify-between px-6 py-3 bg-muted/10 border-b border-border/30">
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
@@ -248,17 +249,17 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                   <div className="flex items-center space-x-3 text-xs text-muted-foreground">
                     <div className="flex items-center space-x-2">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                      <span>Yahoo Finance</span>
+                      <span className="font-light">Yahoo Finance</span>
                     </div>
                     <span className="text-xs">•</span>
-                    <span>Real-time</span>
+                    <span className="font-light">Real-time</span>
                   </div>
                 </div>
                 
-                <div className="h-[500px] w-full bg-background border border-border rounded-lg overflow-hidden">
+                <div className="h-[500px] w-full bg-background/60 overflow-hidden">
                   <div className="h-full w-full relative">
-                    {/* TradingView-style price axis background */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background"></div>
+                    {/* Subtle background gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background/80"></div>
                     
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={formattedData} margin={{ top: 10, right: 60, left: 10, bottom: 30 }}>
@@ -336,23 +337,23 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
             )}
           </div>
 
-          {/* Market Insights - Trading Platform Style */}
+          {/* Market Insights - Minimal Style */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-card border border-border rounded-lg p-4 text-center">
-              <div className="text-xs text-muted-foreground mb-1">30D VOLATILITY</div>
-              <div className="text-lg font-bold text-orange-500">12.5%</div>
+            <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
+              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">30D VOLATILITY</div>
+              <div className="text-xl font-medium text-orange-500">12.5%</div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4 text-center">
-              <div className="text-xs text-muted-foreground mb-1">AVG VOLUME</div>
-              <div className="text-lg font-bold text-blue-500">2.8M</div>
+            <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
+              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">AVG VOLUME</div>
+              <div className="text-xl font-medium text-blue-500">2.8M</div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4 text-center">
-              <div className="text-xs text-muted-foreground mb-1">BEST MODEL</div>
-              <div className="text-lg font-bold text-green-500">Deepseek</div>
+            <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
+              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">BEST MODEL</div>
+              <div className="text-xl font-medium text-green-500">Deepseek</div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-4 text-center">
-              <div className="text-xs text-muted-foreground mb-1">ACCURACY</div>
-              <div className="text-lg font-bold text-primary">84.2%</div>
+            <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
+              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">ACCURACY</div>
+              <div className="text-xl font-medium text-primary">84.2%</div>
             </div>
           </div>
         </div>
