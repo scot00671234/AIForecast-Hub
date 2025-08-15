@@ -10,10 +10,22 @@ interface CachedPrediction {
 
 export class CachedPredictionService {
   
-  // Generate realistic cached predictions that all users will see
-  private generateCachedPrediction(commodityName: string, modelName: string, currentPrice: number): CachedPrediction {
+  // Generate realistic daily predictions with time-based trends
+  private generateDailyPrediction(commodityName: string, modelName: string, currentPrice: number, dayOffset: number, totalDays: number): CachedPrediction {
+    // Calculate progress through the year (0 to 1)
+    const yearProgress = dayOffset / totalDays;
+    
+    // Base trend for the commodity over the year
+    const annualTrend = this.getAnnualTrend(commodityName);
+    
+    // Seasonal variations
+    const seasonal = Math.sin((dayOffset / 365) * 2 * Math.PI) * 0.03; // 3% seasonal variation
+    
+    // Weekly patterns (lower on weekends)
+    const dayOfWeek = (dayOffset % 7);
+    const weeklyPattern = dayOfWeek >= 5 ? -0.005 : 0.002; // Slightly lower on weekends
     // Different AI models have different prediction characteristics
-    let trendMultiplier: number;
+    let baseTrend: number;
     let volatility: number;
     let confidence: number;
     let reasoning: string;
@@ -21,34 +33,35 @@ export class CachedPredictionService {
     const modelLower = modelName.toLowerCase();
     
     if (modelLower.includes('claude')) {
-      trendMultiplier = 0.98 + Math.random() * 0.04; // Conservative: 98-102%
-      volatility = 0.02;
+      baseTrend = 0.02; // 2% annual growth
+      volatility = 0.015; // Lower daily volatility
       confidence = 75 + Math.random() * 15; // 75-90%
-      reasoning = `Conservative market analysis for ${commodityName} suggests stable growth with minimal volatility based on current supply fundamentals and geopolitical stability factors.`;
+      reasoning = `Conservative market analysis for ${commodityName} on day ${dayOffset + 1} suggests stable growth trajectory.`;
     } else if (modelLower.includes('chatgpt')) {
-      trendMultiplier = 0.95 + Math.random() * 0.10; // Moderate: 95-105%
-      volatility = 0.03;
+      baseTrend = 0.05; // 5% annual growth  
+      volatility = 0.025; // Moderate daily volatility
       confidence = 70 + Math.random() * 20; // 70-90%
-      reasoning = `Comprehensive analysis of ${commodityName} indicates moderate price movement driven by demand patterns, economic indicators, and seasonal market cycles.`;
+      reasoning = `Market dynamics analysis for ${commodityName} indicates upward price momentum with moderate volatility.`;
     } else if (modelLower.includes('deepseek')) {
-      trendMultiplier = 0.97 + Math.random() * 0.06; // Balanced: 97-103%
-      volatility = 0.025;
+      baseTrend = 0.03; // 3% annual growth
+      volatility = 0.02; // Balanced daily volatility
       confidence = 80 + Math.random() * 15; // 80-95%
-      reasoning = `Quantitative modeling for ${commodityName} projects steady price appreciation supported by emerging market demand and constrained supply conditions.`;
+      reasoning = `Quantitative modeling for ${commodityName} projects steady appreciation with measured risk factors.`;
     } else {
-      trendMultiplier = 0.96 + Math.random() * 0.08; // Generic: 96-104%
-      volatility = 0.03;
+      baseTrend = 0.025; // 2.5% annual growth
+      volatility = 0.02;
       confidence = 65 + Math.random() * 25; // 65-90%
-      reasoning = `Market analysis suggests moderate price volatility for ${commodityName} based on current economic conditions.`;
+      reasoning = `General market analysis for ${commodityName} suggests moderate growth potential.`;
     }
     
-    // Add consistent but realistic variation based on commodity type
-    const commodityHash = commodityName.charCodeAt(0) % 10;
-    const modelHash = modelName.charCodeAt(0) % 5;
-    const consistentVariation = (commodityHash + modelHash) / 100;
+    // Combine all factors
+    const totalTrend = (baseTrend * yearProgress) + annualTrend + seasonal + weeklyPattern;
     
-    // Calculate prediction
-    const prediction = currentPrice * (trendMultiplier + consistentVariation + (Math.random() - 0.5) * volatility);
+    // Add daily random volatility with some persistence
+    const dailyVolatility = (Math.sin(dayOffset * 0.1) + Math.random() - 0.5) * volatility;
+    
+    // Calculate daily prediction
+    const prediction = currentPrice * (1 + totalTrend + dailyVolatility);
     
     return {
       predictedPrice: Math.max(prediction, currentPrice * 0.5), // Prevent unrealistic drops
@@ -59,7 +72,7 @@ export class CachedPredictionService {
 
   async generateCachedPredictionsForCommodity(commodityId: string): Promise<void> {
     try {
-      console.log(`Generating cached predictions for commodity ${commodityId}...`);
+      console.log(`Generating daily AI predictions for commodity ${commodityId} until August 15, 2026...`);
       
       // Get commodity details
       const commodity = await db.select()
@@ -81,50 +94,78 @@ export class CachedPredictionService {
         .from(aiModels)
         .where(eq(aiModels.isActive, 1));
 
-      const predictionDate = new Date();
-      const targetDate = new Date();
-      targetDate.setFullYear(targetDate.getFullYear() + 1);
+      // Generate daily predictions from today until August 15, 2026
+      const startDate = new Date();
+      const endDate = new Date('2026-08-15');
+      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      console.log(`Generating ${totalDays} days of predictions for ${models.length} AI models...`);
+      
+      let totalSuccessCount = 0;
+      let totalPredictions = 0;
 
-      let successCount = 0;
-
-      // Generate cached predictions for each AI model
+      // Generate predictions for each AI model
       for (const model of models) {
-        try {
-          const cachedPrediction = this.generateCachedPrediction(
-            commodityData.name, 
-            model.name, 
-            currentPrice
-          );
+        console.log(`Generating daily predictions for ${model.name}...`);
+        let modelSuccessCount = 0;
+        
+        // Generate prediction for each day
+        for (let dayOffset = 0; dayOffset < totalDays; dayOffset++) {
+          try {
+            const predictionDate = new Date();
+            const targetDate = new Date(startDate);
+            targetDate.setDate(startDate.getDate() + dayOffset);
+            
+            // Generate price prediction for this specific day
+            const dailyPrediction = this.generateDailyPrediction(
+              commodityData.name,
+              model.name,
+              currentPrice,
+              dayOffset,
+              totalDays
+            );
 
-          // Store prediction in database
-          await db.insert(predictions).values({
-            aiModelId: model.id,
-            commodityId: commodityId,
-            predictionDate: predictionDate,
-            targetDate: targetDate,
-            predictedPrice: cachedPrediction.predictedPrice.toFixed(2),
-            confidence: cachedPrediction.confidence.toString(),
-            metadata: {
-              reasoning: cachedPrediction.reasoning,
-              model: model.name,
-              provider: model.provider,
-              cached: true,
-              generated_at: new Date().toISOString()
-            }
-          });
+            // Store prediction in database
+            await db.insert(predictions).values({
+              aiModelId: model.id,
+              commodityId: commodityId,
+              predictionDate: predictionDate,
+              targetDate: targetDate,
+              predictedPrice: dailyPrediction.predictedPrice.toFixed(2),
+              confidence: dailyPrediction.confidence.toString(),
+              metadata: {
+                reasoning: dailyPrediction.reasoning,
+                model: model.name,
+                provider: model.provider,
+                cached: true,
+                daily_prediction: true,
+                day_offset: dayOffset,
+                total_days: totalDays,
+                generated_at: new Date().toISOString()
+              }
+            });
 
-          console.log(`✓ Generated ${model.name} prediction for ${commodityData.name}: $${cachedPrediction.predictedPrice.toFixed(2)} (${cachedPrediction.confidence}% confidence)`);
-          successCount++;
+            modelSuccessCount++;
+            totalSuccessCount++;
+            totalPredictions++;
 
-        } catch (error) {
-          console.error(`✗ Failed to generate ${model.name} prediction:`, error);
+          } catch (error) {
+            console.error(`✗ Failed to generate ${model.name} prediction for day ${dayOffset}:`, error);
+          }
+          
+          // Small delay every 50 predictions to prevent overwhelming the database
+          if (totalPredictions % 50 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
         }
+        
+        console.log(`✓ Generated ${modelSuccessCount}/${totalDays} daily predictions for ${model.name}`);
       }
 
-      console.log(`Cached prediction generation completed: ${successCount}/${models.length} successful`);
+      console.log(`Daily prediction generation completed: ${totalSuccessCount}/${totalDays * models.length} total predictions generated`);
 
     } catch (error) {
-      console.error(`Failed to generate cached predictions for commodity ${commodityId}:`, error);
+      console.error(`Failed to generate daily predictions for commodity ${commodityId}:`, error);
       throw error;
     }
   }
