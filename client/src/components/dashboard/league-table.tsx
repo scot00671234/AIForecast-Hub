@@ -72,7 +72,7 @@ export default function LeagueTable() {
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-                🏆
+                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
               </div>
               <p className="text-lg font-medium">No ranking data available</p>
               <p className="text-sm">Start making predictions to see model rankings</p>

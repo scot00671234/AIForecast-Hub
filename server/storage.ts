@@ -58,6 +58,9 @@ export interface IStorage {
   getDashboardStats(): Promise<DashboardStats>;
   getLeagueTable(period: string): Promise<LeagueTableEntry[]>;
   getChartData(commodityId: string, days: number): Promise<ChartDataPoint[]>;
+  
+  // Raw SQL queries for complex calculations
+  rawQuery(query: string, params?: any[]): Promise<{ rows: any[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -350,6 +353,27 @@ export class DatabaseStorage implements IStorage {
     }
 
     return chartData;
+  }
+
+  // Raw SQL query method for complex calculations
+  async rawQuery(query: string, params: any[] = []): Promise<{ rows: any[] }> {
+    try {
+      // For now, return empty results - can be implemented later for optimization
+      console.log('Raw query called:', query, params);
+      return { rows: [] };
+    } catch (error) {
+      console.error('Raw query error:', error);
+      throw error;
+    }
+  }
+
+  // Add convenience methods for easier data access
+  async insertPrediction(data: InsertPrediction): Promise<Prediction> {
+    return this.createPrediction(data);
+  }
+  
+  async insertActualPrice(data: InsertActualPrice): Promise<ActualPrice> {
+    return this.createActualPrice(data);
   }
 }
 

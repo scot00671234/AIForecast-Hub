@@ -115,7 +115,6 @@ export class AccuracyCalculator {
   async calculateModelRankings(period: string = "all"): Promise<ModelRanking[]> {
     const aiModels = await storage.getAiModels();
     const commodities = await storage.getCommodities();
-    
     const rankings: ModelRanking[] = [];
 
     for (const model of aiModels) {
