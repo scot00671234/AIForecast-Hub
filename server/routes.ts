@@ -376,6 +376,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint to populate database with sample prediction data
+  app.post("/api/populate-predictions", async (req, res) => {
+    try {
+      const commodities = await storage.getCommodities();
+      const aiModels = await storage.getAiModels();
+      
+      let totalPredictions = 0;
+      let totalActualPrices = 0;
+      
+      // Generate prediction data for each commodity and AI model
+      for (const commodity of commodities) {
+        // Generate mock prediction data
+        const mockData = mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
+        
+        for (const aiModel of aiModels) {
+          // Create predictions for the last 30 days
+          for (let i = 0; i < 30; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            
+            const predictionData = mockData.predictions.find(p => 
+              new Date(p.date).toDateString() === date.toDateString()
+            );
+            
+            if (predictionData && predictionData.actualPrice !== null) {
+              // Get the right prediction based on model name
+              let predictedPrice = predictionData.claudePrediction;
+              if (aiModel.name === 'ChatGPT') predictedPrice = predictionData.chatgptPrediction;
+              if (aiModel.name === 'Deepseek') predictedPrice = predictionData.deepseekPrediction;
+              
+              // Insert prediction
+              await storage.insertPrediction({
+                aiModelId: aiModel.id,
+                commodityId: commodity.id,
+                predictionDate: new Date(date.getTime() - 24 * 60 * 60 * 1000), // Prediction made day before
+                targetDate: date,
+                predictedPrice: predictedPrice.toString(),
+                confidence: (Math.random() * 30 + 70).toFixed(2), // 70-100% confidence
+                metadata: { source: 'system_generated', version: '1.0' }
+              });
+              totalPredictions++;
+              
+              // Insert actual price (only once per commodity per date)
+              if (aiModel === aiModels[0]) { // Only insert once per date
+                await storage.insertActualPrice({
+                  commodityId: commodity.id,
+                  date: date,
+                  price: predictionData.actualPrice.toString(),
+                  volume: (Math.random() * 1000000 + 100000).toString(),
+                  source: 'yahoo_finance'
+                });
+                totalActualPrices++;
+              }
+            }
+          }
+        }
+      }
+      
+      console.log(`Populated ${totalPredictions} predictions and ${totalActualPrices} actual prices`);
+      res.json({ 
+        success: true, 
+        totalPredictions, 
+        totalActualPrices,
+        message: 'Database populated with sample prediction data'
+      });
+    } catch (error) {
+      console.error("Error populating predictions:", error);
+      res.status(500).json({ message: "Failed to populate predictions", error: error.message });
+    }
+  });
+
   // Initialize prediction data on startup
   const initializePredictions = async () => {
     try {
