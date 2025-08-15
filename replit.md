@@ -37,6 +37,7 @@ Preferred communication style: Simple, everyday language.
 
 ### External Dependencies
 - **Yahoo Finance API**: Real-time commodity price data fetching with rate limiting
+- **OpenAI API**: GPT-4o integration for AI-powered commodity price predictions
 - **Font Services**: Google Fonts for typography (Inter primary, with additional font families for variety)
 - **Development Tools**: Replit integration with cartographer plugin and runtime error overlay
 - **Design Assets**: Custom SVG geometric patterns for background elements, triangle logo system
@@ -66,3 +67,9 @@ Preferred communication style: Simple, everyday language.
 - **Background Patterns**: Added custom SVG geometric patterns for visual depth while maintaining minimalism
 - **Consistent UI**: Unified design language between landing page and dashboard with matching headers, footers, and background patterns
 - **Migration Completed**: Successfully migrated from Replit Agent to Replit environment with full PostgreSQL database integration
+- **AI Prediction System**: Implemented comprehensive AI prediction system using OpenAI GPT-4o for weekly commodity price forecasting
+  - **Automated Weekly Predictions**: Scheduled system runs every Monday to generate 7-day future price predictions
+  - **Multi-Model Support**: Predictions generated for Claude, ChatGPT, and Deepseek AI models
+  - **Database Integration**: All AI predictions stored in PostgreSQL with confidence levels and reasoning metadata
+  - **Chart Integration**: Future predictions displayed alongside historical data on detailed charts
+  - **API Endpoints**: New endpoints for generating and retrieving AI predictions with fallback mechanisms

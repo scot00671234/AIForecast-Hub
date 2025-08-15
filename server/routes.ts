@@ -4,9 +4,9 @@ import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
 import { mockPredictionService } from "./services/mockPredictions";
 import { accuracyCalculator } from "./services/accuracyCalculator";
-import { aiPredictionService } from "./services/aiPredictionService.js";
-import { predictionScheduler } from "./services/predictionScheduler.js";
-import { cachedPredictionService } from "./services/cachedPredictionService.js";
+import { aiPredictionService } from "./services/aiPredictionService";
+import { predictionScheduler } from "./services/predictionScheduler";
+import { cachedPredictionService } from "./services/cachedPredictionService";
 import { 
   insertPredictionSchema,
   insertActualPriceSchema,
@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Detailed Chart Data with Real Yahoo Finance Integration
+  // Detailed Chart Data with Real Yahoo Finance Integration and AI Predictions
   app.get("/api/commodities/:id/detailed-chart", async (req, res) => {
     try {
       const commodityId = req.params.id;
@@ -100,6 +100,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const commodity = await storage.getCommodity(commodityId);
       if (!commodity) {
         return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      // Try to get chart data with AI predictions first
+      try {
+        const chartDataWithPredictions = await aiPredictionService.getChartDataWithPredictions(commodityId, period);
+        if (chartDataWithPredictions.chartData.length > 0) {
+          return res.json(chartDataWithPredictions);
+        }
+      } catch (error) {
+        console.log("AI predictions not available, falling back to regular chart data");
       }
 
       // For now, create a simplified mock prediction structure for chart display
@@ -444,9 +454,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalActualPrices,
         message: 'Database populated with sample prediction data'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error populating predictions:", error);
-      res.status(500).json({ message: "Failed to populate predictions", error: error.message });
+      res.status(500).json({ message: "Failed to populate predictions", error: error?.message || 'Unknown error' });
     }
   });
 
@@ -479,6 +489,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching AI predictions:", error);
       res.status(500).json({ message: "Failed to fetch AI predictions" });
+    }
+  });
+
+  // Generate AI predictions manually (for testing)
+  app.post("/api/ai-predictions/generate-ai", async (req, res) => {
+    try {
+      await aiPredictionService.generateWeeklyPredictions();
+      res.json({ success: true, message: "AI predictions generated for all commodities" });
+    } catch (error: any) {
+      console.error("Error generating AI predictions:", error);
+      res.status(500).json({ 
+        message: "Failed to generate AI predictions", 
+        error: error?.message || 'Unknown error' 
+      });
+    }
+  });
+
+  // Get AI future predictions for a commodity
+  app.get("/api/commodities/:id/ai-predictions", async (req, res) => {
+    try {
+      const { id: commodityId } = req.params;
+      const days = parseInt(req.query.days as string) || 7;
+      
+      const predictions = await aiPredictionService.getFuturePredictions(commodityId, days);
+      res.json(predictions);
+    } catch (error: any) {
+      console.error("Error fetching AI predictions:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch AI predictions", 
+        error: error?.message || 'Unknown error' 
+      });
+    }
+  });
+
+  // Get chart data with AI predictions
+  app.get("/api/commodities/:id/chart-with-predictions", async (req, res) => {
+    try {
+      const { id: commodityId } = req.params;
+      const period = req.query.period as string || "1mo";
+      
+      const chartData = await aiPredictionService.getChartDataWithPredictions(commodityId, period);
+      res.json(chartData);
+    } catch (error: any) {
+      console.error("Error fetching chart data with predictions:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch chart data with predictions", 
+        error: error?.message || 'Unknown error' 
+      });
     }
   });
 

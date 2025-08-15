@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import { aiPredictionService } from './aiPredictionService.js';
-import { cachedPredictionService } from './cachedPredictionService.js';
+import { aiPredictionService } from './aiPredictionService';
+import { cachedPredictionService } from './cachedPredictionService';
 
 export class PredictionScheduler {
   private isScheduled = false;
@@ -11,14 +11,14 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule weekly prediction updates every Monday at 2 AM
+    // Schedule weekly AI prediction updates every Monday at 2 AM
     cron.schedule('0 2 * * 1', async () => {
-      console.log('Running weekly prediction update...');
+      console.log('Running weekly AI prediction update...');
       try {
-        await cachedPredictionService.updateWeeklyPredictions();
-        console.log('Weekly prediction update completed successfully');
+        await aiPredictionService.generateWeeklyPredictions();
+        console.log('Weekly AI prediction update completed successfully');
       } catch (error) {
-        console.error('Weekly prediction update failed:', error);
+        console.error('Weekly AI prediction update failed:', error);
       }
     });
 
@@ -27,12 +27,12 @@ export class PredictionScheduler {
   }
 
   async runNow(): Promise<void> {
-    console.log('Running weekly prediction update manually...');
+    console.log('Running weekly AI prediction update manually...');
     try {
-      await cachedPredictionService.updateWeeklyPredictions();
-      console.log('Manual weekly update completed successfully');
+      await aiPredictionService.generateWeeklyPredictions();
+      console.log('Manual weekly AI prediction update completed successfully');
     } catch (error) {
-      console.error('Manual weekly update failed:', error);
+      console.error('Manual weekly AI prediction update failed:', error);
       throw error;
     }
   }
