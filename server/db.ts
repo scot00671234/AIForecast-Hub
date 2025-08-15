@@ -3,14 +3,15 @@ const { Pool } = pkg;
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
+// For development, use a default DATABASE_URL if not set
+const databaseUrl = process.env.DATABASE_URL || "postgresql://runner@localhost:5433/commoditydb";
+
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.warn("DATABASE_URL not set, using default development database");
 }
 
 export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
   max: 10,
   idleTimeoutMillis: 10000,
   connectionTimeoutMillis: 30000,

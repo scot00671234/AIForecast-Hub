@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["jq"]
+packages = ["jq", "postgresql"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -13,6 +13,11 @@ run = ["sh", "-c", "npm run dev"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5433
+externalPort = 3000
+exposeLocalhost = true
 
 [env]
 PORT = "5000"
