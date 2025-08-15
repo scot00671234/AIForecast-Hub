@@ -554,22 +554,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get chart data with AI predictions
-  app.get("/api/commodities/:id/chart-with-predictions", async (req, res) => {
-    try {
-      const { id: commodityId } = req.params;
-      const period = req.query.period as string || "1mo";
-      
-      const chartData = await storage.getChartData(commodityId, 30);
-      res.json(chartData);
-    } catch (error: any) {
-      console.error("Error fetching chart data with predictions:", error);
-      res.status(500).json({ 
-        message: "Failed to fetch chart data with predictions", 
-        error: error?.message || 'Unknown error' 
-      });
-    }
-  });
 
   // Get future predictions with chart data
   app.get("/api/commodities/:id/future-predictions", async (req, res) => {

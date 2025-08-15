@@ -36,10 +36,12 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   });
 
   useEffect(() => {
-    if (!chartContainerRef.current || dataLoading) return;
+    // Clear loading state as soon as data loading is complete
+    if (!dataLoading) {
+      setIsLoading(false);
+    }
     
-    // Always clear loading state
-    setIsLoading(false);
+    if (!chartContainerRef.current || dataLoading) return;
     
     if (!chartData) return;
 
