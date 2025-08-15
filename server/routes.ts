@@ -90,6 +90,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unified Chart Data - Returns historical data and future predictions combined
+  app.get("/api/commodities/:id/chart-with-predictions", async (req, res) => {
+    try {
+      const commodityId = req.params.id;
+      const period = req.query.period as string || "1mo";
+      
+      // Get commodity to access Yahoo symbol
+      const commodity = await storage.getCommodity(commodityId);
+      if (!commodity) {
+        return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      // Get AI models for predictions
+      const aiModels = await storage.getAiModels();
+      const chartData: Array<{
+        date: string;
+        type: 'historical' | 'prediction';
+        actualPrice?: number;
+        predictions?: Record<string, number>;
+      }> = [];
+
+      // Get historical data
+      if (commodity.yahooSymbol) {
+        try {
+          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+          
+          if (realTimeData.length > 0) {
+            // Add historical data points
+            realTimeData.forEach((item: any) => {
+              chartData.push({
+                date: item.date,
+                type: 'historical',
+                actualPrice: Number(item.price.toFixed(2))
+              });
+            });
+          }
+        } catch (error) {
+          console.warn(`Yahoo Finance failed for ${commodity.yahooSymbol}, using fallback data:`, error);
+        }
+      }
+
+      // Get AI predictions for future dates
+      try {
+        const predictions = await storage.getPredictions(commodityId);
+        const futurePredictions = predictions.filter(p => new Date(p.predictionDate) > new Date());
+        
+        // Group predictions by date
+        const predictionsByDate = futurePredictions.reduce((acc, pred) => {
+          const dateKey = pred.predictionDate.toISOString().split('T')[0];
+          if (!acc[dateKey]) {
+            acc[dateKey] = {};
+          }
+          const model = aiModels.find(m => m.id === pred.aiModelId);
+          if (model) {
+            acc[dateKey][model.name] = pred.predictedPrice;
+          }
+          return acc;
+        }, {} as Record<string, Record<string, number>>);
+
+        // Add prediction data points
+        Object.entries(predictionsByDate).forEach(([date, predictions]) => {
+          chartData.push({
+            date,
+            type: 'prediction',
+            predictions
+          });
+        });
+      } catch (error) {
+        console.log("No AI predictions available:", error);
+      }
+
+      res.json({ chartData });
+    } catch (error) {
+      console.error("Error fetching unified chart data:", error);
+      res.status(500).json({ message: "Failed to fetch chart data" });
+    }
+  });
+
   // Detailed Chart Data with Real Yahoo Finance Integration and AI Predictions
   app.get("/api/commodities/:id/detailed-chart", async (req, res) => {
     try {
