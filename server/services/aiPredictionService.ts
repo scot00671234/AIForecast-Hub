@@ -94,7 +94,10 @@ export class AIPredictionService {
       // Prepare historical data for AI analysis
       const historicalData = recentPrices
         .reverse()
-        .map(p => ({ date: p.date, price: p.price }));
+        .map(p => ({ 
+          date: p.date.toISOString().split('T')[0], 
+          price: parseFloat(p.price) 
+        }));
 
       const currentPrice = historicalData[historicalData.length - 1]?.price || 100;
 
@@ -141,16 +144,17 @@ export class AIPredictionService {
           await db.insert(predictionsTable).values({
             commodityId: commodity.id,
             aiModelId: aiModel.id,
-            date: predictionDate.toISOString().split('T')[0],
-            predictedPrice: predictionResult.predictedPrice,
-            confidence: predictionResult.confidence,
-            reasoning: predictionResult.reasoning
+            predictionDate: predictionDate,
+            targetDate: predictionDate,
+            predictedPrice: predictionResult.predictedPrice.toString(),
+            confidence: predictionResult.confidence.toString(),
+            metadata: { reasoning: predictionResult.reasoning }
           }).onConflictDoUpdate({
-            target: [predictionsTable.commodityId, predictionsTable.aiModelId, predictionsTable.date],
+            target: [predictionsTable.commodityId, predictionsTable.aiModelId, predictionsTable.targetDate],
             set: {
-              predictedPrice: predictionResult.predictedPrice,
-              confidence: predictionResult.confidence,
-              reasoning: predictionResult.reasoning
+              predictedPrice: predictionResult.predictedPrice.toString(),
+              confidence: predictionResult.confidence.toString(),
+              metadata: { reasoning: predictionResult.reasoning }
             }
           });
         }

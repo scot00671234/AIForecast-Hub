@@ -154,17 +154,17 @@ export class DatabaseStorage implements IStorage {
 
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
     try {
-      let baseQuery = db.select().from(predictions);
-      
       const conditions = [];
       if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
       if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
       
+      let query = db.select().from(predictions);
+      
       if (conditions.length > 0) {
-        baseQuery = baseQuery.where(and(...conditions));
+        query = query.where(and(...conditions)) as any;
       }
       
-      return await baseQuery.orderBy(desc(predictions.createdAt));
+      return await query.orderBy(desc(predictions.createdAt));
     } catch (error) {
       console.error('Error fetching predictions:', error);
       return [];
@@ -189,7 +189,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(actualPrices.date));
       
       if (limit) {
-        query = query.limit(limit);
+        query = query.limit(limit) as any;
       }
       
       return await query;

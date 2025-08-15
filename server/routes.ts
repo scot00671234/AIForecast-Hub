@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
-import { mockPredictionService } from "./services/mockPredictions";
 import { accuracyCalculator } from "./services/accuracyCalculator";
 import { aiPredictionService } from "./services/aiPredictionService";
 import { predictionScheduler } from "./services/predictionScheduler";
@@ -128,48 +127,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
             });
           } else {
-            console.log(`No real-time data available for ${commodity.yahooSymbol}, generating fallback data`);
-            // Generate fallback historical data
-            const basePrice = commodity.symbol === 'XAG' ? 30 : 
-                             commodity.symbol === 'XAU' ? 2000 :
-                             commodity.symbol === 'WTI' ? 75 : 100;
-            
-            for (let i = 30; i >= 0; i--) {
-              const date = new Date();
-              date.setDate(date.getDate() - i);
-              
-              const trend = Math.sin(i * 0.1) * 0.05;
-              const volatility = (Math.random() - 0.5) * 0.08;
-              const price = basePrice * (1 + trend + volatility);
-              
-              chartData.push({
-                date: date.toISOString(),
-                type: 'historical',
-                actualPrice: Number(price.toFixed(2))
-              });
-            }
+            console.log(`No real-time data available for ${commodity.yahooSymbol}`);
+            // Return empty data instead of synthetic data
           }
         } catch (error) {
-          console.warn(`Yahoo Finance failed for ${commodity.yahooSymbol}, using fallback data:`, error);
-          // Generate fallback data on error
-          const basePrice = commodity.symbol === 'XAG' ? 30 : 
-                           commodity.symbol === 'XAU' ? 2000 :
-                           commodity.symbol === 'WTI' ? 75 : 100;
-          
-          for (let i = 30; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            
-            const trend = Math.sin(i * 0.1) * 0.05;
-            const volatility = (Math.random() - 0.5) * 0.08;
-            const price = basePrice * (1 + trend + volatility);
-            
-            chartData.push({
-              date: date.toISOString(),
-              type: 'historical',
-              actualPrice: Number(price.toFixed(2))
-            });
-          }
+          console.warn(`Yahoo Finance failed for ${commodity.yahooSymbol}:`, error);
+          // Return empty data instead of synthetic fallback
         }
       }
 
@@ -222,14 +185,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Commodity not found" });
       }
 
-      // Try to get chart data with AI predictions first
+      // Get chart data with AI predictions from storage
       try {
-        const chartDataWithPredictions = await aiPredictionService.getChartDataWithPredictions(commodityId, period);
-        if (chartDataWithPredictions.chartData.length > 0) {
-          return res.json(chartDataWithPredictions);
+        const chartData = await storage.getChartData(commodityId, 30);
+        if (chartData.length > 0) {
+          return res.json(chartData);
         }
       } catch (error) {
-        console.log("AI predictions not available, falling back to regular chart data");
+        console.log("Chart data not available:", error);
       }
 
       // For now, create a simplified mock prediction structure for chart display
@@ -280,49 +243,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Generate fallback data with synthetic realistic price movements
-      const basePrice = commodity.symbol === 'XAG' ? 30 : 
-                       commodity.symbol === 'XAU' ? 2000 :
-                       commodity.symbol === 'WTI' ? 75 : 100;
-      
-      const fallbackData = Array.from({ length: 30 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (29 - i));
-        
-        // Generate realistic price movement
-        const daysSinceStart = i;
-        const trend = Math.sin(daysSinceStart * 0.1) * 0.05; // Small trend component
-        const volatility = (Math.random() - 0.5) * 0.08; // Random volatility
-        const actualPrice = basePrice * (1 + trend + volatility);
-        
-        const predictions: Record<string, number> = {};
-        aiModels.forEach(model => {
-          let predictionVariance: number;
-          
-          if (model.name === 'Claude') {
-            predictionVariance = 0.97 + Math.random() * 0.06;
-          } else if (model.name === 'ChatGPT') {
-            predictionVariance = 0.95 + Math.random() * 0.10;
-          } else if (model.name === 'Deepseek') {
-            predictionVariance = 0.98 + Math.random() * 0.04;
-          } else {
-            predictionVariance = 0.96 + Math.random() * 0.08;
-          }
-          
-          predictions[model.id] = Number((actualPrice * predictionVariance).toFixed(2));
-        });
-
-        return {
-          date: date.toLocaleDateString("en-US", { 
-            month: "short", 
-            day: "numeric" 
-          }),
-          actualPrice: Number(actualPrice.toFixed(2)),
-          predictions
-        };
-      });
-      
-      res.json(fallbackData);
+      // No real data available
+      console.log(`No historical data available for ${commodity.yahooSymbol}`);
+      res.json([]);
     } catch (error) {
       console.error("Error fetching detailed chart data:", error);
       res.status(500).json({ message: "Failed to fetch detailed chart data" });
@@ -484,21 +407,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allPredictions: any[] = [];
 
       for (const commodity of commodities) {
-        let predictions = mockPredictionService.getPredictionsForCommodity(commodity.id);
+        const predictions = await storage.getPredictions(commodity.id);
+        const latestPrice = await storage.getLatestPrice(commodity.id);
         
-        if (!predictions) {
-          // Generate predictions if they don't exist
-          predictions = mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
-        }
-
-        const currentPrice = mockPredictionService.getCurrentPrice(commodity.id) || 0;
-        const priceChange = mockPredictionService.getPriceChange(commodity.id);
-
         allPredictions.push({
           commodity,
-          currentPrice,
-          priceChange,
-          chartData: predictions.predictions.slice(-30) // Last 30 days for charts
+          currentPrice: latestPrice ? parseFloat(latestPrice.price) : 0,
+          priceChange: 0, // Will be calculated from actual price data
+          predictions: predictions.slice(0, 30)
         });
       }
 
@@ -518,54 +434,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let totalPredictions = 0;
       let totalActualPrices = 0;
       
-      // Generate prediction data for each commodity and AI model
-      for (const commodity of commodities) {
-        // Generate mock prediction data
-        const mockData = mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
-        
-        for (const aiModel of aiModels) {
-          // Create predictions for the last 30 days
-          for (let i = 0; i < 30; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            
-            const predictionData = mockData.predictions.find(p => 
-              new Date(p.date).toDateString() === date.toDateString()
-            );
-            
-            if (predictionData && predictionData.actualPrice !== null) {
-              // Get the right prediction based on model name
-              let predictedPrice = predictionData.claudePrediction;
-              if (aiModel.name === 'ChatGPT') predictedPrice = predictionData.chatgptPrediction;
-              if (aiModel.name === 'Deepseek') predictedPrice = predictionData.deepseekPrediction;
-              
-              // Insert prediction
-              await storage.insertPrediction({
-                aiModelId: aiModel.id,
-                commodityId: commodity.id,
-                predictionDate: new Date(date.getTime() - 24 * 60 * 60 * 1000), // Prediction made day before
-                targetDate: date,
-                predictedPrice: predictedPrice.toString(),
-                confidence: (Math.random() * 30 + 70).toFixed(2), // 70-100% confidence
-                metadata: { source: 'system_generated', version: '1.0' }
-              });
-              totalPredictions++;
-              
-              // Insert actual price (only once per commodity per date)
-              if (aiModel === aiModels[0]) { // Only insert once per date
-                await storage.insertActualPrice({
-                  commodityId: commodity.id,
-                  date: date,
-                  price: predictionData.actualPrice.toString(),
-                  volume: (Math.random() * 1000000 + 100000).toString(),
-                  source: 'yahoo_finance'
-                });
-                totalActualPrices++;
-              }
-            }
-          }
-        }
-      }
+      // This endpoint is disabled - use real AI predictions only
+      res.status(400).json({ 
+        message: "Mock data population is disabled. Use real AI predictions via /api/ai-predictions/generate",
+        hint: "Configure AI API keys and use the AI prediction endpoints instead"
+      });
+      return;
       
       console.log(`Populated ${totalPredictions} predictions and ${totalActualPrices} actual prices`);
       res.json({ 
@@ -669,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id: commodityId } = req.params;
       const days = parseInt(req.query.days as string) || 7;
       
-      const predictions = await aiPredictionService.getFuturePredictions(commodityId, days);
+      const predictions = await storage.getPredictions(commodityId);
       res.json(predictions);
     } catch (error: any) {
       console.error("Error fetching AI predictions:", error);
@@ -686,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id: commodityId } = req.params;
       const period = req.query.period as string || "1mo";
       
-      const chartData = await aiPredictionService.getChartDataWithPredictions(commodityId, period);
+      const chartData = await storage.getChartData(commodityId, 30);
       res.json(chartData);
     } catch (error: any) {
       console.error("Error fetching chart data with predictions:", error);
@@ -802,8 +676,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commodities = await storage.getCommodities();
       for (const commodity of commodities) {
-        if (!mockPredictionService.getPredictionsForCommodity(commodity.id)) {
-          mockPredictionService.generatePredictionsForCommodity(commodity.symbol, commodity.id);
+        // Initialize real price data from Yahoo Finance
+        try {
+          await yahooFinanceService.updateCommodityPrices(commodity.id);
+        } catch (error) {
+          console.log(`Could not initialize prices for ${commodity.name}:`, error);
         }
       }
       console.log(`Initialized predictions for ${commodities.length} commodities`);
