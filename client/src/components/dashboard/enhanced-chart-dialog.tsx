@@ -340,19 +340,19 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
           {/* Market Insights - Minimal Style */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
-              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">30D VOLATILITY</div>
+              <div className="text-xs text-foreground/60 mb-2 font-light tracking-wide">30D VOLATILITY</div>
               <div className="text-xl font-medium text-orange-500">12.5%</div>
             </div>
             <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
-              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">AVG VOLUME</div>
+              <div className="text-xs text-foreground/60 mb-2 font-light tracking-wide">AVG VOLUME</div>
               <div className="text-xl font-medium text-blue-500">2.8M</div>
             </div>
             <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
-              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">BEST MODEL</div>
+              <div className="text-xs text-foreground/60 mb-2 font-light tracking-wide">BEST MODEL</div>
               <div className="text-xl font-medium text-green-500">Deepseek</div>
             </div>
             <div className="bg-card/30 border border-border/40 rounded-lg p-6 text-center backdrop-blur-sm">
-              <div className="text-xs text-muted-foreground mb-2 font-light tracking-wide">ACCURACY</div>
+              <div className="text-xs text-foreground/60 mb-2 font-light tracking-wide">ACCURACY</div>
               <div className="text-xl font-medium text-primary">84.2%</div>
             </div>
           </div>
