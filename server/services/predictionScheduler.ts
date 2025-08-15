@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { aiPredictionService } from './aiPredictionService.js';
+import { cachedPredictionService } from './cachedPredictionService.js';
 
 export class PredictionScheduler {
   private isScheduled = false;
@@ -10,39 +11,50 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule monthly predictions on the 1st of each month at 2 AM
-    cron.schedule('0 2 1 * *', async () => {
-      console.log('Running monthly prediction update...');
+    // Schedule weekly prediction updates every Monday at 2 AM
+    cron.schedule('0 2 * * 1', async () => {
+      console.log('Running weekly prediction update...');
       try {
-        await aiPredictionService.generateAllPredictions();
-        console.log('Monthly prediction update completed successfully');
+        await cachedPredictionService.updateWeeklyPredictions();
+        console.log('Weekly prediction update completed successfully');
       } catch (error) {
-        console.error('Monthly prediction update failed:', error);
+        console.error('Weekly prediction update failed:', error);
       }
     });
 
     this.isScheduled = true;
-    console.log('Prediction scheduler started - will run on the 1st of each month at 2 AM');
+    console.log('Prediction scheduler started - will run every Monday at 2 AM');
   }
 
   async runNow(): Promise<void> {
-    console.log('Running predictions manually...');
+    console.log('Running weekly prediction update manually...');
     try {
-      await aiPredictionService.generateAllPredictions();
-      console.log('Manual prediction run completed successfully');
+      await cachedPredictionService.updateWeeklyPredictions();
+      console.log('Manual weekly update completed successfully');
     } catch (error) {
-      console.error('Manual prediction run failed:', error);
+      console.error('Manual weekly update failed:', error);
+      throw error;
+    }
+  }
+
+  async runFullGeneration(): Promise<void> {
+    console.log('Running full daily prediction generation manually...');
+    try {
+      await cachedPredictionService.generateAllCachedPredictions();
+      console.log('Manual full generation completed successfully');
+    } catch (error) {
+      console.error('Manual full generation failed:', error);
       throw error;
     }
   }
 
   async runForCommodity(commodityId: string): Promise<void> {
-    console.log(`Running predictions manually for commodity ${commodityId}...`);
+    console.log(`Running daily predictions manually for commodity ${commodityId}...`);
     try {
-      await aiPredictionService.generatePredictionsForCommodity(commodityId);
-      console.log(`Manual prediction run completed for commodity ${commodityId}`);
+      await cachedPredictionService.generateCachedPredictionsForCommodity(commodityId);
+      console.log(`Manual daily prediction run completed for commodity ${commodityId}`);
     } catch (error) {
-      console.error(`Manual prediction run failed for commodity ${commodityId}:`, error);
+      console.error(`Manual daily prediction run failed for commodity ${commodityId}:`, error);
       throw error;
     }
   }

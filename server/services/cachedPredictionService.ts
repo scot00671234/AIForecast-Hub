@@ -1,6 +1,6 @@
 import { db } from '../db.js';
 import { predictions, commodities, aiModels } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 interface CachedPrediction {
   predictedPrice: number;
@@ -68,6 +68,29 @@ export class CachedPredictionService {
       confidence: Math.round(confidence),
       reasoning
     };
+  }
+
+  // Get annual trend based on commodity type
+  private getAnnualTrend(commodityName: string): number {
+    const name = commodityName.toLowerCase();
+    
+    // Energy commodities tend to have higher volatility
+    if (name.includes('oil') || name.includes('gas')) {
+      return 0.01 + Math.sin(Date.now() / (1000 * 60 * 60 * 24 * 30)) * 0.02; // Oil cycle
+    }
+    
+    // Precious metals tend to be stable with slight growth
+    if (name.includes('gold') || name.includes('silver') || name.includes('platinum')) {
+      return 0.005 + Math.sin(Date.now() / (1000 * 60 * 60 * 24 * 90)) * 0.01; // Quarterly cycle
+    }
+    
+    // Agricultural commodities have seasonal patterns
+    if (name.includes('corn') || name.includes('wheat') || name.includes('soy') || name.includes('cotton') || name.includes('coffee') || name.includes('sugar')) {
+      return Math.sin((Date.now() / (1000 * 60 * 60 * 24)) / 365 * 2 * Math.PI) * 0.015; // Annual cycle
+    }
+    
+    // Industrial metals
+    return 0.008 + Math.sin(Date.now() / (1000 * 60 * 60 * 24 * 60)) * 0.01; // Bi-monthly cycle
   }
 
   async generateCachedPredictionsForCommodity(commodityId: string): Promise<void> {
@@ -172,7 +195,7 @@ export class CachedPredictionService {
 
   async generateAllCachedPredictions(): Promise<void> {
     try {
-      console.log('Starting cached prediction generation for all commodities...');
+      console.log('Starting daily prediction generation for all commodities...');
       
       const allCommodities = await db.select().from(commodities);
       let totalSuccess = 0;
@@ -181,16 +204,126 @@ export class CachedPredictionService {
         try {
           await this.generateCachedPredictionsForCommodity(commodity.id);
           totalSuccess++;
-          // Small delay to prevent overwhelming the database
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Small delay between commodities to prevent overwhelming the database
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(`Failed to generate cached predictions for ${commodity.name}:`, error);
+          console.error(`Failed to generate daily predictions for ${commodity.name}:`, error);
         }
       }
       
-      console.log(`Cached prediction generation completed: ${totalSuccess}/${allCommodities.length} commodities processed`);
+      console.log(`Daily prediction generation completed: ${totalSuccess}/${allCommodities.length} commodities processed`);
     } catch (error) {
-      console.error('Failed to generate all cached predictions:', error);
+      console.error('Failed to generate all daily predictions:', error);
+    }
+  }
+
+  async updateWeeklyPredictions(): Promise<void> {
+    try {
+      console.log('Starting weekly prediction update (preserving past predictions)...');
+      
+      const allCommodities = await db.select().from(commodities);
+      let totalSuccess = 0;
+      
+      for (const commodity of allCommodities) {
+        try {
+          // Only generate new predictions for future dates (preserve past predictions)
+          await this.generateFuturePredictionsOnly(commodity.id);
+          totalSuccess++;
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error(`Failed to update weekly predictions for ${commodity.name}:`, error);
+        }
+      }
+      
+      console.log(`Weekly prediction update completed: ${totalSuccess}/${allCommodities.length} commodities updated`);
+    } catch (error) {
+      console.error('Failed to update weekly predictions:', error);
+    }
+  }
+
+  private async generateFuturePredictionsOnly(commodityId: string): Promise<void> {
+    try {
+      // Get commodity details
+      const commodity = await db.select()
+        .from(commodities)
+        .where(eq(commodities.id, commodityId))
+        .limit(1);
+
+      if (!commodity.length) {
+        throw new Error(`Commodity not found: ${commodityId}`);
+      }
+
+      const commodityData = commodity[0];
+      const currentPrice = this.getCurrentPrice(commodityData.symbol);
+      const models = await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
+
+      // Only generate predictions for future dates (today and beyond)
+      const startDate = new Date();
+      const endDate = new Date('2026-08-15');
+      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      console.log(`Updating future predictions for ${commodityData.name} (${totalDays} days)...`);
+      
+      // Delete existing future predictions to replace with updated ones
+      // But keep past predictions (target_date < today)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      for (const model of models) {
+        // Delete only future predictions for this model and commodity
+        await db.delete(predictions)
+          .where(
+            eq(predictions.aiModelId, model.id) &&
+            eq(predictions.commodityId, commodityId) &&
+            sql`${predictions.targetDate} >= ${today.toISOString()}`
+          );
+        
+        // Generate new future predictions
+        for (let dayOffset = 0; dayOffset < totalDays; dayOffset++) {
+          const predictionDate = new Date();
+          const targetDate = new Date(startDate);
+          targetDate.setDate(startDate.getDate() + dayOffset);
+          
+          const dailyPrediction = this.generateDailyPrediction(
+            commodityData.name,
+            model.name,
+            currentPrice,
+            dayOffset,
+            totalDays
+          );
+
+          await db.insert(predictions).values({
+            aiModelId: model.id,
+            commodityId: commodityId,
+            predictionDate: predictionDate,
+            targetDate: targetDate,
+            predictedPrice: dailyPrediction.predictedPrice.toFixed(2),
+            confidence: dailyPrediction.confidence.toString(),
+            metadata: {
+              reasoning: dailyPrediction.reasoning,
+              model: model.name,
+              provider: model.provider,
+              cached: true,
+              daily_prediction: true,
+              weekly_update: true,
+              day_offset: dayOffset,
+              total_days: totalDays,
+              generated_at: new Date().toISOString()
+            }
+          });
+          
+          // Small delay every 20 predictions
+          if (dayOffset % 20 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        }
+      }
+      
+      console.log(`✓ Updated future predictions for ${commodityData.name}`);
+      
+    } catch (error) {
+      console.error(`Failed to generate future-only predictions for commodity ${commodityId}:`, error);
+      throw error;
     }
   }
 

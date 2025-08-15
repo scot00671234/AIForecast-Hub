@@ -554,10 +554,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/scheduler/run-now", async (req, res) => {
     try {
       await predictionScheduler.runNow();
-      res.json({ success: true, message: "Predictions generated manually" });
+      res.json({ success: true, message: "Weekly prediction update completed" });
     } catch (error: any) {
-      console.error("Error running predictions:", error);
-      res.status(500).json({ message: "Failed to run predictions", error: error?.message || 'Unknown error' });
+      console.error("Error running weekly update:", error);
+      res.status(500).json({ message: "Failed to run weekly update", error: error?.message || 'Unknown error' });
+    }
+  });
+
+  app.post("/api/scheduler/run-full-generation", async (req, res) => {
+    try {
+      await predictionScheduler.runFullGeneration();
+      res.json({ success: true, message: "Full daily prediction generation completed" });
+    } catch (error: any) {
+      console.error("Error running full generation:", error);
+      res.status(500).json({ message: "Failed to run full generation", error: error?.message || 'Unknown error' });
     }
   });
 
