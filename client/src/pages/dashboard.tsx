@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import LeagueTable from "@/components/dashboard/league-table";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
+import { FuturePredictionsChart } from "@/components/dashboard/future-predictions-chart";
 
 export default function Dashboard() {
   const { theme, setTheme } = useTheme();

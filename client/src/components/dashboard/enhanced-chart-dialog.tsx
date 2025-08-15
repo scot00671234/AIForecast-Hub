@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, BrainIcon } from "lucide-react";
+import { FuturePredictionsChart } from "./future-predictions-chart";
 import type { ChartDataPoint, Commodity, AiModel, TimePeriod, LatestPrice } from "@shared/schema";
 
 interface EnhancedChartDialogProps {
@@ -28,6 +30,7 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
 
 export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiModels }: EnhancedChartDialogProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1mo");
+  const [activeTab, setActiveTab] = useState("historical");
 
   const { data: chartData, isLoading: chartLoading } = useQuery<ChartDataPoint[]>({
     queryKey: [`/api/commodities/${commodity.id}/detailed-chart`, selectedPeriod],
@@ -190,10 +193,20 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
         </DialogHeader>
 
         <div className="space-y-6 py-8">
-          {/* Trading Platform Style Chart */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-foreground tracking-wide">Price Movement & AI Predictions</h3>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="historical" data-testid="tab-historical">Historical Analysis</TabsTrigger>
+              <TabsTrigger value="future" data-testid="tab-future">
+                <BrainIcon className="h-4 w-4 mr-2" />
+                Future Predictions
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="historical" className="space-y-6">
+              {/* Trading Platform Style Chart */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-foreground tracking-wide">Price Movement & AI Predictions</h3>
               
               {/* Minimal Time Period Controls */}
               <div className="flex items-center space-x-1 bg-muted/30 rounded-lg p-1 border border-border/40">
@@ -355,7 +368,13 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
               <div className="text-xs text-foreground/60 mb-2 font-light tracking-wide">ACCURACY</div>
               <div className="text-xl font-medium text-primary">84.2%</div>
             </div>
-          </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="future">
+              <FuturePredictionsChart commodityId={commodity.id} />
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>

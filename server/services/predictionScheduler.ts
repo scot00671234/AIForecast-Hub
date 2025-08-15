@@ -10,19 +10,19 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule weekly predictions every Sunday at 2 AM
-    cron.schedule('0 2 * * 0', async () => {
-      console.log('Running weekly prediction update...');
+    // Schedule monthly predictions on the 1st of each month at 2 AM
+    cron.schedule('0 2 1 * *', async () => {
+      console.log('Running monthly prediction update...');
       try {
         await aiPredictionService.generateAllPredictions();
-        console.log('Weekly prediction update completed successfully');
+        console.log('Monthly prediction update completed successfully');
       } catch (error) {
-        console.error('Weekly prediction update failed:', error);
+        console.error('Monthly prediction update failed:', error);
       }
     });
 
     this.isScheduled = true;
-    console.log('Prediction scheduler started - will run every Sunday at 2 AM');
+    console.log('Prediction scheduler started - will run on the 1st of each month at 2 AM');
   }
 
   async runNow(): Promise<void> {
@@ -32,6 +32,17 @@ export class PredictionScheduler {
       console.log('Manual prediction run completed successfully');
     } catch (error) {
       console.error('Manual prediction run failed:', error);
+      throw error;
+    }
+  }
+
+  async runForCommodity(commodityId: string): Promise<void> {
+    console.log(`Running predictions manually for commodity ${commodityId}...`);
+    try {
+      await aiPredictionService.generatePredictionsForCommodity(commodityId);
+      console.log(`Manual prediction run completed for commodity ${commodityId}`);
+    } catch (error) {
+      console.error(`Manual prediction run failed for commodity ${commodityId}:`, error);
       throw error;
     }
   }

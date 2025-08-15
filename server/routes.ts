@@ -481,6 +481,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get future predictions with chart data
+  app.get("/api/commodities/:id/future-predictions", async (req, res) => {
+    try {
+      const commodityId = req.params.id;
+      const commodity = await storage.getCommodity(commodityId);
+      
+      if (!commodity) {
+        return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      // Get AI models
+      const aiModels = await storage.getAiModels();
+      
+      // Get future predictions (target date > current date)
+      const allPredictions = await storage.getPredictionsByCommodity(commodityId);
+      const currentDate = new Date();
+      const futurePredictions = allPredictions.filter(p => new Date(p.targetDate) > currentDate);
+      
+      // Group predictions by target date and AI model
+      const predictionMap = new Map<string, any>();
+      
+      futurePredictions.forEach(prediction => {
+        const dateKey = new Date(prediction.targetDate).toISOString().split('T')[0];
+        if (!predictionMap.has(dateKey)) {
+          predictionMap.set(dateKey, {
+            date: dateKey,
+            actualPrice: null, // Future dates don't have actual prices
+            predictions: {}
+          });
+        }
+        
+        const model = aiModels.find(m => m.id === prediction.aiModelId);
+        if (model) {
+          predictionMap.get(dateKey).predictions[model.id] = {
+            value: Number(prediction.predictedPrice),
+            confidence: Number(prediction.confidence || 0),
+            modelName: model.name,
+            color: model.color
+          };
+        }
+      });
+      
+      // Convert to array and sort by date
+      const chartData = Array.from(predictionMap.values())
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      res.json({
+        commodity,
+        aiModels,
+        futurePredictions: chartData,
+        totalPredictions: futurePredictions.length
+      });
+    } catch (error) {
+      console.error("Error fetching future predictions:", error);
+      res.status(500).json({ message: "Failed to fetch future predictions" });
+    }
+  });
+
   // Scheduler management endpoints
   app.post("/api/scheduler/start", async (req, res) => {
     try {
@@ -499,6 +557,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error running predictions:", error);
       res.status(500).json({ message: "Failed to run predictions", error: error?.message || 'Unknown error' });
+    }
+  });
+
+  app.post("/api/scheduler/run-commodity/:commodityId", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      await predictionScheduler.runForCommodity(commodityId);
+      res.json({ success: true, message: `Predictions generated for commodity ${commodityId}` });
+    } catch (error: any) {
+      console.error("Error running commodity predictions:", error);
+      res.status(500).json({ message: "Failed to run commodity predictions", error: error?.message || 'Unknown error' });
     }
   });
 
