@@ -36,7 +36,12 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   });
 
   useEffect(() => {
-    if (!chartContainerRef.current || dataLoading || !chartData) return;
+    if (!chartContainerRef.current || dataLoading) return;
+    
+    // Always clear loading state
+    setIsLoading(false);
+    
+    if (!chartData) return;
 
     // Chart configuration
     const chartOptions = {
@@ -89,7 +94,8 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
     chartRef.current = chart;
 
     // Process and add data
-    if (chartData && chartData.chartData && chartData.chartData.length > 0) {
+    console.log('Chart data received:', chartData);
+    if (chartData && chartData.chartData && Array.isArray(chartData.chartData) && chartData.chartData.length > 0) {
       // Separate historical and prediction data
       const historicalData: ChartDataPoint[] = [];
       const predictionData: { [modelName: string]: ChartDataPoint[] } = {};
@@ -147,9 +153,9 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           predictionSeries.setData(data);
         }
       });
+    } else {
+      console.log('No chart data available');
     }
-
-    setIsLoading(false);
 
     // Handle resize
     const handleResize = () => {
