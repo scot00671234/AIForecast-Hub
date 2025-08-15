@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, LineStyle, LineData } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, LineStyle } from 'lightweight-charts';
 import { useTheme } from '@/components/theme-provider';
 import { useQuery } from '@tanstack/react-query';
 
@@ -14,7 +14,7 @@ interface ChartDataPoint {
   value: number;
 }
 
-export const UnifiedChart: React.FC<UnifiedChartProps> = ({ 
+const UnifiedChart: React.FC<UnifiedChartProps> = ({ 
   commodityId, 
   period = "1mo", 
   height = 400 
@@ -249,3 +249,5 @@ export const UnifiedChart: React.FC<UnifiedChartProps> = ({
 };
 
 export default UnifiedChart;
+
+export { UnifiedChart };

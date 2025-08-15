@@ -144,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           const model = aiModels.find(m => m.id === pred.aiModelId);
           if (model) {
-            acc[dateKey][model.name] = pred.predictedPrice;
+            acc[dateKey][model.name] = Number(pred.predictedPrice);
           }
           return acc;
         }, {} as Record<string, Record<string, number>>);
