@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import { db } from "../db";
 import { commodities, predictions as predictionsTable, actualPrices, aiModels } from "@shared/schema";
 import { eq, desc, and, gte } from "drizzle-orm";
+import { claudeService } from "./claudeService";
+import { deepseekService } from "./deepseekService";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 let openai: OpenAI | null = null;
@@ -25,11 +27,22 @@ export class AIPredictionService {
   async generateWeeklyPredictions(): Promise<void> {
     console.log("Starting weekly AI prediction generation...");
     
-    if (!process.env.OPENAI_API_KEY) {
-      console.log("OpenAI API key not found, skipping AI predictions");
+    // Check which AI services are available
+    const availableServices = {
+      openai: !!process.env.OPENAI_API_KEY,
+      claude: claudeService.isConfigured(),
+      deepseek: deepseekService.isConfigured()
+    };
+    
+    const activeServices = Object.entries(availableServices).filter(([_, active]) => active).map(([name]) => name);
+    
+    if (activeServices.length === 0) {
+      console.log("No AI API keys configured, skipping AI predictions");
       return;
     }
-
+    
+    console.log(`Available AI services: ${activeServices.join(', ')}`);
+    
     try {
       // Get all active commodities and AI models
       const [allCommodities, allAiModels] = await Promise.all([
@@ -42,7 +55,15 @@ export class AIPredictionService {
       // Generate predictions for each commodity with each AI model
       for (const commodity of allCommodities) {
         for (const aiModel of allAiModels) {
-          await this.generateCommodityPredictions(commodity, aiModel);
+          // Only generate predictions for models we have API keys for
+          const modelName = aiModel.name.toLowerCase();
+          if (availableServices.openai && modelName.includes('gpt')) {
+            await this.generateCommodityPredictions(commodity, aiModel, 'openai');
+          } else if (availableServices.claude && modelName.includes('claude')) {
+            await this.generateCommodityPredictions(commodity, aiModel, 'claude');
+          } else if (availableServices.deepseek && modelName.includes('deepseek')) {
+            await this.generateCommodityPredictions(commodity, aiModel, 'deepseek');
+          }
         }
       }
 
@@ -55,7 +76,7 @@ export class AIPredictionService {
   /**
    * Generate 7-day future predictions for a specific commodity and AI model
    */
-  private async generateCommodityPredictions(commodity: any, aiModel: any): Promise<void> {
+  private async generateCommodityPredictions(commodity: any, aiModel: any, service: 'openai' | 'claude' | 'deepseek'): Promise<void> {
     try {
       // Get recent price history for context
       const recentPrices = await db
@@ -73,96 +94,121 @@ export class AIPredictionService {
       // Prepare historical data for AI analysis
       const historicalData = recentPrices
         .reverse()
-        .map(price => ({
-          date: price.date.toISOString().split('T')[0],
-          price: parseFloat(price.price),
-          volume: price.volume ? parseFloat(price.volume) : null
-        }));
+        .map(p => ({ date: p.date, price: p.price }));
 
-      // Generate predictions for the next 7 days
-      const aiPredictions = await this.generateAIPredictions(commodity, aiModel, historicalData);
+      const currentPrice = historicalData[historicalData.length - 1]?.price || 100;
 
-      // Store predictions in database
-      const predictionDate = new Date();
-      const insertPromises = aiPredictions.map((prediction, index) => {
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + index + 1); // Next 7 days
+      // Get prediction using the specified service
+      let predictionResult;
+      
+      try {
+        if (service === 'openai') {
+          predictionResult = await this.generateOpenAIPrediction({
+            name: commodity.name,
+            symbol: commodity.symbol,
+            currentPrice,
+            historicalPrices: historicalData,
+            category: commodity.category,
+            unit: commodity.unit
+          });
+        } else if (service === 'claude') {
+          predictionResult = await claudeService.generatePrediction({
+            name: commodity.name,
+            symbol: commodity.symbol,
+            currentPrice,
+            historicalPrices: historicalData,
+            category: commodity.category,
+            unit: commodity.unit
+          });
+        } else if (service === 'deepseek') {
+          predictionResult = await deepseekService.generatePrediction({
+            name: commodity.name,
+            symbol: commodity.symbol,
+            currentPrice,
+            historicalPrices: historicalData,
+            category: commodity.category,
+            unit: commodity.unit
+          });
+        } else {
+          throw new Error(`Unsupported AI service: ${service}`);
+        }
 
-        return db.insert(predictionsTable).values({
-          aiModelId: aiModel.id,
-          commodityId: commodity.id,
-          predictionDate,
-          targetDate,
-          predictedPrice: prediction.price.toString(),
-          confidence: prediction.confidence.toString(),
-          metadata: {
-            reasoning: prediction.reasoning,
-            marketFactors: prediction.marketFactors,
-            generatedAt: new Date().toISOString()
-          }
-        });
-      });
+        // Generate predictions for next 7 days
+        for (let daysAhead = 1; daysAhead <= 7; daysAhead++) {
+          const predictionDate = new Date();
+          predictionDate.setDate(predictionDate.getDate() + daysAhead);
 
-      await Promise.all(insertPromises);
-      console.log(`Generated 7-day predictions for ${commodity.name} using ${aiModel.name}`);
+          await db.insert(predictionsTable).values({
+            commodityId: commodity.id,
+            aiModelId: aiModel.id,
+            date: predictionDate.toISOString().split('T')[0],
+            predictedPrice: predictionResult.predictedPrice,
+            confidence: predictionResult.confidence,
+            reasoning: predictionResult.reasoning
+          }).onConflictDoUpdate({
+            target: [predictionsTable.commodityId, predictionsTable.aiModelId, predictionsTable.date],
+            set: {
+              predictedPrice: predictionResult.predictedPrice,
+              confidence: predictionResult.confidence,
+              reasoning: predictionResult.reasoning
+            }
+          });
+        }
 
+        console.log(`Generated ${service} predictions for ${commodity.name} using ${aiModel.name}`);
+      } catch (error) {
+        console.error(`Error generating ${service} prediction for ${commodity.name}:`, error);
+      }
     } catch (error) {
-      console.error(`Error generating predictions for ${commodity.name} with ${aiModel.name}:`, error);
+      console.error(`Error generating predictions for ${commodity.name}:`, error);
     }
   }
 
   /**
-   * Use AI to generate price predictions based on historical data
+   * Generate OpenAI prediction for a commodity
    */
-  private async generateAIPredictions(commodity: any, aiModel: any, historicalData: any[]): Promise<any[]> {
-    const latestPrice = historicalData[historicalData.length - 1];
-    const priceHistory = historicalData.slice(-10).map(d => `${d.date}: $${d.price}`).join('\n');
+  private async generateOpenAIPrediction(commodityData: {
+    name: string;
+    symbol: string;
+    currentPrice: number;
+    historicalPrices: Array<{ date: string; price: number }>;
+    category: string;
+    unit: string;
+  }): Promise<{
+    predictedPrice: number;
+    confidence: number;
+    reasoning: string;
+  }> {
+    const openai = getOpenAIClient();
+    
+    const prompt = `You are a commodity trading expert analyzing ${commodityData.name} (${commodityData.symbol}).
 
-    const prompt = `You are an expert commodity price analyst. Analyze the following data for ${commodity.name} (${commodity.symbol}) and predict prices for the next 7 days.
+Current market data:
+- Current Price: $${commodityData.currentPrice} per ${commodityData.unit}
+- Category: ${commodityData.category} commodity
+- Recent price trend: ${this.formatHistoricalData(commodityData.historicalPrices)}
 
-Recent Price History:
-${priceHistory}
-
-Latest Price: $${latestPrice.price}
-Commodity Category: ${commodity.category}
-Market Unit: ${commodity.unit}
-
-Please provide predictions for the next 7 days with:
-1. Predicted price for each day
-2. Confidence level (0-100%)
-3. Brief reasoning for each prediction
-4. Key market factors considered
-
-Respond in JSON format with this structure:
-{
-  "predictions": [
-    {
-      "day": 1,
-      "price": number,
-      "confidence": number,
-      "reasoning": "string",
-      "marketFactors": ["factor1", "factor2"]
-    }
-  ]
-}
-
-Consider factors like:
-- Recent price trends and volatility
-- Seasonal patterns for ${commodity.category} commodities
-- Global economic conditions
-- Supply chain factors
-- Market sentiment
+Analyze the market conditions and provide a price prediction for one week from now. Consider:
 - Technical analysis patterns
+- Market sentiment and momentum
+- Economic indicators
+- Supply/demand fundamentals
+- Seasonal factors
 
-Be realistic and base predictions on actual market dynamics.`;
+Respond in JSON format:
+{
+  "predictedPrice": number,
+  "confidence": number (0-1),
+  "reasoning": "Brief explanation of your prediction methodology"
+}`;
 
     try {
-      const response = await getOpenAIClient().chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are ${aiModel.name}, an AI model specialized in commodity price prediction. Provide accurate, data-driven predictions based on market analysis.`
+            content: "You are an expert commodity trader. Provide accurate, data-driven price predictions in JSON format."
           },
           {
             role: "user",
@@ -170,141 +216,53 @@ Be realistic and base predictions on actual market dynamics.`;
           }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.1, // Low temperature for more consistent predictions
+        temperature: 0.7
       });
 
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error("No content received from OpenAI");
-      }
+      const result = JSON.parse(response.choices[0].message.content || '{}');
       
-      const result = JSON.parse(content);
-      return result.predictions.map((pred: any) => ({
-        price: pred.price,
-        confidence: pred.confidence,
-        reasoning: pred.reasoning,
-        marketFactors: pred.marketFactors
-      }));
-
+      return {
+        predictedPrice: Number(result.predictedPrice),
+        confidence: Number(result.confidence),
+        reasoning: result.reasoning
+      };
     } catch (error) {
-      console.error("Error calling OpenAI API:", error);
-      // Return fallback predictions based on simple trend analysis
-      return this.generateFallbackPredictions(historicalData);
+      console.error('OpenAI prediction error:', error);
+      throw error;
     }
   }
 
   /**
-   * Generate simple trend-based predictions as fallback
+   * Format historical data for AI analysis
    */
-  private generateFallbackPredictions(historicalData: any[]): any[] {
-    const recentPrices = historicalData.slice(-5).map(d => d.price);
-    const avgPrice = recentPrices.reduce((sum, price) => sum + price, 0) / recentPrices.length;
-    const trend = (recentPrices[recentPrices.length - 1] - recentPrices[0]) / recentPrices.length;
-
-    return Array.from({ length: 7 }, (_, index) => ({
-      price: Math.max(0, avgPrice + (trend * (index + 1))),
-      confidence: 60, // Lower confidence for fallback
-      reasoning: "Trend-based prediction (API unavailable)",
-      marketFactors: ["Recent price trend", "Historical average"]
-    }));
+  private formatHistoricalData(prices: Array<{ date: string; price: number }>): string {
+    const recent = prices.slice(-7); // Last 7 days
+    return recent.map(p => `${p.date}: $${p.price.toFixed(2)}`).join(', ');
   }
 
   /**
-   * Get future predictions for a specific commodity
+   * Generate manual predictions for testing (when API keys are not available)
    */
-  async getFuturePredictions(commodityId: string, days: number = 7): Promise<any[]> {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + days);
-
-    const futurePredictions = await db
-      .select({
-        prediction: predictionsTable,
-        aiModel: aiModels
-      })
-      .from(predictionsTable)
-      .leftJoin(aiModels, eq(predictionsTable.aiModelId, aiModels.id))
-      .where(
-        and(
-          eq(predictionsTable.commodityId, commodityId),
-          gte(predictionsTable.targetDate, new Date())
-        )
-      )
-      .orderBy(predictionsTable.targetDate);
-
-    return futurePredictions;
-  }
-
-  /**
-   * Get chart data including both historical and future predictions
-   */
-  async getChartDataWithPredictions(commodityId: string, period: string = "1mo"): Promise<any> {
-    // Get historical prices
-    const daysBack = this.getPeriodDays(period);
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - daysBack);
-
-    const [historicalPrices, futurePredictions] = await Promise.all([
-      db
-        .select()
-        .from(actualPrices)
-        .where(
-          and(
-            eq(actualPrices.commodityId, commodityId),
-            gte(actualPrices.date, startDate)
-          )
-        )
-        .orderBy(actualPrices.date),
-      this.getFuturePredictions(commodityId)
-    ]);
-
-    // Combine historical and prediction data
-    const chartData: any[] = [];
-
-    // Add historical data points
-    historicalPrices.forEach(price => {
-      chartData.push({
-        date: price.date.toISOString().split('T')[0],
-        actualPrice: parseFloat(price.price),
-        type: 'historical'
-      });
-    });
-
-    // Group predictions by date and AI model
-    const predictionsByDate = new Map<string, any>();
-    futurePredictions.forEach(({ prediction, aiModel }) => {
-      if (!prediction || !aiModel) return;
+  async generateManualPrediction(commodityId: string, aiModelId: string): Promise<void> {
+    try {
+      const commodity = await db.select().from(commodities).where(eq(commodities.id, commodityId)).limit(1);
+      const aiModel = await db.select().from(aiModels).where(eq(aiModels.id, aiModelId)).limit(1);
       
-      const dateKey = prediction.targetDate.toISOString().split('T')[0];
-      if (!predictionsByDate.has(dateKey)) {
-        predictionsByDate.set(dateKey, {
-          date: dateKey,
-          type: 'prediction',
-          predictions: {}
-        });
+      if (!commodity[0] || !aiModel[0]) {
+        throw new Error('Commodity or AI model not found');
       }
-      predictionsByDate.get(dateKey)!.predictions[aiModel.name] = parseFloat(prediction.predictedPrice);
-    });
 
-    // Add prediction data points
-    predictionsByDate.forEach(predictionData => {
-      chartData.push(predictionData);
-    });
-
-    return {
-      chartData: chartData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-      lastUpdate: new Date().toISOString()
-    };
-  }
-
-  private getPeriodDays(period: string): number {
-    const periodMap: Record<string, number> = {
-      '1w': 7,
-      '1mo': 30,
-      '3mo': 90,
-      '6mo': 180,
-      '1y': 365
-    };
-    return periodMap[period] || 30;
+      const modelName = aiModel[0].name.toLowerCase();
+      let service: 'openai' | 'claude' | 'deepseek' = 'openai';
+      
+      if (modelName.includes('claude')) service = 'claude';
+      else if (modelName.includes('deepseek')) service = 'deepseek';
+      
+      await this.generateCommodityPredictions(commodity[0], aiModel[0], service);
+    } catch (error) {
+      console.error('Error generating manual prediction:', error);
+      throw error;
+    }
   }
 }
 

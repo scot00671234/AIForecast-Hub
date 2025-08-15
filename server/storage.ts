@@ -176,9 +176,7 @@ export class DatabaseStorage implements IStorage {
     return prediction;
   }
 
-  async insertPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
-    return this.createPrediction(insertPrediction);
-  }
+
 
   async getPredictionsByCommodity(commodityId: string): Promise<Prediction[]> {
     return this.getPredictions(commodityId);
@@ -206,9 +204,7 @@ export class DatabaseStorage implements IStorage {
     return price;
   }
 
-  async insertActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
-    return this.createActualPrice(insertPrice);
-  }
+
 
   async getLatestPrice(commodityId: string): Promise<ActualPrice | undefined> {
     const prices = await this.getActualPrices(commodityId, 1);

@@ -615,14 +615,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate AI predictions manually (for testing)
   app.post("/api/ai-predictions/generate-ai", async (req, res) => {
     try {
-      await aiPredictionService.generateWeeklyPredictions();
-      res.json({ success: true, message: "AI predictions generated for all commodities" });
+      const { commodityId, aiModelId } = req.body;
+      
+      if (commodityId && aiModelId) {
+        // Generate for specific commodity and model
+        await aiPredictionService.generateManualPrediction(commodityId, aiModelId);
+        res.json({ success: true, message: `AI prediction generated for commodity ${commodityId} with model ${aiModelId}` });
+      } else {
+        // Generate for all commodities and models
+        await aiPredictionService.generateWeeklyPredictions();
+        res.json({ success: true, message: "AI predictions generated for all commodities" });
+      }
     } catch (error: any) {
       console.error("Error generating AI predictions:", error);
       res.status(500).json({ 
         message: "Failed to generate AI predictions", 
         error: error?.message || 'Unknown error' 
       });
+    }
+  });
+
+  // Get AI prediction status and capabilities
+  app.get("/api/ai-predictions/status", async (req, res) => {
+    try {
+      const availableServices = {
+        openai: !!process.env.OPENAI_API_KEY,
+        claude: !!process.env.ANTHROPIC_API_KEY,
+        deepseek: !!process.env.DEEPSEEK_API_KEY
+      };
+      
+      const activeServices = Object.entries(availableServices).filter(([_, active]) => active).map(([name]) => name);
+      
+      res.json({
+        availableServices,
+        activeServices,
+        totalActiveServices: activeServices.length,
+        needsConfiguration: activeServices.length === 0,
+        configured: {
+          openai: availableServices.openai,
+          claude: availableServices.claude,
+          deepseek: availableServices.deepseek
+        }
+      });
+    } catch (error) {
+      console.error('Error getting AI prediction status:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
