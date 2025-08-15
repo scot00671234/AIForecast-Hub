@@ -39,11 +39,14 @@ export interface IStorage {
 
   // Predictions
   getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]>;
+  getPredictionsByCommodity(commodityId: string): Promise<Prediction[]>;
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
+  insertPrediction(prediction: InsertPrediction): Promise<Prediction>;
 
   // Actual Prices
   getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]>;
   createActualPrice(price: InsertActualPrice): Promise<ActualPrice>;
+  insertActualPrice(price: InsertActualPrice): Promise<ActualPrice>;
   getLatestPrice(commodityId: string): Promise<ActualPrice | undefined>;
 
   // Accuracy Metrics
@@ -173,6 +176,14 @@ export class DatabaseStorage implements IStorage {
     return prediction;
   }
 
+  async insertPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
+    return this.createPrediction(insertPrediction);
+  }
+
+  async getPredictionsByCommodity(commodityId: string): Promise<Prediction[]> {
+    return this.getPredictions(commodityId);
+  }
+
   async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
     try {
       let query = db.select().from(actualPrices)
@@ -193,6 +204,10 @@ export class DatabaseStorage implements IStorage {
   async createActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
     const [price] = await db.insert(actualPrices).values(insertPrice).returning();
     return price;
+  }
+
+  async insertActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
+    return this.createActualPrice(insertPrice);
   }
 
   async getLatestPrice(commodityId: string): Promise<ActualPrice | undefined> {

@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
 import { mockPredictionService } from "./services/mockPredictions";
 import { accuracyCalculator } from "./services/accuracyCalculator";
+import { aiPredictionService } from "./services/aiPredictionService.js";
+import { predictionScheduler } from "./services/predictionScheduler.js";
 import { 
   insertPredictionSchema,
   insertActualPriceSchema,
@@ -447,6 +449,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Prediction Management Endpoints
+  app.post("/api/ai-predictions/generate", async (req, res) => {
+    try {
+      const { commodityId } = req.body;
+      
+      if (commodityId) {
+        // Generate predictions for specific commodity
+        await aiPredictionService.generatePredictionsForCommodity(commodityId);
+        res.json({ success: true, message: `Predictions generated for commodity ${commodityId}` });
+      } else {
+        // Generate predictions for all commodities
+        await aiPredictionService.generateAllPredictions();
+        res.json({ success: true, message: "Predictions generated for all commodities" });
+      }
+    } catch (error: any) {
+      console.error("Error generating AI predictions:", error);
+      res.status(500).json({ message: "Failed to generate AI predictions", error: error?.message || 'Unknown error' });
+    }
+  });
+
+  // Get AI predictions for a commodity
+  app.get("/api/ai-predictions/:commodityId", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      const predictions = await storage.getPredictionsByCommodity(commodityId);
+      res.json(predictions);
+    } catch (error) {
+      console.error("Error fetching AI predictions:", error);
+      res.status(500).json({ message: "Failed to fetch AI predictions" });
+    }
+  });
+
+  // Scheduler management endpoints
+  app.post("/api/scheduler/start", async (req, res) => {
+    try {
+      predictionScheduler.start();
+      res.json({ success: true, message: "Prediction scheduler started" });
+    } catch (error: any) {
+      console.error("Error starting scheduler:", error);
+      res.status(500).json({ message: "Failed to start scheduler" });
+    }
+  });
+
+  app.post("/api/scheduler/run-now", async (req, res) => {
+    try {
+      await predictionScheduler.runNow();
+      res.json({ success: true, message: "Predictions generated manually" });
+    } catch (error: any) {
+      console.error("Error running predictions:", error);
+      res.status(500).json({ message: "Failed to run predictions", error: error?.message || 'Unknown error' });
+    }
+  });
+
   // Initialize prediction data on startup
   const initializePredictions = async () => {
     try {
@@ -457,6 +512,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       console.log(`Initialized predictions for ${commodities.length} commodities`);
+      
+      // Start the prediction scheduler
+      predictionScheduler.start();
     } catch (error) {
       console.error("Error initializing predictions:", error);
     }
