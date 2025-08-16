@@ -1,4 +1,4 @@
-# Simplified Node.js deployment configuration
+# Minimal configuration to prevent all default file creation
 providers = ["node"]
 
 [variables]
@@ -8,11 +8,8 @@ PORT = "3000"
 [phases.install]
 cmds = ["npm ci --production=false"]
 
-[phases.build]  
+[phases.build]
 cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
-
-[staticAssets]
-enabled = "false"
