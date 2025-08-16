@@ -704,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Yahoo Finance Real-time Data
   app.post("/api/yahoo-finance/update-all", async (req, res) => {
     try {
-      await yahooFinanceIntegration.updateAllCommodityPrices();
+      await storage.updateAllCommodityPricesFromYahoo();
       res.json({ message: "All commodity prices updated from Yahoo Finance" });
     } catch (error) {
       console.error("Error updating all prices:", error);
@@ -715,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/yahoo-finance/update/:commodityId", async (req, res) => {
     try {
       const { commodityId } = req.params;
-      await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
+      await storage.updateSingleCommodityPricesFromYahoo(commodityId);
       res.json({ message: `Commodity ${commodityId} prices updated from Yahoo Finance` });
     } catch (error) {
       console.error("Error updating commodity prices:", error);

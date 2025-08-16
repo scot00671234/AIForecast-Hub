@@ -9,6 +9,10 @@ class DeepseekService {
     this.apiKey = process.env.DEEPSEEK_API_KEY;
   }
 
+  isConfigured(): boolean {
+    return !!this.apiKey;
+  }
+
   async generatePrediction(commodityData: {
     name: string;
     symbol: string;
@@ -41,6 +45,10 @@ Return your analysis in JSON format:
   "confidence": <number between 0 and 1>,
   "reasoning": "<concise explanation of prediction methodology>"
 }`;
+
+    if (!this.apiKey) {
+      throw new Error('Deepseek not configured - missing API key');
+    }
 
     try {
       const response = await fetch(`${this.baseURL}/chat/completions`, {
@@ -84,10 +92,6 @@ Return your analysis in JSON format:
   private formatHistoricalData(prices: Array<{ date: string; price: number }>): string {
     const recent = prices.slice(-7); // Last 7 days
     return recent.map(p => `${p.date}: $${p.price.toFixed(2)}`).join(', ');
-  }
-
-  isConfigured(): boolean {
-    return !!this.apiKey;
   }
 }
 

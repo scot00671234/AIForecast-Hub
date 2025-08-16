@@ -5,9 +5,14 @@ import { yahooFinanceIntegration } from "./yahooFinanceIntegration";
 import { OpenAI } from "openai";
 import type { InsertPrediction } from "@shared/schema";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+// Initialize OpenAI only if API key is available
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 interface CommodityData {
   name: string;
@@ -19,6 +24,10 @@ interface CommodityData {
 }
 
 export class AIPredictionService {
+  
+  isOpenAIConfigured(): boolean {
+    return !!process.env.OPENAI_API_KEY && !!openai;
+  }
   
   async generateOpenAIPrediction(commodityData: CommodityData): Promise<{
     predictedPrice: number;
@@ -45,6 +54,10 @@ Respond in JSON format:
   "confidence": <decimal between 0 and 1>,
   "reasoning": "<detailed analysis explaining your prediction methodology>"
 }`;
+
+    if (!openai) {
+      throw new Error('OpenAI not configured - missing API key');
+    }
 
     try {
       const completion = await openai.chat.completions.create({
@@ -140,7 +153,7 @@ Respond in JSON format:
               }
               break;
             case 'chatgpt':
-              if (process.env.OPENAI_API_KEY) {
+              if (this.isOpenAIConfigured()) {
                 prediction = await this.generateOpenAIPrediction(commodityData);
               }
               break;
@@ -221,6 +234,92 @@ Respond in JSON format:
 
   async isAnyServiceConfigured(): Promise<boolean> {
     return !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.DEEPSEEK_API_KEY);
+  }
+
+  async generateManualPrediction(commodityId: string, aiModelId: string): Promise<void> {
+    console.log(`Generating manual prediction for commodity ${commodityId} with model ${aiModelId}...`);
+    
+    try {
+      const commodity = await storage.getCommodity(commodityId);
+      const aiModel = await storage.getAiModel(aiModelId);
+      
+      if (!commodity || !aiModel) {
+        throw new Error('Commodity or AI model not found');
+      }
+
+      // Get historical prices for context
+      const historicalPrices = await storage.getActualPrices(commodityId, 30);
+      if (historicalPrices.length === 0) {
+        console.log(`No historical data for ${commodity.name}, fetching from Yahoo Finance...`);
+        await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
+      }
+
+      const latestPrice = await storage.getLatestPrice(commodityId);
+      if (!latestPrice) {
+        throw new Error(`No current price available for ${commodity.name}`);
+      }
+
+      const commodityData: CommodityData = {
+        name: commodity.name,
+        symbol: commodity.symbol,
+        currentPrice: parseFloat(latestPrice.price),
+        historicalPrices: historicalPrices.map(p => ({
+          date: p.date.toISOString().split('T')[0],
+          price: parseFloat(p.price)
+        })),
+        category: commodity.category,
+        unit: commodity.unit || "USD"
+      };
+
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + 7);
+
+      let prediction;
+      
+      switch (aiModel.name.toLowerCase()) {
+        case 'claude':
+          if (claudeService.isConfigured()) {
+            prediction = await claudeService.generatePrediction(commodityData);
+          }
+          break;
+        case 'chatgpt':
+          if (this.isOpenAIConfigured()) {
+            prediction = await this.generateOpenAIPrediction(commodityData);
+          }
+          break;
+        case 'deepseek':
+          if (deepseekService.isConfigured()) {
+            prediction = await deepseekService.generatePrediction(commodityData);
+          }
+          break;
+      }
+
+      if (prediction) {
+        const insertPrediction: InsertPrediction = {
+          aiModelId: aiModel.id,
+          commodityId: commodity.id,
+          predictionDate: new Date(),
+          targetDate,
+          predictedPrice: prediction.predictedPrice.toString(),
+          confidence: prediction.confidence.toString(),
+          metadata: {
+            reasoning: prediction.reasoning,
+            inputData: {
+              currentPrice: commodityData.currentPrice,
+              historicalDataPoints: commodityData.historicalPrices.length
+            }
+          }
+        };
+
+        await storage.createPrediction(insertPrediction);
+        console.log(`Generated manual ${aiModel.name} prediction for ${commodity.name}: $${prediction.predictedPrice}`);
+      } else {
+        throw new Error(`${aiModel.name} service not configured or available`);
+      }
+    } catch (error) {
+      console.error(`Error in generateManualPrediction:`, error);
+      throw error;
+    }
   }
 
   async getServiceStatus(): Promise<{ openai: boolean; claude: boolean; deepseek: boolean }> {

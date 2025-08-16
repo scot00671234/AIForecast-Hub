@@ -13,12 +13,18 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
 
 class ClaudeService {
-  private anthropic: Anthropic;
+  private anthropic: Anthropic | null = null;
 
   constructor() {
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+    if (process.env.ANTHROPIC_API_KEY) {
+      this.anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+    }
+  }
+
+  isConfigured(): boolean {
+    return !!process.env.ANTHROPIC_API_KEY && !!this.anthropic;
   }
 
   async generatePrediction(commodityData: {
@@ -54,6 +60,10 @@ Respond in JSON format with:
   "reasoning": "Brief explanation of your prediction logic"
 }`;
 
+    if (!this.anthropic) {
+      throw new Error('Claude not configured - missing API key');
+    }
+
     try {
       const message = await this.anthropic.messages.create({
         max_tokens: 1024,
@@ -82,10 +92,6 @@ Respond in JSON format with:
   private formatHistoricalData(prices: Array<{ date: string; price: number }>): string {
     const recent = prices.slice(-7); // Last 7 days
     return recent.map(p => `${p.date}: $${p.price.toFixed(2)}`).join(', ');
-  }
-
-  isConfigured(): boolean {
-    return !!process.env.ANTHROPIC_API_KEY;
   }
 }
 
