@@ -26,6 +26,7 @@ export default function Blog() {
               </Link>
             </div>
             <div className="flex items-center space-x-3">
+              <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -41,7 +42,6 @@ export default function Blog() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function Blog() {
       <main className="pt-24 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto px-8">
           <div className="mb-8">
-            <Link href="/">
+            <Link href="/dashboard">
               <Button variant="ghost" className="flex items-center space-x-2 mb-6">
                 <ArrowLeftIcon className="h-4 w-4" />
                 <span>Back to Home</span>
