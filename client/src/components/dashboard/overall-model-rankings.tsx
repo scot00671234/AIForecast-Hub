@@ -8,15 +8,9 @@ import type { AiModel } from "@shared/schema";
 interface OverallModelRanking {
   rank: number;
   aiModel: AiModel;
-  overallAccuracy: number;
+  accuracy: number;
   totalPredictions: number;
   trend: number; // 1 for up, -1 for down, 0 for stable
-  avgAbsoluteError: number;
-  commodityPerformance: Array<{
-    commodity: string;
-    accuracy: number;
-    predictions: number;
-  }>;
 }
 
 export default function OverallModelRankings() {
@@ -24,6 +18,7 @@ export default function OverallModelRankings() {
 
   const { data: rankings, isLoading } = useQuery<OverallModelRanking[]>({
     queryKey: ["/api/league-table", selectedPeriod],
+    queryFn: () => fetch(`/api/league-table/${selectedPeriod}`).then(res => res.json()),
     enabled: true,
   });
 
@@ -125,7 +120,7 @@ export default function OverallModelRankings() {
             {/* Right side: Performance metrics */}
             <div className="text-right">
               <div className="text-2xl font-bold text-foreground">
-                {ranking.overallAccuracy.toFixed(1)}%
+                {ranking.accuracy.toFixed(1)}%
               </div>
               <div className="text-xs text-muted-foreground">Accuracy</div>
             </div>
@@ -137,7 +132,7 @@ export default function OverallModelRankings() {
       <div className="mt-6 pt-4 border-t border-border/30">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Based on predictions across all commodities</span>
-          <span>Best performer: {rankings[0]?.overallAccuracy.toFixed(1)}% accuracy</span>
+          <span>Best performer: {rankings?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
         </div>
       </div>
     </Card>

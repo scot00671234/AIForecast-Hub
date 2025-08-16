@@ -27,6 +27,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   // Fetch chart data with predictions
   const { data: chartData, isLoading: dataLoading } = useQuery({
     queryKey: [`/api/commodities/${commodityId}/chart-with-predictions`, period],
+    queryFn: () => fetch(`/api/commodities/${commodityId}/chart-with-predictions/${period}`).then(res => res.json()),
     enabled: !!commodityId,
   });
 
