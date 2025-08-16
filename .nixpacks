@@ -1,0 +1,11 @@
+# Force nixpacks to treat this as a Node.js application only
+# Disable all other provider detection
+
+[providers]
+nodejs = true
+caddy = false
+go = false
+php = false
+python = false
+rust = false
+java = false

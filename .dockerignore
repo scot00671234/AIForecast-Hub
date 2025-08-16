@@ -12,3 +12,20 @@ attached_assets
 docs
 .replit
 replit.md
+
+# Block any Caddy-related files
+Caddyfile
+caddy*
+*.caddy
+caddy.json
+caddy.conf
+caddy.config
+/etc/caddy*
+
+# Block other potential conflicting files
+Dockerfile
+docker-compose.yml
+.dockerignore
+nginx.conf
+apache.conf
+httpd.conf

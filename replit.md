@@ -63,10 +63,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Recent Changes (August 2025)
 - **VPS Deployment Configuration (August 16, 2025)**: Prepared application for VPS deployment via nixpacks on dokploy
-  - **Nixpacks Configuration**: Created nixpacks.toml for proper Node.js detection and build process
+  - **NUCLEAR CADDY ELIMINATION**: Complete removal of Caddy detection with multiple failsafes
+  - **Forced Node.js Detection**: nixpacks.toml, .nixpacks, Procfile, .buildpacks, runtime.txt all enforce Node.js
   - **Environment Variables Setup**: Documented proper placement of API keys (PROJECT env), database config (DATABASE env), and app settings (APP env)
   - **Deployment Documentation**: Created comprehensive DEPLOYMENT.md guide for VPS setup
-  - **Production Optimizations**: Configured .dockerignore and build process for efficient container deployment
+  - **Production Optimizations**: Configured .dockerignore blocking all Caddy files and build process for efficient container deployment
   - **Footer Updates**: Removed "Built with..." text and updated copyright to 2025
 - **Migration to Replit Environment Completed (August 16, 2025)**: Successfully migrated from Replit Agent to standard Replit environment
   - **Graceful API Key Handling**: All AI services (OpenAI, Claude, Deepseek) now handle missing API keys gracefully without application crashes

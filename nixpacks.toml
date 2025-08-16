@@ -1,13 +1,18 @@
 [variables]
 NODE_ENV = "production"
 
+[providers]
+# Force Node.js provider, disable all other auto-detection
+nodejs = true
+caddy = false
+
 [phases.setup]
 dependsOn = []
 nixPkgs = ["nodejs_20", "npm-9_x"]
 
 [phases.install]
 dependsOn = ["setup"]
-cmds = ["npm ci"]
+cmds = ["npm ci --only=production"]
 
 [phases.build]
 dependsOn = ["install"]
@@ -16,6 +21,15 @@ cmds = ["npm run build"]
 [start]
 cmd = "npm start"
 
-[staticAssets]
-# Serve static assets from the dist/public directory
-"dist/public" = "/"
+# Explicitly disable Caddy and other providers
+[providers.caddy]
+enabled = false
+
+[providers.go]
+enabled = false
+
+[providers.php]
+enabled = false
+
+[providers.python]
+enabled = false
