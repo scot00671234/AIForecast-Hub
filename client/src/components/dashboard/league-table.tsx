@@ -79,66 +79,42 @@ export default function LeagueTable() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {leagueTable.map((entry, index) => {
-              const isFirst = index === 0;
-              const isSecond = index === 1;
-              const isThird = index === 2;
-              
-              // Medal icons for top 3
-              const getMedalIcon = () => {
-                if (isFirst) return "🥇";
-                if (isSecond) return "🥈";
-                if (isThird) return "🥉";
-                return null;
+              // Get model color indicator
+              const getModelColor = (modelName: string) => {
+                switch (modelName) {
+                  case 'Claude': return 'bg-green-500';
+                  case 'ChatGPT': return 'bg-blue-500';
+                  case 'Deepseek': return 'bg-purple-500';
+                  default: return 'bg-gray-500';
+                }
               };
 
               return (
                 <div 
                   key={entry.aiModel.id} 
-                  className={`flex items-center justify-between p-5 rounded-lg border transition-all duration-200 hover:shadow-md
-                    ${isFirst ? 'bg-primary/5 border-primary/20 shadow-sm' : 
-                      isSecond ? 'bg-muted/30 border-border/60' : 
-                      'bg-card/20 border-border/40 hover:bg-card/40'}`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className="group flex items-center justify-between p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/60 hover:border-border/80 transition-all duration-300 hover:translate-y-[-1px] hover:shadow-sm cursor-pointer"
                   data-testid={`league-entry-${entry.rank}`}
                 >
                   <div className="flex items-center space-x-4">
+                    <span className="text-sm font-medium text-muted-foreground min-w-[24px]">
+                      #{entry.rank}
+                    </span>
                     <div className="flex items-center space-x-3">
-                      {getMedalIcon() ? (
-                        <div className="text-2xl">{getMedalIcon()}</div>
-                      ) : (
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted/60 text-muted-foreground text-sm font-medium">
-                          {entry.rank}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground text-base" data-testid={`model-name-${entry.rank}`}>
+                      <div className={`w-3 h-3 rounded-full ${getModelColor(entry.aiModel.name)} group-hover:scale-110 transition-transform duration-200`}></div>
+                      <span className="font-medium text-foreground group-hover:text-foreground/90 transition-colors" data-testid={`model-name-${entry.rank}`}>
                         {entry.aiModel.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground font-light">
-                        {entry.aiModel.provider}
-                      </p>
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="text-right space-y-1">
-                    <div className={`text-xl font-medium tracking-tight
-                      ${isFirst ? 'text-primary' : 'text-foreground'}`} 
-                      data-testid={`accuracy-${entry.rank}`}>
+                  <div className="text-right">
+                    <div className="text-lg font-semibold text-foreground group-hover:text-foreground/90 transition-colors" 
+                         data-testid={`accuracy-${entry.rank}`}>
                       {entry.accuracy.toFixed(1)}%
                     </div>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <span data-testid={`predictions-${entry.rank}`}>
-                        {entry.totalPredictions.toLocaleString()} predictions
-                      </span>
-                      {entry.trend !== undefined && (
-                        <span className={`text-xs ${entry.trend > 0 ? 'text-green-500' : entry.trend < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                          {entry.trend > 0 ? '↗' : entry.trend < 0 ? '↘' : '→'}
-                        </span>
-                      )}
-                    </div>
+                    <div className="text-xs text-muted-foreground">Accuracy</div>
                   </div>
                 </div>
               );
