@@ -69,7 +69,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="relative z-10 max-w-6xl mx-auto px-8 py-16">
         
-        {/* Hero Stats Section */}
+        {/* Hero Section */}
         <section className="mb-20">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6 tracking-wide">
@@ -79,7 +79,6 @@ export default function Dashboard() {
               Real-time tracking of AI model accuracy in commodity price forecasting
             </p>
           </div>
-          <StatsOverview />
         </section>
 
         <div className="space-y-20">
