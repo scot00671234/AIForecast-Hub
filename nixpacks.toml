@@ -1,15 +1,20 @@
-# CLEAN MINIMAL NODE.JS ONLY CONFIGURATION
+# CLEAN MINIMAL NODE.JS ONLY - NO WEB SERVERS
 providers = ["node"]
 
+# Explicitly disable all web server detection
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+NIXPACKS_NO_CADDY = "1"
+NIXPACKS_NO_STATIC_SITE = "1"
+DISABLE_CADDY = "true"
 
 [phases.install] 
 cmds = ["npm ci --production=false"]
 
 [phases.build]
-cmds = ["npm run build", "npm run db:push", "node fix-build.js"]
+cmds = ["npm run build", "node fix-build.js", "chmod +x start.sh"]
 
+# Custom start script that handles DB migration at runtime
 [start]
-cmd = "npm start"
+cmd = "./start.sh"

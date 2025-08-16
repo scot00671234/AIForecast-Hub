@@ -1,0 +1,12 @@
+# PREVENT ALL WEB SERVER DETECTION
+*caddy*
+*Caddy*
+Caddyfile*
+*nginx*
+*apache*
+*httpd*
+*traefik*
+assets/
+static/
+public/
+*.html
