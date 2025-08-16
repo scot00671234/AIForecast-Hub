@@ -123,22 +123,24 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         }
       });
 
-      // Add historical data series (main line)
+      // Add historical data series (main bold black line)
       if (historicalData.length > 0) {
         const historicalSeries = chart.addLineSeries({
-          color: theme === 'dark' ? '#3b82f6' : '#1d4ed8',
-          lineWidth: 2,
-          title: 'Historical Price',
+          color: theme === 'dark' ? '#ffffff' : '#000000',
+          lineWidth: 3,
+          lineStyle: LineStyle.Solid,
+          title: 'Actual Price',
           priceLineVisible: false,
+          lastValueVisible: true,
         });
-        historicalSeries.setData(historicalData);
+        historicalSeries.setData(historicalData.sort((a, b) => a.time - b.time));
       }
 
-      // Add prediction series for each AI model
+      // Add prediction series for each AI model with distinct colors and dotted style
       const modelColors = {
-        'Claude': '#ef4444',
-        'ChatGPT': '#22c55e', 
-        'Deepseek': '#a855f7',
+        'Claude': '#10b981', // Green
+        'ChatGPT': '#3b82f6', // Blue  
+        'Deepseek': '#8b5cf6', // Purple
         'GPT-4': '#f59e0b',
       };
 
@@ -148,11 +150,12 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           const predictionSeries = chart.addLineSeries({
             color: color,
             lineWidth: 2,
-            lineStyle: LineStyle.Dashed, // Dashed line for predictions
+            lineStyle: LineStyle.Dotted, // Dotted line for predictions like in your design
             title: `${modelName} Prediction`,
             priceLineVisible: false,
+            lastValueVisible: false,
           });
-          predictionSeries.setData(data);
+          predictionSeries.setData(data.sort((a, b) => a.time - b.time));
         }
       });
     } else {
@@ -221,33 +224,39 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-end">
-        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+      {/* Chart Header with Legend */}
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-medium text-foreground">Price Movement & AI Predictions</h3>
+        <div className="flex items-center space-x-6 text-sm">
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-0.5 bg-blue-500"></div>
-            <span>Historical</span>
+            <div className="w-4 h-0.5 bg-black dark:bg-white"></div>
+            <span className="text-foreground font-medium">Actual Price</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-0.5 border-t-2 border-dashed border-red-500"></div>
-            <span>Claude</span>
+            <div className="w-4 h-0.5 border-t-2 border-dotted border-green-500"></div>
+            <span className="text-muted-foreground">Claude</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-0.5 border-t-2 border-dashed border-green-500"></div>
-            <span>ChatGPT</span>
+            <div className="w-4 h-0.5 border-t-2 border-dotted border-blue-500"></div>
+            <span className="text-muted-foreground">ChatGPT</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-0.5 border-t-2 border-dashed border-purple-500"></div>
-            <span>Deepseek</span>
+            <div className="w-4 h-0.5 border-t-2 border-dotted border-purple-500"></div>
+            <span className="text-muted-foreground">Deepseek</span>
           </div>
         </div>
       </div>
+      
       <div 
         ref={chartContainerRef} 
         className="w-full border border-border rounded-lg bg-background"
         style={{ height: `${height}px` }}
       />
-      <div className="mt-2 text-xs text-muted-foreground text-center">
-        Use mouse wheel to zoom • Drag to pan • Click and drag on axes to scale
+      
+      {/* Chart Footer */}
+      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+        <span>Data from Yahoo Finance • Updated {new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+        <span>Use mouse wheel to zoom • Drag to pan</span>
       </div>
     </div>
   );
