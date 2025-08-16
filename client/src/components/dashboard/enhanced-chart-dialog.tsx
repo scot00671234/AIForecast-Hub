@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 import { TrendingUp, TrendingDown, Activity, BrainIcon } from "lucide-react";
 import ModelAccuracyRanking from "./model-accuracy-ranking";
@@ -32,14 +33,37 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
 export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiModels }: EnhancedChartDialogProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1mo");
 
-
-
   const { data: latestPrice } = useQuery<LatestPrice>({
     queryKey: ["/api/commodities", commodity.id, "latest-price"],
     enabled: isOpen && !!commodity.id,
   });
 
+  const { data: chartData, isLoading } = useQuery<ChartDataPoint[]>({
+    queryKey: ["/api/commodities", commodity.id, "chart", "30"], // 30 days of data
+    enabled: isOpen && !!commodity.id,
+  });
 
+  const formattedData = useMemo(() => {
+    if (!chartData) return [];
+
+    return chartData.map(point => {
+      const formattedPoint: any = {
+        date: new Date(point.date).toLocaleDateString(),
+        actualPrice: point.actualPrice,
+      };
+
+      // Add prediction data for each AI model (if available)
+      if (aiModels) {
+        aiModels.forEach(model => {
+          if (point.predictions && point.predictions[model.id]) {
+            formattedPoint[model.name] = point.predictions[model.id];
+          }
+        });
+      }
+
+      return formattedPoint;
+    });
+  }, [chartData, aiModels]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -66,7 +90,18 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     return acc;
   }, {} as Record<string, typeof TIME_PERIODS>);
 
-  // All fake data has been completely removed from this component
+  if (isLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-background border border-border/50 backdrop-blur-md">
+          <div className="space-y-6 p-8">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-80 w-full" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -108,44 +143,103 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
         </DialogHeader>
 
         <div className="space-y-6 py-8">
+          {/* Time Period Selection */}
+          <div className="flex items-center justify-center space-x-2">
+            {Object.entries(groupedPeriods).map(([group, periods]) => (
+              <div key={group} className="flex space-x-1">
+                {periods.map(period => (
+                  <Button
+                    key={period.value}
+                    variant={selectedPeriod === period.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setSelectedPeriod(period.value)}
+                    className="h-8 px-3"
+                  >
+                    {period.label}
+                  </Button>
+                ))}
+              </div>
+            ))}
+          </div>
+
           {/* Chart Interface */}
           <div className="space-y-6">
-            {/* Real Data Only - No More Fake Predictions */}
+            {/* Main Chart */}
             <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm p-6">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-green-600 dark:text-green-400 mb-2">
-                    ✅ REAL DATA ONLY - ZERO FAKE DATA
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    All mock/fake predictions have been completely removed from your application.
-                  </p>
-                </div>
-                
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <h4 className="font-medium text-green-800 dark:text-green-200 mb-2">Real Data Sources Now Active:</h4>
-                  <ul className="text-sm space-y-2 text-green-700 dark:text-green-300">
-                    <li>• <strong>Yahoo Finance Integration:</strong> Live commodity prices ✅</li>
-                    <li>• <strong>PostgreSQL Database:</strong> Real historical data storage ✅</li>
-                    <li>• <strong>Claude API:</strong> Ready for your ANTHROPIC_API_KEY ✅</li>
-                    <li>• <strong>ChatGPT API:</strong> Ready for your OPENAI_API_KEY ✅</li>
-                    <li>• <strong>Deepseek API:</strong> Ready for your DEEPSEEK_API_KEY ✅</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Next Steps:</h4>
-                  <ol className="text-sm space-y-1 text-blue-700 dark:text-blue-300">
-                    <li>1. Add your AI API keys to environment variables</li>
-                    <li>2. Real AI predictions will automatically populate</li>
-                    <li>3. Charts will display genuine Yahoo Finance data + AI predictions</li>
-                  </ol>
-                </div>
-                
-                <div className="text-center text-xs text-muted-foreground pt-4 border-t">
-                  All fake prediction data cleared • {new Date().toLocaleString()} • Ready for production
-                </div>
+              <div className="h-96 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={formattedData}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="date" 
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backdropFilter: 'blur(8px)',
+                      }}
+                      labelStyle={{ color: 'var(--foreground)' }}
+                      formatter={(value: any, name: string) => {
+                        if (name === 'Actual Price') {
+                          return [`$${value?.toFixed(2)}`, 'Actual (Yahoo Finance)'];
+                        }
+                        return [`$${value?.toFixed(2)}`, `${name} Prediction`];
+                      }}
+                    />
+                    <Legend />
+                    
+                    {/* Actual Price Line with Enhanced Dots */}
+                    <Line
+                      type="monotone"
+                      dataKey="actualPrice"
+                      stroke="var(--foreground)"
+                      strokeWidth={3}
+                      dot={{ 
+                        fill: 'var(--foreground)', 
+                        strokeWidth: 2, 
+                        r: 4,
+                      }}
+                      activeDot={{ 
+                        r: 8, 
+                        fill: 'var(--primary)',
+                        stroke: 'var(--primary-foreground)',
+                        strokeWidth: 3,
+                      }}
+                      name="Actual Price"
+                    />
+                    
+                    {/* AI Model Prediction Lines */}
+                    {aiModels?.map(model => (
+                      <Line
+                        key={model.id}
+                        type="monotone"
+                        dataKey={model.name}
+                        stroke={model.color}
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={{ fill: model.color, strokeWidth: 2, r: 3 }}
+                        name={model.name}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
+              
+              {/* Chart Status */}
+              {formattedData.length === 0 && (
+                <div className="text-center text-muted-foreground py-8">
+                  <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>Loading chart data...</p>
+                </div>
+              )}
             </div>
 
             {/* Model Accuracy Rankings */}
