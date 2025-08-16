@@ -13,6 +13,21 @@ docs
 .replit
 replit.md
 
+# NUCLEAR STATIC DETECTION BLOCKING
+# Block all static patterns that trigger Caddy
+dist/public/
+dist/public
+public/
+public
+static/
+static
+www/
+www
+assets/index.html
+*/index.html
+!client/index.html
+*.html
+
 # NUCLEAR CADDY ELIMINATION - BLOCK EVERYTHING
 Caddyfile*
 caddy*

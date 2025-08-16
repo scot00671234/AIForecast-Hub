@@ -1,0 +1,9 @@
+# BLOCK STATIC FILE DETECTION
+dist/public/
+public/
+static/
+www/
+assets/
+*.html
+index.html
+client/index.html
