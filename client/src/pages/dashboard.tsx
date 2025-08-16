@@ -1,9 +1,11 @@
-import { MoonIcon, SunIcon, SearchIcon } from "lucide-react";
+import { MoonIcon, SunIcon, SearchIcon, MenuIcon } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "wouter";
 import OverallModelRankings from "@/components/dashboard/overall-model-rankings";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import type { Commodity } from "@shared/schema";
@@ -56,14 +58,18 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* Triangle logo - same as landing */}
-              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="text-lg font-medium text-foreground">
-                AIForecast Hub
-              </span>
+              <Link href="/">
+                <div className="flex items-center space-x-3 cursor-pointer">
+                  {/* Triangle logo - same as landing */}
+                  <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+                  <span className="text-lg font-medium text-foreground">
+                    AIForecast Hub
+                  </span>
+                </div>
+              </Link>
             </div>
             
-            {/* Search Bar */}
+            {/* Search Bar and Menu */}
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -107,6 +113,22 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <MenuIcon className="h-[1.2rem] w-[1.2rem]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/blog">Blog</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/policy">Policy</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               <Button
                 onClick={toggleTheme}

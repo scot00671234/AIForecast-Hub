@@ -61,6 +61,14 @@ Preferred communication style: Simple, everyday language.
 - **Code Splitting**: Automatic code splitting via Vite
 - **Development Experience**: Hot reload, TypeScript checking, and runtime error modals
 
+### Recent Changes (January 2025)
+- **Menu System & Content Pages (January 16, 2025)**: Added comprehensive navigation menu with Blog and Policy pages
+  - **Header Menu Integration**: Dropdown menu button added to both landing page and dashboard headers with Blog and Policy options
+  - **Blog Page**: Comprehensive article explaining the purpose and mission of AIForecast Hub, covering AI model comparison, real data integration, and technology stack
+  - **Policy Page**: Detailed data usage policy with disclaimers about AI predictions, covering data collection practices, limitations, and financial advice warnings
+  - **Consistent Navigation**: All pages maintain unified header design with triangle logo, menu dropdown, and theme toggle
+  - **Router Integration**: Full wouter routing support for /blog and /policy paths with proper navigation flow
+
 ### Recent Changes (August 2025)
 - **Overall Model Rankings Dashboard (August 16, 2025)**: Added comprehensive model performance rankings to main dashboard
   - **Clean Minimalist Design**: Replaced league table with streamlined ranking component showing overall AI model accuracy across all commodities
