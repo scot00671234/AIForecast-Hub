@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { TrendingUp, TrendingDown, Activity, BrainIcon } from "lucide-react";
-import UnifiedChart from "./unified-chart";
+import MockChart from "./mock-chart";
 import ModelAccuracyRanking from "./model-accuracy-ranking";
 import type { ChartDataPoint, Commodity, AiModel, TimePeriod, LatestPrice } from "@shared/schema";
 
@@ -27,6 +27,8 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
   { value: "2y", label: "2Y", group: "Long" },
   { value: "5y", label: "5Y", group: "Long" },
 ];
+
+
 
 export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiModels }: EnhancedChartDialogProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1mo");
@@ -130,12 +132,18 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                 ))}
               </div>
             </div>
-            {/* Unified Chart Component */}
-            <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm">
-              <UnifiedChart
-                commodityId={commodity.id}
-                period={selectedPeriod}
-                height={500}
+            {/* Mock Chart Component */}
+            <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm p-6">
+              <MockChart
+                commodityName={commodity.name}
+                basePrice={(() => {
+                  const basePrices: { [key: string]: number } = {
+                    'Crude Oil': 72.5, 'Gold': 3350, 'Natural Gas': 2.85, 'Copper': 4.45,
+                    'Silver': 38.2, 'Coffee': 334, 'Sugar': 16.8, 'Corn': 408,
+                    'Soybeans': 1045, 'Cotton': 66.5,
+                  };
+                  return basePrices[commodity.name] || 100;
+                })()}
               />
             </div>
 
