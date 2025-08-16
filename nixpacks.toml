@@ -1,30 +1,6 @@
 # NUCLEAR CADDY ELIMINATION - NODE.JS ONLY
 providers = ["node"]
 
-# FORCE NODE.JS ONLY - NO EXCEPTIONS
-[providers.node]
-enabledBuilders = ["nodejs"]
-
-# NUCLEAR DISABLE ALL NON-NODE PROVIDERS
-[providers.static]
-disabled = true
-[providers.deno]
-disabled = true
-[providers.caddy]
-disabled = true
-[providers.go]
-disabled = true
-[providers.rust]
-disabled = true
-[providers.python]
-disabled = true
-[providers.php]
-disabled = true
-[providers.ruby]
-disabled = true
-[providers.java]
-disabled = true
-
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
@@ -47,7 +23,7 @@ dependsOn = ["setup"]
 cmds = ["npm ci"]
 
 [phases.build]
-dependsOn = ["install"]
+dependsOn = ["install"] 
 cmds = ["npm run build", "npm prune --production"]
 
 [start]
