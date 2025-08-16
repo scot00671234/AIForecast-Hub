@@ -828,29 +828,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Initialize prediction data on startup
-  const initializePredictions = async () => {
-    try {
-      const commodities = await storage.getCommodities();
-      for (const commodity of commodities) {
-        // Initialize real price data from Yahoo Finance
-        try {
-          await yahooFinanceService.updateCommodityPrices(commodity.id);
-        } catch (error) {
-          console.log(`Could not initialize prices for ${commodity.name}:`, error);
-        }
-      }
-      console.log(`Initialized predictions for ${commodities.length} commodities`);
-      
-      // Start the prediction scheduler
-      predictionScheduler.start();
-    } catch (error) {
-      console.error("Error initializing predictions:", error);
-    }
-  };
-
-  // Initialize predictions
-  await initializePredictions();
+  // Professional startup management
+  const { StartupManager } = await import('./services/startupManager');
+  const startupManager = new StartupManager(storage);
+  
+  // Critical initialization (must complete)
+  await startupManager.initializeCritical();
+  
+  // Heavy operations (background)
+  startupManager.initializeHeavy();
 
   const httpServer = createServer(app);
   return httpServer;

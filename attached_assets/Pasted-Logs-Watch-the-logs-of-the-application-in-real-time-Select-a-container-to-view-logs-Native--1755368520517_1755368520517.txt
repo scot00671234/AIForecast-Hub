@@ -1,0 +1,108 @@
+Logs
+Watch the logs of the application in real time
+
+Select a container to view logs
+Native
+
+
+aiforecast-hub-app-ywa0gl.1.ncxd7orbhna8j5c1tgc55r9om (eb18f3a111ce) 
+Search logs...
+constraint: 'actual_prices_commodity_id_commodities_id_fk',
+file: 'ri_triggers.c',
+line: '2596',
+routine: 'ri_ReportViolation'
+}
+Generated 156 historical predictions for Natural Gas
+Generated 156 historical predictions for Copper
+Database error, using fallback: error: insert or update on table "actual_prices" violates foreign key constraint "actual_prices_commodity_id_commodities_id_fk"
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.createActualPrice (file:///app/dist/index.js:825:23)
+at async YahooFinanceService.updateCommodityPrices (file:///app/dist/index.js:1121:17)
+at async initializePredictions (file:///app/dist/index.js:2783:11)
+at async registerRoutes (file:///app/dist/index.js:2794:3)
+at async file:///app/dist/index.js:2936:18 {
+length: 322,
+severity: 'ERROR',
+code: '23503',
+detail: 'Key (commodity_id)=(c1) is not present in table "commodities".',
+hint: undefined,
+position: undefined,
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: 'public',
+table: 'actual_prices',
+column: undefined,
+dataType: undefined,
+constraint: 'actual_prices_commodity_id_commodities_id_fk',
+file: 'ri_triggers.c',
+line: '2596',
+routine: 'ri_ReportViolation'
+}
+Generated 156 historical predictions for Silver
+Generated 156 historical predictions for Coffee
+Database error, using fallback: error: insert or update on table "actual_prices" violates foreign key constraint "actual_prices_commodity_id_commodities_id_fk"
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.createActualPrice (file:///app/dist/index.js:825:23)
+at async YahooFinanceService.updateCommodityPrices (file:///app/dist/index.js:1121:17)
+at async initializePredictions (file:///app/dist/index.js:2783:11)
+at async registerRoutes (file:///app/dist/index.js:2794:3)
+at async file:///app/dist/index.js:2936:18 {
+length: 322,
+severity: 'ERROR',
+code: '23503',
+detail: 'Key (commodity_id)=(c1) is not present in table "commodities".',
+hint: undefined,
+position: undefined,
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: 'public',
+table: 'actual_prices',
+column: undefined,
+dataType: undefined,
+constraint: 'actual_prices_commodity_id_commodities_id_fk',
+file: 'ri_triggers.c',
+line: '2596',
+routine: 'ri_ReportViolation'
+}
+Generated 156 historical predictions for Sugar
+Database error, using fallback: error: insert or update on table "actual_prices" violates foreign key constraint "actual_prices_commodity_id_commodities_id_fk"
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.createActualPrice (file:///app/dist/index.js:825:23)
+at async YahooFinanceService.updateCommodityPrices (file:///app/dist/index.js:1121:17)
+at async initializePredictions (file:///app/dist/index.js:2783:11)
+at async registerRoutes (file:///app/dist/index.js:2794:3)
+at async file:///app/dist/index.js:2936:18 {
+length: 322,
+severity: 'ERROR',
+code: '23503',
+detail: 'Key (commodity_id)=(c1) is not present in table "commodities".',
+hint: undefined,
+position: undefined,
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: 'public',
+table: 'actual_prices',
+column: undefined,
+dataType: undefined,
+constraint: 'actual_prices_commodity_id_commodities_id_fk',
+file: 'ri_triggers.c',
+line: '2596',
+routine: 'ri_ReportViolation'
+}
+Generated 156 historical predictions for Corn
+Generated 156 historical predictions for Soybeans
+Initialized predictions for 10 commodities
+Prediction scheduler started - will run every Monday at 2 AM
+6:19:33 PM [express] serving on port 3000
+Generated 156 historical predictions for Cotton
+Historical prediction initialization complete. Generated 1560 total predictions.
+Default data and historical predictions initialized successfully

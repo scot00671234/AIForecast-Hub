@@ -83,9 +83,20 @@ export class DatabaseStorage implements IStorage {
       this.isDbConnected = true;
       console.log("Database connection successful");
     } catch (error) {
-      console.error("Database connection failed, using fallback storage:", error);
+      console.error("Database connection failed:", error);
       this.isDbConnected = false;
+      throw new Error(`Database connection required for production deployment: ${error.message}`);
     }
+  }
+
+  // Public wrapper for startup manager
+  async ensureConnection(): Promise<void> {
+    await this.testConnection();
+  }
+
+  // Public wrapper for startup manager
+  async ensureDefaultData(): Promise<void> {
+    await this.initializeDefaultData();
   }
 
   private async initializeDefaultData() {
