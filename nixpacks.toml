@@ -1,14 +1,10 @@
-# NUCLEAR ANTI-CADDY: EMPTY PROVIDERS ARRAY  
-providers = []
+# FORCE NODE.JS PROVIDER ONLY  
+providers = ["node"]
 
 [variables]
-NIXPACKS_NODEJS_VERSION = "20"
-NODE_ENV = "production" 
+NODE_ENV = "production"
 PORT = "3000"
-# MAXIMUM ANTI-CADDY PROTECTION
 NIXPACKS_NO_CADDY = "1"
-DISABLE_STATIC_DETECTION = "1"
-NO_WEB_SERVER = "1"
 
 [phases.setup]
 nixPkgs = ["nodejs_20"]
@@ -18,7 +14,7 @@ dependsOn = ["setup"]
 cmds = ["npm ci"]
 
 [phases.build]
-dependsOn = ["install"]
+dependsOn = ["install"] 
 cmds = ["npm run build", "npm prune --production"]
 
 [start]
