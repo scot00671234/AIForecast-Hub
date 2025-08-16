@@ -3,8 +3,14 @@ const { Pool } = pkg;
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// For development, use a default DATABASE_URL if not set
-const databaseUrl = process.env.DATABASE_URL || "postgresql://runner@localhost/commoditydb?host=/tmp&port=5433";
+// Use DATABASE_URL or throw error in production
+const databaseUrl = process.env.DATABASE_URL || (process.env.NODE_ENV === 'production' 
+  ? null 
+  : "postgresql://runner@localhost/commoditydb?host=/tmp&port=5433");
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL environment variable is required in production");
+}
 
 if (!process.env.DATABASE_URL) {
   console.warn("DATABASE_URL not set, using default development database");

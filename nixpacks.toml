@@ -11,11 +11,11 @@ nixPkgs = ["nodejs_20"]
 
 [phases.install]
 dependsOn = ["setup"]
-cmds = ["npm ci --only=production"]
+cmds = ["npm ci"]
 
 [phases.build]
 dependsOn = ["install"]
-cmds = ["npm run build"]
+cmds = ["npm run build", "npm prune --production"]
 
 [start]
 cmd = "npm start"
