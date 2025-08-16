@@ -106,7 +106,7 @@ export default function Landing() {
       <footer className="absolute bottom-8 w-full z-10">
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            © 2024 AIForecast Hub
+            © 2025 AIForecast Hub
           </p>
         </div>
       </footer>

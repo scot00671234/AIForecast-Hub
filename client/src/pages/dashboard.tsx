@@ -100,7 +100,7 @@ export default function Dashboard() {
               <span className="font-medium text-foreground">AIForecast Hub</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 AIForecast Hub. Built with real-time Yahoo Finance data.
+              © 2025 AIForecast Hub.
             </p>
           </div>
         </div>

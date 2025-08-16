@@ -314,23 +314,28 @@ export class DatabaseStorage implements IStorage {
       return await fallbackStorage.getDashboardStats();
     }
     try {
-    const allPredictions = await db.select().from(predictions);
-    const thirtyDayMetrics = await this.getAccuracyMetrics('30d');
-    const allCommodities = await this.getCommodities();
+      const allPredictions = await db.select().from(predictions);
+      const allCommodities = await this.getCommodities();
+      
+      // Get the best performing model using accuracy calculator rankings
+      const rankings = await this.getLeagueTable('30d');
+      const topRanking = rankings.find(r => r.rank === 1);
+      
+      const topModel = topRanking?.aiModel || "No predictions yet";
+      const topAccuracy = topRanking?.accuracy || 0;
+      
+      // Calculate average accuracy across all models
+      const avgAccuracy = rankings.length > 0 
+        ? rankings.reduce((sum, r) => sum + r.accuracy, 0) / rankings.length
+        : 0;
 
-    const topMetric = thirtyDayMetrics[0];
-    const topModel = topMetric ? await this.getAiModel(topMetric.aiModelId) : null;
-    const avgAccuracy = thirtyDayMetrics.length > 0 
-      ? thirtyDayMetrics.reduce((sum, m) => sum + parseFloat(m.accuracy), 0) / thirtyDayMetrics.length
-      : 0;
-
-    return {
-      totalPredictions: allPredictions.length,
-      topModel: topModel?.name || "N/A",
-      topAccuracy: topMetric ? parseFloat(topMetric.accuracy) : 0,
-      activeCommodities: allCommodities.length,
-      avgAccuracy: Number(avgAccuracy.toFixed(2))
-    };
+      return {
+        totalPredictions: allPredictions.length,
+        topModel: typeof topModel === 'string' ? topModel : topModel.name,
+        topAccuracy: Number(topAccuracy.toFixed(1)),
+        activeCommodities: allCommodities.length,
+        avgAccuracy: Number(avgAccuracy.toFixed(2))
+      };
     } catch (error) {
       console.error("Database error in getDashboardStats, using fallback:", error);
       return await fallbackStorage.getDashboardStats();
