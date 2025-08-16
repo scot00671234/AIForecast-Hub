@@ -247,13 +247,24 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
     }
   }, [theme]);
 
-  if (dataLoading || isLoading) {
+  if (dataLoading) {
     return (
       <div 
         className="flex items-center justify-center bg-background border border-border rounded-lg"
         style={{ height: `${height}px` }}
       >
         <div className="text-muted-foreground">Loading chart data...</div>
+      </div>
+    );
+  }
+
+  if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+    return (
+      <div 
+        className="flex items-center justify-center bg-background border border-border rounded-lg"
+        style={{ height: `${height}px` }}
+      >
+        <div className="text-muted-foreground">No chart data available</div>
       </div>
     );
   }

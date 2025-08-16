@@ -49,7 +49,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(price);
+    }).format(price).replace(/\.00$/, ''); // Remove trailing .00 zeros
   };
 
   const formatChange = (change: number) => {
@@ -93,7 +93,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                       </div>
                       <div className="text-sm text-muted-foreground font-light">Current Price</div>
                     </div>
-                    {latestPrice.changePercent && (
+                    {latestPrice.changePercent !== 0 && (
                       <div className="text-right">
                         <div className="text-lg font-medium">
                           {formatChange(latestPrice.changePercent)}
