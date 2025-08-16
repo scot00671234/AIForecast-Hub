@@ -71,17 +71,17 @@ export default function LeagueTable() {
       
       <CardContent className="p-0 pt-2">
         {!leagueTable || leagueTable.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-muted-foreground mb-6">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-muted/30 to-muted/60 flex items-center justify-center">
-                <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[14px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
+          <div className="text-center py-12">
+            <div className="text-muted-foreground mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
+                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
               </div>
-              <p className="text-xl font-semibold mb-2">No ranking data available</p>
+              <p className="text-lg font-medium mb-2">No ranking data available</p>
               <p className="text-sm text-muted-foreground/80">Start making predictions to see model rankings</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-3">
             {leagueTable.map((entry, index) => {
               // Get model color indicator
               const getModelColor = (modelName: string) => {
@@ -93,43 +93,31 @@ export default function LeagueTable() {
                 }
               };
 
-              const getGlowColor = (modelName: string) => {
-                switch (modelName) {
-                  case 'Claude': return 'hover:shadow-green-500/20';
-                  case 'ChatGPT': return 'hover:shadow-blue-500/20';
-                  case 'Deepseek': return 'hover:shadow-purple-500/20';
-                  default: return 'hover:shadow-gray-500/20';
-                }
-              };
-
               return (
                 <div 
                   key={entry.aiModel.id} 
-                  className={`group relative flex items-center justify-between px-6 py-5 rounded-2xl bg-white/5 hover:bg-white/10 dark:bg-black/5 dark:hover:bg-black/10 border-0 hover:scale-[1.02] transition-all duration-300 hover:shadow-xl ${getGlowColor(entry.aiModel.name)} cursor-pointer backdrop-blur-sm`}
+                  className="group flex items-center justify-between py-4 px-5 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 hover:border-border/80"
                   data-testid={`league-entry-${entry.rank}`}
                 >
-                  <div className="flex items-center space-x-6">
-                    <div className="text-lg font-bold text-muted-foreground/60 group-hover:text-muted-foreground transition-colors min-w-[32px]">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm font-medium text-muted-foreground min-w-[24px]">
                       #{entry.rank}
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-4 h-4 rounded-full ${getModelColor(entry.aiModel.name)} group-hover:scale-125 group-hover:shadow-lg transition-all duration-300`}></div>
-                      <span className="text-lg font-semibold text-foreground group-hover:text-foreground transition-colors" data-testid={`model-name-${entry.rank}`}>
+                    </span>
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
+                      <span className="font-medium text-foreground" data-testid={`model-name-${entry.rank}`}>
                         {entry.aiModel.name}
                       </span>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300" 
+                    <div className="text-lg font-semibold text-foreground" 
                          data-testid={`accuracy-${entry.rank}`}>
                       {entry.accuracy.toFixed(1)}%
                     </div>
-                    <div className="text-sm text-muted-foreground/80 font-medium">Accuracy</div>
+                    <div className="text-xs text-muted-foreground">Accuracy</div>
                   </div>
-                  
-                  {/* Subtle gradient overlay on hover */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
               );
             })}
