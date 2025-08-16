@@ -19,7 +19,7 @@ export default function LeagueTable() {
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-32" />
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -45,7 +45,7 @@ export default function LeagueTable() {
           Model Rankings
         </h2>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-          <SelectTrigger className="w-36 h-9 bg-background/60 border border-border/30 text-sm rounded-lg hover:bg-background/80 hover:border-border/50 transition-all duration-200" data-testid="select-period">
+          <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md" data-testid="select-period">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -64,7 +64,7 @@ export default function LeagueTable() {
           <p className="text-xs text-muted-foreground">Start making predictions to see model rankings</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {leagueTable.map((entry, index) => {
             // Get model color indicator  
             const getModelColor = (modelName: string) => {
@@ -79,25 +79,25 @@ export default function LeagueTable() {
             return (
               <div 
                 key={entry.aiModel.id}
-                className="group flex items-center justify-between p-4 bg-background/40 border border-border/30 rounded-xl hover:bg-background/60 hover:border-border/50 hover:shadow-sm transition-all duration-300 hover:scale-[1.01]"
+                className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200"
                 data-testid={`league-entry-${entry.rank}`}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-muted-foreground/70 font-medium w-6">
+                  <span className="text-sm text-muted-foreground font-normal">
                     #{entry.rank}
                   </span>
-                  <div className={`w-2.5 h-2.5 rounded-full ${getModelColor(entry.aiModel.name)} group-hover:scale-110 transition-transform duration-200`}></div>
-                  <span className="text-sm font-medium text-foreground" data-testid={`model-name-${entry.rank}`}>
+                  <div className={`w-2 h-2 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
+                  <span className="text-sm font-normal text-foreground" data-testid={`model-name-${entry.rank}`}>
                     {entry.aiModel.name}
                   </span>
                 </div>
                 
                 <div className="text-right">
-                  <div className="text-lg font-semibold text-foreground group-hover:text-foreground/90 transition-colors" 
+                  <div className="text-base font-medium text-foreground" 
                        data-testid={`accuracy-${entry.rank}`}>
                     {entry.accuracy.toFixed(1)}%
                   </div>
-                  <div className="text-xs text-muted-foreground/70">Accuracy</div>
+                  <div className="text-xs text-muted-foreground">Accuracy</div>
                 </div>
               </div>
             );
@@ -105,7 +105,7 @@ export default function LeagueTable() {
         </div>
       )}
       
-      <div className="flex items-center justify-between text-xs text-muted-foreground/60 pt-3 mt-4 border-t border-border/20">
+      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/20">
         <span>Based on predictions across all commodities</span>
         <span>Best performer: {leagueTable?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
       </div>
