@@ -25,6 +25,7 @@ import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { fallbackStorage } from "./services/fallbackStorage";
+import { HistoricalPredictionGenerator } from "./services/historicalPredictionGenerator";
 
 export interface IStorage {
   // AI Models
@@ -69,6 +70,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   private isDbConnected = false;
+  private historicalGenerator = new HistoricalPredictionGenerator();
 
   constructor() {
     this.testConnection();
@@ -124,8 +126,11 @@ export class DatabaseStorage implements IStorage {
       ];
 
       await db.insert(commodities).values(defaultCommodities);
+
+      // Initialize historical predictions for the past year
+      await this.initializeHistoricalPredictions();
       
-      console.log("Default data initialized successfully");
+      console.log("Default data and historical predictions initialized successfully");
     } catch (error) {
       console.error("Error initializing default data:", error);
     }
@@ -455,6 +460,74 @@ export class DatabaseStorage implements IStorage {
   
   async insertActualPrice(data: InsertActualPrice): Promise<ActualPrice> {
     return this.createActualPrice(data);
+  }
+
+  /**
+   * Initialize historical predictions for the past year
+   * Creates realistic AI predictions based on sample historical data
+   */
+  private async initializeHistoricalPredictions() {
+    if (!this.isDbConnected) {
+      console.log("Skipping historical predictions - database not connected");
+      return;
+    }
+
+    try {
+      // Check if historical predictions already exist
+      const existingPredictions = await db.select().from(predictions).limit(1);
+      if (existingPredictions.length > 0) {
+        console.log("Historical predictions already exist, skipping initialization");
+        return;
+      }
+
+      console.log("Generating historical predictions for the past year...");
+
+      // Get all AI models and commodities
+      const models = await this.getAiModels();
+      const allCommodities = await this.getCommodities();
+
+      // Focus on the main commodities that match your Yahoo Finance integration
+      const mainCommodities = allCommodities.filter(c => 
+        ['WTI', 'XAU', 'NG', 'HG', 'XAG', 'KC', 'SB', 'ZC', 'ZS', 'CT'].includes(c.symbol)
+      );
+
+      let totalPredictions = 0;
+
+      for (const commodity of mainCommodities) {
+        // Generate sample historical prices for this commodity
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        
+        const samplePrices = this.historicalGenerator.generateSampleHistoricalPrices(
+          commodity,
+          oneYearAgo,
+          365
+        );
+
+        // Generate historical predictions
+        const historicalPredictions = this.historicalGenerator.generateHistoricalPredictions(
+          commodity,
+          models,
+          samplePrices
+        );
+
+        // Insert predictions in batches to avoid overwhelming the database
+        const batchSize = 50;
+        for (let i = 0; i < historicalPredictions.length; i += batchSize) {
+          const batch = historicalPredictions.slice(i, i + batchSize);
+          await db.insert(predictions).values(batch);
+          totalPredictions += batch.length;
+        }
+
+        console.log(`Generated ${historicalPredictions.length} historical predictions for ${commodity.name}`);
+      }
+
+      console.log(`Historical prediction initialization complete. Generated ${totalPredictions} total predictions.`);
+
+    } catch (error) {
+      console.error("Error initializing historical predictions:", error);
+      // Don't throw - we want the app to continue even if historical data fails
+    }
   }
 }
 

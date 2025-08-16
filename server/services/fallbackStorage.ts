@@ -16,6 +16,7 @@ import type {
   ChartDataPoint
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { HistoricalPredictionGenerator } from "./historicalPredictionGenerator";
 
 // In-memory fallback storage for when PostgreSQL is not available
 export class FallbackStorage {
@@ -44,6 +45,8 @@ export class FallbackStorage {
   private predictions: Prediction[] = [];
   private accuracyMetrics: AccuracyMetric[] = [];
   private marketAlerts: MarketAlert[] = [];
+  private historicalGenerator = new HistoricalPredictionGenerator();
+  private historicalDataInitialized = false;
 
   // AI Models
   async getAiModels(): Promise<AiModel[]> {
@@ -128,6 +131,11 @@ export class FallbackStorage {
 
   // Predictions
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
+    // Initialize historical data on first access
+    if (!this.historicalDataInitialized) {
+      await this.initializeHistoricalPredictions();
+    }
+    
     let filtered = this.predictions;
     
     if (commodityId) {
@@ -235,7 +243,7 @@ export class FallbackStorage {
         aiModel: model,
         accuracy: Math.round(finalAccuracy * 10) / 10, // Round to 1 decimal
         totalPredictions: Math.floor(45 + Math.random() * 30), // 45-75 predictions
-        trend: Math.random() > 0.6 ? "up" : (Math.random() > 0.3 ? "down" : "stable")
+        trend: Math.random() > 0.6 ? 1 : (Math.random() > 0.3 ? -1 : 0)
       };
     });
     
@@ -269,7 +277,7 @@ export class FallbackStorage {
       chartData.push({
         date: price.date.toISOString().split('T')[0],
         actualPrice: parseFloat(price.price),
-        ...dayPredictions
+        predictions: dayPredictions
       });
     }
     
@@ -311,6 +319,61 @@ export class FallbackStorage {
 
   async rawQuery(query: string, params?: any[]): Promise<{ rows: any[] }> {
     return { rows: [] };
+  }
+
+  /**
+   * Initialize historical predictions for the past year in fallback storage
+   */
+  private async initializeHistoricalPredictions() {
+    if (this.historicalDataInitialized) {
+      return;
+    }
+
+    try {
+      console.log("Generating historical predictions for fallback storage...");
+
+      for (const commodity of this.commodities) {
+        // Generate sample historical prices for this commodity
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        
+        const samplePrices = this.historicalGenerator.generateSampleHistoricalPrices(
+          commodity,
+          oneYearAgo,
+          365
+        );
+
+        // Generate historical predictions
+        const historicalPredictions = this.historicalGenerator.generateHistoricalPredictions(
+          commodity,
+          this.aiModels,
+          samplePrices
+        );
+
+        // Add predictions to fallback storage
+        for (const predictionData of historicalPredictions) {
+          const newPrediction: Prediction = {
+            id: randomUUID(),
+            ...predictionData,
+            predictionDate: new Date(predictionData.predictionDate),
+            targetDate: new Date(predictionData.targetDate),
+            confidence: predictionData.confidence ?? null,
+            metadata: predictionData.metadata ?? null,
+            createdAt: new Date()
+          };
+          this.predictions.push(newPrediction);
+        }
+
+        console.log(`Generated ${historicalPredictions.length} historical predictions for ${commodity.name}`);
+      }
+
+      this.historicalDataInitialized = true;
+      console.log(`Historical prediction initialization complete for fallback storage. Generated ${this.predictions.length} total predictions.`);
+
+    } catch (error) {
+      console.error("Error initializing historical predictions in fallback storage:", error);
+      this.historicalDataInitialized = true; // Mark as initialized to prevent retries
+    }
   }
 }
 

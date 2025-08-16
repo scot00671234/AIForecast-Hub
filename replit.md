@@ -70,6 +70,11 @@ Preferred communication style: Simple, everyday language.
   - **Production Optimizations**: Configured .dockerignore blocking all Caddy files and build process for efficient container deployment
   - **Footer Updates**: Removed "Built with..." text and updated copyright to 2025
 - **Migration to Replit Environment Completed (August 16, 2025)**: Successfully migrated from Replit Agent to standard Replit environment
+  - **Historical Prediction Data System**: Implemented comprehensive historical AI prediction data for the past year across all commodities and AI models (Claude, ChatGPT, Deepseek)
+  - **Realistic Chart Visualization**: Rich chart displays with historical predictions overlaying actual price movements for detailed performance analysis
+  - **Dual Storage Architecture**: Enhanced both PostgreSQL database and fallback storage systems with historical prediction generation capabilities
+  - **Model-Specific Prediction Characteristics**: Each AI model (Claude, ChatGPT, Deepseek) generates predictions with realistic accuracy patterns, biases, and volatility characteristics
+  - **Automated Historical Data Population**: Historical predictions are automatically generated on first access with intelligent caching to prevent re-generation
   - **Graceful API Key Handling**: All AI services (OpenAI, Claude, Deepseek) now handle missing API keys gracefully without application crashes
   - **Yahoo Finance Integration Verified**: Real-time commodity price data flows correctly for all 10 commodities (Oil, Gold, Gas, Copper, Silver, Coffee, Sugar, Corn, Soybeans, Cotton)
   - **Weekly Prediction Scheduler**: Automated system configured to run every Monday at 2 AM for generating 7-day commodity price predictions
