@@ -5,9 +5,11 @@ import { useTheme } from '@/components/theme-provider';
 interface MockChartProps {
   commodityName: string;
   basePrice: number;
+  selectedPeriod: string;
+  onPeriodChange: (period: string) => void;
 }
 
-export default function MockChart({ commodityName, basePrice }: MockChartProps) {
+export default function MockChart({ commodityName, basePrice, selectedPeriod, onPeriodChange }: MockChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
 
@@ -44,6 +46,15 @@ export default function MockChart({ commodityName, basePrice }: MockChartProps) 
         secondsVisible: false,
       },
     });
+
+    // Get number of days based on selected period
+    const getDaysForPeriod = (period: string) => {
+      const periodMap: { [key: string]: number } = {
+        '1d': 1, '5d': 5, '1w': 7, '1mo': 30, '3mo': 90,
+        '6mo': 180, '1y': 365, '2y': 730, '5y': 1825
+      };
+      return periodMap[period] || 30;
+    };
 
     // Generate mock data that looks realistic for the specific commodity
     const generateMockData = (startDate: Date, days: number, basePrice: number, volatility: number = 0.02) => {
@@ -82,16 +93,19 @@ export default function MockChart({ commodityName, basePrice }: MockChartProps) 
       });
     };
 
+    const days = getDaysForPeriod(selectedPeriod);
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 90); // 90 days ago
+    startDate.setDate(startDate.getDate() - days);
     
     // Generate actual price data
-    const actualData = generateMockData(startDate, 90, basePrice, 0.03);
+    const actualData = generateMockData(startDate, days, basePrice, 0.03);
     
     // Generate AI prediction data with different characteristics
-    const claudeData = generatePredictionData(actualData, 0.04, 60);
-    const chatgptData = generatePredictionData(actualData, 0.05, 60);
-    const deepseekData = generatePredictionData(actualData, 0.03, 60);
+    // Start predictions from 2/3 through the data
+    const predictionStart = Math.floor(days * 0.67);
+    const claudeData = generatePredictionData(actualData, 0.04, predictionStart);
+    const chatgptData = generatePredictionData(actualData, 0.05, predictionStart);
+    const deepseekData = generatePredictionData(actualData, 0.03, predictionStart);
 
     // Add actual price series (bold black line)
     const actualSeries = chart.addSeries(LineSeries, {
@@ -143,7 +157,7 @@ export default function MockChart({ commodityName, basePrice }: MockChartProps) 
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [theme, commodityName, basePrice]);
+  }, [theme, commodityName, basePrice, selectedPeriod]);
 
   return (
     <div className="space-y-4">
@@ -175,16 +189,27 @@ export default function MockChart({ commodityName, basePrice }: MockChartProps) 
         
         {/* Time period buttons */}
         <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 p-1">
-          {['1D', '5D', '1W', '1M', '3M', '6M', '1Y', '2Y', '5Y'].map((period) => (
+          {[
+            { value: '1d', label: '1D' },
+            { value: '5d', label: '5D' },
+            { value: '1w', label: '1W' },
+            { value: '1mo', label: '1M' },
+            { value: '3mo', label: '3M' },
+            { value: '6mo', label: '6M' },
+            { value: '1y', label: '1Y' },
+            { value: '2y', label: '2Y' },
+            { value: '5y', label: '5Y' }
+          ].map((period) => (
             <button
-              key={period}
-              className={`px-3 py-1 text-xs font-medium rounded ${
-                period === '6M'
+              key={period.value}
+              onClick={() => onPeriodChange(period.value)}
+              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                selectedPeriod === period.value
                   ? 'bg-blue-500 text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
-              {period}
+              {period.label}
             </button>
           ))}
         </div>

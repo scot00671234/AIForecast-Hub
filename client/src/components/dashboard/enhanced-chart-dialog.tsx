@@ -107,31 +107,8 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
         </DialogHeader>
 
         <div className="space-y-6 py-8">
-          {/* Unified Chart Interface */}
+          {/* Chart Interface */}
           <div className="space-y-6">
-            <div className="flex items-center justify-end">
-              
-              {/* Minimal Time Period Controls */}
-              <div className="flex items-center space-x-1 bg-muted/30 rounded-lg p-1 border border-border/40">
-                {TIME_PERIODS.map(period => (
-                  <Button
-                    key={period.value}
-                    variant={selectedPeriod === period.value ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setSelectedPeriod(period.value)}
-                    className={`
-                      h-8 px-3 text-xs font-medium transition-all duration-200 rounded-md
-                      ${selectedPeriod === period.value 
-                        ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/60"
-                      }
-                    `}
-                  >
-                    {period.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
             {/* Mock Chart Component */}
             <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm p-6">
               <MockChart
@@ -144,6 +121,8 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                   };
                   return basePrices[commodity.name] || 100;
                 })()}
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={(period: string) => setSelectedPeriod(period as TimePeriod)}
               />
             </div>
 
