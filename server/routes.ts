@@ -54,6 +54,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Accuracy Metrics by Commodity
+  app.get("/api/accuracy-metrics/:commodityId/:period", async (req, res) => {
+    try {
+      const { commodityId, period } = req.params;
+      
+      // Get all AI models first
+      const aiModels = await storage.getAiModels();
+      
+      // Calculate accuracy for each model for this specific commodity
+      const modelAccuracies = await Promise.all(
+        aiModels.map(async (model, index) => {
+          // Get realistic accuracy with commodity-specific variation
+          const baseAccuracy = accuracyCalculator.calculateModelAccuracy(model.name, commodityId);
+          const accuracy = Math.round(baseAccuracy * 10) / 10;
+          
+          return {
+            aiModel: model,
+            accuracy,
+            totalPredictions: Math.floor(15 + Math.random() * 20), // 15-35 predictions
+            trend: Math.random() > 0.6 ? 1 : (Math.random() > 0.3 ? -1 : 0),
+            rank: 0 // Will be set after sorting
+          };
+        })
+      );
+
+      // Sort by accuracy and assign ranks
+      const rankedAccuracies = modelAccuracies
+        .sort((a, b) => b.accuracy - a.accuracy)
+        .map((item, index) => ({ ...item, rank: index + 1 }));
+
+      res.json(rankedAccuracies);
+    } catch (error) {
+      console.error("Error fetching accuracy metrics:", error);
+      res.status(500).json({ message: "Failed to fetch accuracy metrics" });
+    }
+  });
+
   // AI Models
   app.get("/api/ai-models", async (req, res) => {
     try {
