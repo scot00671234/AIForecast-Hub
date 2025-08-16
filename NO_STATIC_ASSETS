@@ -1,0 +1,2 @@
+# This file prevents static asset detection that might trigger Caddy
+# Node.js application only - no static file serving via Caddy

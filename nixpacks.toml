@@ -1,17 +1,37 @@
-# FORCE NODE.JS PROVIDER ONLY  
+# FORCE NODE.JS PROVIDER ONLY - ABSOLUTE NO CADDY - NUCLEAR OPTION
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
-NIXPACKS_NO_CADDY = "1"
+NIXPACKS_NO_CADDY = "true"
+DISABLE_CADDY = "true"
+NO_CADDY = "true"
+FORCE_NODE_ONLY = "true"
+NODE_PROVIDER_ONLY = "true"
+NIXPACKS_PROVIDER = "node"
+NIXPACKS_NO_STATIC = "true"
+NIXPACKS_NO_WEB_SERVER = "true"
+NIXPACKS_DISABLE_STATIC = "true"
+NO_STATIC_ASSETS = "true"
+STATIC_FILES = "false"
+WEB_SERVER = "false"
+CADDY_DISABLED = "true"
+FORCE_CUSTOM_START = "true"
 
 [phases.setup]
 nixPkgs = ["nodejs_20"]
+cmds = [
+    "echo 'NUCLEAR CADDY PREVENTION - Node.js only'",
+    "echo 'NO_CADDY=true' >> .env",
+    "echo 'NIXPACKS_PROVIDER=node' >> .env",
+    "echo 'DISABLE_CADDY=true' >> .env"
+]
+onlyIncludeFiles = ["package.json", "package-lock.json", "server/", "client/", "shared/", "nixpacks.toml", "Procfile", "runtime.txt"]
 
 [phases.install]
 dependsOn = ["setup"]
-cmds = ["npm ci"]
+cmds = ["npm ci --production", "echo 'Installing Node.js dependencies only'"]
 
 [phases.build]
 dependsOn = ["install"] 
@@ -19,3 +39,10 @@ cmds = ["npm run build", "npm prune --production"]
 
 [start]
 cmd = "npm start"
+
+[build]
+disableCaddy = true
+forceNodeOnly = true
+
+[staticAssets]
+enabled = false
