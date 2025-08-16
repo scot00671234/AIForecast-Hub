@@ -1,5 +1,8 @@
 {
   "providers": ["node"],
   "buildCommand": "npm run build",
-  "startCommand": "npm start"
+  "startCommand": "npm start",
+  "staticAssets": {
+    "enabled": false
+  }
 }

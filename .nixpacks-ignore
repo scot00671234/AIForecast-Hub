@@ -1,9 +1,0 @@
-# Ignore files that might trigger non-Node.js providers
-Caddyfile*
-caddy*
-nginx*
-apache*
-httpd*
-lighttpd*
-*.conf
-*.caddy

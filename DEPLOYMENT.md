@@ -35,7 +35,7 @@ DATABASE_URL=postgresql://username:password@host:port/database
 
 # Application (APP ENV)
 NODE_ENV=production
-PORT=5000
+PORT=3000
 ```
 
 ## Deployment Configuration
