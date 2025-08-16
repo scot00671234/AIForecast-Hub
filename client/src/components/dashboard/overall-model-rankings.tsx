@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import type { AiModel } from "@shared/schema";
 
@@ -22,39 +21,39 @@ export default function OverallModelRankings() {
     enabled: true,
   });
 
-  const getTrendIcon = (trend: number) => {
-    if (trend > 0) return <TrendingUp className="w-4 h-4 text-green-500" />;
-    if (trend < 0) return <TrendingDown className="w-4 h-4 text-red-500" />;
-    return <Minus className="w-4 h-4 text-muted-foreground" />;
-  };
-
-  const getRankNumber = (rank: number) => {
-    return <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>;
-  };
-
   if (isLoading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">Model Rankings</h2>
-          <div className="w-32 h-10 bg-muted rounded animate-pulse"></div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-9 w-32" />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Skeleton className="w-6 h-4" />
+                <Skeleton className="w-1.5 h-1.5 rounded-full" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="text-right">
+                <Skeleton className="h-5 w-12" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            </div>
           ))}
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (!rankings || rankings.length === 0) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">Model Rankings</h2>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-light text-foreground">Model Rankings</h2>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md font-light">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -65,25 +64,20 @@ export default function OverallModelRankings() {
           </Select>
         </div>
         
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 opacity-20">
-            <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-muted-foreground">
-              <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 10.31c5.16-.57 9-4.76 9-10.31V7l-10-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-muted-foreground mb-2">No ranking data available</h3>
-          <p className="text-sm text-muted-foreground">Start making predictions to see model rankings</p>
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground font-light">No ranking data available</p>
+          <p className="text-xs text-muted-foreground font-light">Start making predictions to see model rankings</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Model Rankings</h2>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-light text-foreground">Model Rankings</h2>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md font-light">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -98,43 +92,35 @@ export default function OverallModelRankings() {
         {rankings.map((ranking) => (
           <div 
             key={ranking.aiModel.id} 
-            className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 transition-colors"
+            className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200"
           >
-            {/* Left side: Rank and model info */}
-            <div className="flex items-center space-x-4">
-              {getRankNumber(ranking.rank)}
-              
-              <div className="flex items-center space-x-3">
-                <span 
-                  className={`w-4 h-4 rounded-full ${
-                    ranking.aiModel.name === 'Claude' ? 'bg-green-500' :
-                    ranking.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
-                    ranking.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
-                    'bg-gray-500'
-                  }`}
-                />
-                <div className="font-semibold text-foreground">{ranking.aiModel.name}</div>
-              </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-muted-foreground font-light">
+                #{ranking.rank}
+              </span>
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                ranking.aiModel.name === 'Claude' ? 'bg-green-500' :
+                ranking.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
+                ranking.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
+                'bg-gray-500'
+              }`}></div>
+              <span className="text-sm font-light text-foreground">{ranking.aiModel.name}</span>
             </div>
 
-            {/* Right side: Performance metrics */}
             <div className="text-right">
-              <div className="text-2xl font-bold text-foreground">
+              <div className="text-base font-light text-foreground">
                 {ranking.accuracy.toFixed(1)}%
               </div>
-              <div className="text-xs text-muted-foreground">Accuracy</div>
+              <div className="text-xs text-muted-foreground font-light">Accuracy</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Summary footer */}
-      <div className="mt-6 pt-4 border-t border-border/30">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Based on predictions across all commodities</span>
-          <span>Best performer: {rankings?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
-        </div>
+      <div className="flex items-center justify-between text-xs text-muted-foreground font-light pt-2 border-t border-border/20">
+        <span>Based on predictions across all commodities</span>
+        <span>Best performer: {rankings?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
       </div>
-    </Card>
+    </div>
   );
 }
