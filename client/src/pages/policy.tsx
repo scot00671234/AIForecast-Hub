@@ -8,29 +8,7 @@ import { MenuIcon, ArrowLeftIcon, AlertTriangleIcon } from "lucide-react";
 export default function Policy() {
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Minimal geometric background pattern */}
-      <div className="absolute inset-0 text-foreground pointer-events-none">
-        <svg className="w-full h-full object-cover opacity-40" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
-            </pattern>
-            <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{stopColor:"currentColor", stopOpacity:0.05}} />
-              <stop offset="50%" style={{stopColor:"currentColor", stopOpacity:0.02}} />
-              <stop offset="100%" style={{stopColor:"currentColor", stopOpacity:0.08}} />
-            </linearGradient>
-          </defs>
-          
-          <rect width="100%" height="100%" fill="url(#grid)" />
-          
-          <circle cx="150" cy="120" r="60" fill="url(#fadeGradient)" />
-          <circle cx="650" cy="480" r="80" fill="url(#fadeGradient)" />
-          
-          <polygon points="200,300 250,200 300,300" fill="currentColor" opacity="0.03" />
-          <polygon points="500,150 580,100 560,200" fill="currentColor" opacity="0.04" />
-        </svg>
-      </div>
+
 
       {/* Header */}
       <header className="absolute top-0 w-full z-50">
