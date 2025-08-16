@@ -45,4 +45,4 @@ disableCaddy = true
 forceNodeOnly = true
 
 [staticAssets]
-enabled = false
+enabled = "false"
