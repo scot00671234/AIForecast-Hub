@@ -70,24 +70,7 @@ export default function Landing() {
                 AIForecast Hub
               </span>
             </div>
-            <div className="flex items-center space-x-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <MenuIcon className="h-[1.2rem] w-[1.2rem]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link href="/blog">Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/policy">Policy</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
