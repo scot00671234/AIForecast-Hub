@@ -1,2 +1,0 @@
-# FORCE NIXPACKS ONLY - NO DOCKER
-# This file ensures deployment uses nixpacks instead of Docker

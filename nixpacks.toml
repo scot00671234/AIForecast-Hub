@@ -1,11 +1,11 @@
-# Minimal configuration to prevent all default file creation
+# CLEAN MINIMAL NODE.JS ONLY CONFIGURATION
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
 
-[phases.install]
+[phases.install] 
 cmds = ["npm ci --production=false"]
 
 [phases.build]
