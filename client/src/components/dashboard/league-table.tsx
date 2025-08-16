@@ -81,13 +81,13 @@ export default function LeagueTable() {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {leagueTable.map((entry, index) => {
-              // Get model color indicator
+              // Get model color indicator  
               const getModelColor = (modelName: string) => {
                 switch (modelName) {
                   case 'Claude': return 'bg-green-500';
-                  case 'ChatGPT': return 'bg-blue-500';
+                  case 'ChatGPT': return 'bg-blue-500'; 
                   case 'Deepseek': return 'bg-purple-500';
                   default: return 'bg-gray-500';
                 }
@@ -95,28 +95,28 @@ export default function LeagueTable() {
 
               return (
                 <div 
-                  key={entry.aiModel.id} 
-                  className="group flex items-center justify-between py-4 px-5 rounded-lg border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 hover:border-border/80"
+                  key={entry.aiModel.id}
+                  className="flex items-center justify-between py-3 hover:bg-muted/20 transition-colors duration-200 rounded-md px-2"
                   data-testid={`league-entry-${entry.rank}`}
                 >
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium text-muted-foreground min-w-[24px]">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-muted-foreground font-normal min-w-[20px]">
                       #{entry.rank}
                     </span>
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
-                      <span className="font-medium text-foreground" data-testid={`model-name-${entry.rank}`}>
+                    <div className="flex items-center space-x-2.5">
+                      <div className={`w-1.5 h-1.5 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
+                      <span className="text-sm font-normal text-foreground" data-testid={`model-name-${entry.rank}`}>
                         {entry.aiModel.name}
                       </span>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-foreground" 
+                    <div className="text-base font-normal text-foreground" 
                          data-testid={`accuracy-${entry.rank}`}>
                       {entry.accuracy.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-muted-foreground">Accuracy</div>
+                    <div className="text-xs text-muted-foreground font-normal">Accuracy</div>
                   </div>
                 </div>
               );
