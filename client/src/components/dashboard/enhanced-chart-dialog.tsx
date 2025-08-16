@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-import { TrendingUp, TrendingDown, Activity, BrainIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import ModelAccuracyRanking from "./model-accuracy-ranking";
-import type { ChartDataPoint, Commodity, AiModel, TimePeriod, LatestPrice } from "@shared/schema";
+import UnifiedChart from "./unified-chart";
+import type { Commodity, AiModel, TimePeriod, LatestPrice } from "@shared/schema";
 
 interface EnhancedChartDialogProps {
   isOpen: boolean;
@@ -38,32 +38,6 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     enabled: isOpen && !!commodity.id,
   });
 
-  const { data: chartData, isLoading } = useQuery<ChartDataPoint[]>({
-    queryKey: ["/api/commodities", commodity.id, "chart", "30"], // 30 days of data
-    enabled: isOpen && !!commodity.id,
-  });
-
-  const formattedData = useMemo(() => {
-    if (!chartData) return [];
-
-    return chartData.map(point => {
-      const formattedPoint: any = {
-        date: new Date(point.date).toLocaleDateString(),
-        actualPrice: point.actualPrice,
-      };
-
-      // Add prediction data for each AI model (if available)
-      if (aiModels) {
-        aiModels.forEach(model => {
-          if (point.predictions && point.predictions[model.id]) {
-            formattedPoint[model.name] = point.predictions[model.id];
-          }
-        });
-      }
-
-      return formattedPoint;
-    });
-  }, [chartData, aiModels]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -162,84 +136,14 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
             ))}
           </div>
 
-          {/* Chart Interface */}
+          {/* Professional Trading Chart */}
           <div className="space-y-6">
-            {/* Main Chart */}
             <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm p-6">
-              <div className="h-96 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={formattedData}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis 
-                      dataKey="date" 
-                      className="text-xs"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `$${value}`}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(8px)',
-                      }}
-                      labelStyle={{ color: 'var(--foreground)' }}
-                      formatter={(value: any, name: string) => {
-                        if (name === 'Actual Price') {
-                          return [`$${value?.toFixed(2)}`, 'Actual (Yahoo Finance)'];
-                        }
-                        return [`$${value?.toFixed(2)}`, `${name} Prediction`];
-                      }}
-                    />
-                    <Legend />
-                    
-                    {/* Actual Price Line with Enhanced Dots */}
-                    <Line
-                      type="monotone"
-                      dataKey="actualPrice"
-                      stroke="var(--foreground)"
-                      strokeWidth={3}
-                      dot={{ 
-                        fill: 'var(--foreground)', 
-                        strokeWidth: 2, 
-                        r: 4,
-                      }}
-                      activeDot={{ 
-                        r: 8, 
-                        fill: 'var(--primary)',
-                        stroke: 'var(--primary-foreground)',
-                        strokeWidth: 3,
-                      }}
-                      name="Actual Price"
-                    />
-                    
-                    {/* AI Model Prediction Lines */}
-                    {aiModels?.map(model => (
-                      <Line
-                        key={model.id}
-                        type="monotone"
-                        dataKey={model.name}
-                        stroke={model.color}
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ fill: model.color, strokeWidth: 2, r: 3 }}
-                        name={model.name}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              
-              {/* Chart Status */}
-              {formattedData.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>Loading chart data...</p>
-                </div>
-              )}
+              <UnifiedChart 
+                commodityId={commodity.id} 
+                period={selectedPeriod} 
+                height={500}
+              />
             </div>
 
             {/* Model Accuracy Rankings */}
