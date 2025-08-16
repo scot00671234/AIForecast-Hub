@@ -40,15 +40,19 @@ PORT=5000
 
 ## Deployment Configuration
 
-**DEPLOYMENT READY: Multiple Options Available**
+**NUCLEAR CADDY ELIMINATION: Complete Node.js-Only Setup**
 
-The app includes these deployment files for maximum compatibility:
-- `nixpacks.toml` - Clean nixpacks configuration for Node.js
-- `Dockerfile` - Standard Docker deployment option
-- `Procfile` - Heroku-style process definition
+The app includes multiple failsafe files to FORCE Node.js detection and prevent Caddy:
+- `nixpacks.toml` - Explicit Node.js provider with Caddy/nginx disabled
+- `nixpacks.json` - Additional provider enforcement
+- `.nixpacks` - Node.js detection markers
+- `.nixpacks-ignore` - Blocks web server config detection
+- `.nixpacks.env` - Environment forcing Node.js provider
+- `Procfile` - Node.js process definition
+- `Dockerfile` - Fallback Docker deployment option
 - `.buildpacks` - Explicit Node.js buildpack specification  
 - `runtime.txt` - Runtime version specification
-- `.dockerignore` - Optimized file exclusions
+- `.dockerignore` - Blocks all Caddy-related files
 
 **Deployment Options:**
 1. **Nixpacks** (recommended for dokploy): Uses nixpacks.toml

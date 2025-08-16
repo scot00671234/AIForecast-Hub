@@ -1,9 +1,27 @@
+# FORCE NODE.JS DETECTION - NO CADDY
+[providers]
+node = true
+
 [variables]
 NODE_ENV = "production"
+PORT = "5000"
+NIXPACKS_NODE_VERSION = "20"
+NIXPACKS_NPM_VERSION = "9"
+
+# Explicitly disable other providers
+[providers.caddy]
+enabled = false
+
+[providers.nginx]
+enabled = false
+
+[providers.apache]
+enabled = false
 
 [phases.setup]
 dependsOn = []
 nixPkgs = ["nodejs_20", "npm-9_x"]
+cmds = ["echo 'Forcing Node.js detection - NO CADDY'"]
 
 [phases.install]
 dependsOn = ["setup"]
@@ -15,3 +33,4 @@ cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
+runImage = "node:20-alpine"
