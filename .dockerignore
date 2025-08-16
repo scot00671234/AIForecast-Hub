@@ -13,14 +13,19 @@ docs
 .replit
 replit.md
 
-# Block any Caddy-related files
-Caddyfile
+# Block ALL Caddy files completely
+Caddyfile*
 caddy*
 *.caddy
 caddy.json
 caddy.conf
 caddy.config
 /etc/caddy*
+
+# Block all nixpacks files
+nixpacks.toml
+nixpacks.json
+.nixpacks*
 
 # Block other potential conflicting files
 docker-compose.yml
