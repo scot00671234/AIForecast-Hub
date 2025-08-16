@@ -104,11 +104,11 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
       const predictionData: { [modelName: string]: ChartDataPoint[] } = {};
 
       chartData.forEach((item: any) => {
-        const timeStamp = new Date(item.date).getTime() / 1000 as Time; // Convert to Unix timestamp
+        const timeStamp = Math.floor(new Date(item.date).getTime() / 1000); // Convert to Unix timestamp in seconds
 
         if (item.type === 'historical' && item.actualPrice !== null) {
           historicalData.push({
-            time: timeStamp,
+            time: timeStamp as Time,
             value: item.actualPrice,
           });
         } else if (item.type === 'prediction' && item.predictions) {
@@ -117,7 +117,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
               predictionData[modelName] = [];
             }
             predictionData[modelName].push({
-              time: timeStamp,
+              time: timeStamp as Time,
               value: price as number,
             });
           });
@@ -131,13 +131,10 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         const historicalSeries = chart.addSeries(LineSeries, {
           color: theme === 'dark' ? '#ffffff' : '#000000',
           lineWidth: 3,
-          lineStyle: 0, // Solid line
-          title: 'Actual Price',
-          priceLineVisible: false,
-          lastValueVisible: true,
+          title: 'Actual Price'
         });
         const sortedHistoricalData = historicalData.sort((a, b) => (a.time as number) - (b.time as number));
-        console.log('Setting historical data:', sortedHistoricalData.length, 'points');
+        console.log('Setting historical data:', sortedHistoricalData.length, 'points', sortedHistoricalData.slice(0, 2));
         historicalSeries.setData(sortedHistoricalData);
       }
 
@@ -157,13 +154,11 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           const predictionSeries = chart.addSeries(LineSeries, {
             color: color,
             lineWidth: 2,
-            lineStyle: 1, // Dotted line for predictions
-            title: `${modelName} Prediction`,
-            priceLineVisible: false,
-            lastValueVisible: false,
+            lineStyle: 2, // Dotted line for predictions
+            title: `${modelName} Prediction`
           });
           const sortedPredictionData = data.sort((a, b) => (a.time as number) - (b.time as number));
-          console.log(`Setting ${modelName} prediction data:`, sortedPredictionData.length, 'points');
+          console.log(`Setting ${modelName} prediction data:`, sortedPredictionData.length, 'points', sortedPredictionData.slice(0, 2));
           predictionSeries.setData(sortedPredictionData);
         }
       });
