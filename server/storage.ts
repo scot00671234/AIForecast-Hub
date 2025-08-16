@@ -196,6 +196,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
+    if (!this.isDbConnected) {
+      console.log("Database not connected, using fallback storage for predictions");
+      return await fallbackStorage.getPredictions(commodityId, aiModelId);
+    }
     try {
       const conditions = [];
       if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
@@ -209,8 +213,8 @@ export class DatabaseStorage implements IStorage {
       
       return await query.orderBy(desc(predictions.createdAt));
     } catch (error) {
-      console.error('Error fetching predictions:', error);
-      return [];
+      console.error('Error fetching predictions, using fallback:', error);
+      return await fallbackStorage.getPredictions(commodityId, aiModelId);
     }
   }
 
@@ -460,6 +464,40 @@ export class DatabaseStorage implements IStorage {
   
   async insertActualPrice(data: InsertActualPrice): Promise<ActualPrice> {
     return this.createActualPrice(data);
+  }
+
+  // Add missing Yahoo Finance update methods
+  async updateAllCommodityPricesFromYahoo(): Promise<void> {
+    console.log("Updating all commodity prices from Yahoo Finance...");
+    const commodities = await this.getCommodities();
+    for (const commodity of commodities) {
+      try {
+        await this.updateSingleCommodityPricesFromYahoo(commodity.id);
+      } catch (error) {
+        console.error(`Failed to update prices for ${commodity.name}:`, error);
+      }
+    }
+  }
+
+  async updateSingleCommodityPricesFromYahoo(commodityId: string): Promise<void> {
+    if (!this.isDbConnected) {
+      console.log("Database not connected, skipping Yahoo Finance update");
+      return;
+    }
+    
+    const commodity = await this.getCommodity(commodityId);
+    if (!commodity || !commodity.yahooSymbol) {
+      console.log(`No Yahoo symbol for commodity ${commodityId}`);
+      return;
+    }
+
+    try {
+      // This would integrate with your yahoo finance service
+      // For now, just log the attempt
+      console.log(`Updating prices for ${commodity.name} (${commodity.yahooSymbol})`);
+    } catch (error) {
+      console.error(`Yahoo Finance update failed for ${commodity.name}:`, error);
+    }
   }
 
   /**

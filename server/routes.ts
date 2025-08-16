@@ -237,14 +237,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Get AI predictions for future dates
+      // Get AI predictions for historical overlay and future dates
       try {
         const predictions = await storage.getPredictions(commodityId);
-        const futurePredictions = predictions.filter(p => new Date(p.predictionDate) > new Date());
+        console.log(`Found ${predictions.length} predictions for ${commodityId}`);
         
-        // Group predictions by date
-        const predictionsByDate = futurePredictions.reduce((acc, pred) => {
-          const dateKey = pred.predictionDate.toISOString().split('T')[0];
+        // Get all predictions for chart overlay (both historical and future)
+        const allPredictions = predictions;
+        
+        // Group predictions by target date (the date they predict for)
+        const predictionsByDate = allPredictions.reduce((acc, pred) => {
+          const dateKey = pred.targetDate.toISOString().split('T')[0];
           if (!acc[dateKey]) {
             acc[dateKey] = {};
           }
@@ -264,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         });
       } catch (error) {
-        console.log("No AI predictions available:", error);
+        console.error("Error fetching predictions:", error);
       }
 
       console.log(`Returning ${chartData.length} chart data points for ${commodityId}`);

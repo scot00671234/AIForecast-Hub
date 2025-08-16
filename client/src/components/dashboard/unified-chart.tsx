@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, LineStyle } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, LineStyle, LineData, Time } from 'lightweight-charts';
 import { useTheme } from '@/components/theme-provider';
 import { useQuery } from '@tanstack/react-query';
 
@@ -10,7 +10,7 @@ interface UnifiedChartProps {
 }
 
 interface ChartDataPoint {
-  time: number;
+  time: Time;
   value: number;
 }
 
@@ -98,13 +98,13 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
 
     // Process and add data
     console.log('Chart data received:', chartData);
-    if (chartData && chartData.chartData && Array.isArray(chartData.chartData) && chartData.chartData.length > 0) {
+    if (chartData && Array.isArray(chartData) && chartData.length > 0) {
       // Separate historical and prediction data
       const historicalData: ChartDataPoint[] = [];
       const predictionData: { [modelName: string]: ChartDataPoint[] } = {};
 
-      chartData.chartData.forEach((item: any) => {
-        const timeStamp = new Date(item.date).getTime() / 1000; // Convert to Unix timestamp
+      chartData.forEach((item: any) => {
+        const timeStamp = new Date(item.date).getTime() / 1000 as Time; // Convert to Unix timestamp
 
         if (item.type === 'historical' && item.actualPrice !== null) {
           historicalData.push({
@@ -126,7 +126,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
 
       // Add historical data series (main bold black line)
       if (historicalData.length > 0) {
-        const historicalSeries = chart.addLineSeries({
+        const historicalSeries = chart.addSeries('Line', {
           color: theme === 'dark' ? '#ffffff' : '#000000',
           lineWidth: 3,
           lineStyle: LineStyle.Solid,
@@ -134,7 +134,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           priceLineVisible: false,
           lastValueVisible: true,
         });
-        historicalSeries.setData(historicalData.sort((a, b) => a.time - b.time));
+        historicalSeries.setData(historicalData.sort((a, b) => (a.time as number) - (b.time as number)) as LineData[]);
       }
 
       // Add prediction series for each AI model with distinct colors and dotted style
@@ -148,7 +148,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
       Object.entries(predictionData).forEach(([modelName, data]) => {
         if (data.length > 0) {
           const color = modelColors[modelName as keyof typeof modelColors] || '#6b7280';
-          const predictionSeries = chart.addLineSeries({
+          const predictionSeries = chart.addSeries('Line', {
             color: color,
             lineWidth: 2,
             lineStyle: LineStyle.Dotted, // Dotted line for predictions like in your design
@@ -156,7 +156,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
             priceLineVisible: false,
             lastValueVisible: false,
           });
-          predictionSeries.setData(data.sort((a, b) => a.time - b.time));
+          predictionSeries.setData(data.sort((a, b) => (a.time as number) - (b.time as number)) as LineData[]);
         }
       });
     } else {
