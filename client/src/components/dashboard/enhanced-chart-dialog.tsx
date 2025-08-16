@@ -106,8 +106,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
         <div className="space-y-6 py-8">
           {/* Unified Chart Interface */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-foreground tracking-wide">Price Movement & AI Predictions</h3>
+            <div className="flex items-center justify-end">
               
               {/* Minimal Time Period Controls */}
               <div className="flex items-center space-x-1 bg-muted/30 rounded-lg p-1 border border-border/40">

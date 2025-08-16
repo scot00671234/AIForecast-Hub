@@ -221,10 +221,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">
-          Price Analysis & Predictions
-        </h3>
+      <div className="mb-4 flex items-center justify-end">
         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-0.5 bg-blue-500"></div>
