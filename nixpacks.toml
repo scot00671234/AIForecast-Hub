@@ -1,11 +1,6 @@
 [variables]
 NODE_ENV = "production"
 
-[providers]
-# Force Node.js provider, disable all other auto-detection
-nodejs = true
-caddy = false
-
 [phases.setup]
 dependsOn = []
 nixPkgs = ["nodejs_20", "npm-9_x"]
@@ -20,16 +15,3 @@ cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
-
-# Explicitly disable Caddy and other providers
-[providers.caddy]
-enabled = false
-
-[providers.go]
-enabled = false
-
-[providers.php]
-enabled = false
-
-[providers.python]
-enabled = false

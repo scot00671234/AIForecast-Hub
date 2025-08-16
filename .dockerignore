@@ -23,9 +23,7 @@ caddy.config
 /etc/caddy*
 
 # Block other potential conflicting files
-Dockerfile
 docker-compose.yml
-.dockerignore
 nginx.conf
 apache.conf
 httpd.conf
