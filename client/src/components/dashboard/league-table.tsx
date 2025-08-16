@@ -19,12 +19,12 @@ export default function LeagueTable() {
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-32" />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Skeleton className="w-6 h-4" />
-                <Skeleton className="w-2 h-2 rounded-full" />
+                <Skeleton className="w-1.5 h-1.5 rounded-full" />
                 <Skeleton className="h-4 w-16" />
               </div>
               <div className="text-right">
@@ -41,11 +41,11 @@ export default function LeagueTable() {
   return (
     <div className="space-y-4" data-testid="league-table">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-foreground">
+        <h2 className="text-lg font-light text-foreground">
           Model Rankings
         </h2>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-          <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md" data-testid="select-period">
+          <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md font-light" data-testid="select-period">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -60,11 +60,11 @@ export default function LeagueTable() {
       
       {!leagueTable || leagueTable.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">No ranking data available</p>
-          <p className="text-xs text-muted-foreground">Start making predictions to see model rankings</p>
+          <p className="text-sm text-muted-foreground font-light">No ranking data available</p>
+          <p className="text-xs text-muted-foreground font-light">Start making predictions to see model rankings</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {leagueTable.map((entry, index) => {
             // Get model color indicator  
             const getModelColor = (modelName: string) => {
@@ -83,21 +83,21 @@ export default function LeagueTable() {
                 data-testid={`league-entry-${entry.rank}`}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-muted-foreground font-normal">
+                  <span className="text-sm text-muted-foreground font-light">
                     #{entry.rank}
                   </span>
-                  <div className={`w-2 h-2 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
-                  <span className="text-sm font-normal text-foreground" data-testid={`model-name-${entry.rank}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${getModelColor(entry.aiModel.name)}`}></div>
+                  <span className="text-sm font-light text-foreground" data-testid={`model-name-${entry.rank}`}>
                     {entry.aiModel.name}
                   </span>
                 </div>
                 
                 <div className="text-right">
-                  <div className="text-base font-medium text-foreground" 
+                  <div className="text-base font-light text-foreground" 
                        data-testid={`accuracy-${entry.rank}`}>
                     {entry.accuracy.toFixed(1)}%
                   </div>
-                  <div className="text-xs text-muted-foreground">Accuracy</div>
+                  <div className="text-xs text-muted-foreground font-light">Accuracy</div>
                 </div>
               </div>
             );
@@ -105,7 +105,7 @@ export default function LeagueTable() {
         </div>
       )}
       
-      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/20">
+      <div className="flex items-center justify-between text-xs text-muted-foreground font-light pt-2 border-t border-border/20">
         <span>Based on predictions across all commodities</span>
         <span>Best performer: {leagueTable?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
       </div>
