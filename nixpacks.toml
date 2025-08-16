@@ -9,7 +9,7 @@ PORT = "3000"
 cmds = ["npm ci --production=false"]
 
 [phases.build]
-cmds = ["npm run build", "node fix-build.js"]
+cmds = ["npm run build", "npm run db:push", "node fix-build.js"]
 
 [start]
 cmd = "npm start"

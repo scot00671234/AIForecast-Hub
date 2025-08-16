@@ -9,7 +9,21 @@ const distIndexPath = path.resolve('dist', 'index.js');
 if (fs.existsSync(distIndexPath)) {
   let content = fs.readFileSync(distIndexPath, 'utf8');
   
-  // Replace import.meta.dirname with process.cwd() in the bundled code
+  // Fix path resolution for production - handle multiple patterns
+  
+  // First: Fix the serveStatic function specifically - it looks for 'public' directory
+  content = content.replace(
+    /path\d*\.resolve\(path\.dirname\(new URL\(import\.meta\.url\)\.pathname\),\s*['"]public['"]\)/g,
+    'path.resolve(process.cwd(), "dist", "public")'
+  );
+  
+  // Also handle direct import.meta.dirname patterns
+  content = content.replace(
+    /path\d*\.resolve\(import\.meta\.dirname,\s*['"]public['"]\)/g,
+    'path.resolve(process.cwd(), "dist", "public")'
+  );
+  
+  // Replace any remaining import.meta.dirname with process.cwd() for bundled code
   content = content.replace(
     /import\.meta\.dirname/g,
     'process.cwd()'

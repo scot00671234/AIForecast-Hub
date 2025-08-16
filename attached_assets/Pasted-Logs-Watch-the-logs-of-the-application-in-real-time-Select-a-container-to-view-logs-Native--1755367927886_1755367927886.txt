@@ -1,0 +1,79 @@
+Logs
+Watch the logs of the application in real time
+
+Select a container to view logs
+Native
+
+
+aiforecast-hub-app-ywa0gl.1.q7ew0ee3jmaopufnv2nqbjy3c (40124babb86b) 
+Search logs...
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Fetching data for Crude Oil (CL=F)
+Error initializing default data: error: relation "ai_models" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.initializeDefaultData (file:///app/dist/index.js:692:30) {
+length: 108,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '60',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+Database connected successfully
+Database connection failed, using fallback storage: error: relation "ai_models" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.testConnection (file:///app/dist/index.js:682:7) {
+length: 108,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '60',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+Fetching data for Gold (GC=F)
+Fetching data for Natural Gas (NG=F)
+Fetching data for Copper (HG=F)
+Fetching data for Silver (SI=F)
+Fetching data for Coffee (KC=F)
+Fetching data for Sugar (SB=F)
+Fetching data for Corn (ZC=F)
+Fetching data for Soybeans (ZS=F)
+Fetching data for Cotton (CT=F)
+Initialized predictions for 10 commodities
+Prediction scheduler started - will run every Monday at 2 AM
+file:///app/dist/index.js:2897
+throw new Error(
+^
+Error: Could not find the build directory: /app/public, make sure to build the client first
+at serveStatic (file:///app/dist/index.js:2897:11)
+at file:///app/dist/index.js:2946:5
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Node.js v18.20.5
