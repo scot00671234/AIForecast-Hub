@@ -22,10 +22,9 @@ caddy.conf
 caddy.config
 /etc/caddy*
 
-# Block all nixpacks files
-nixpacks.toml
+# Allow nixpacks configuration but block others
 nixpacks.json
-.nixpacks*
+.nixpacks.env
 
 # Block other potential conflicting files
 docker-compose.yml

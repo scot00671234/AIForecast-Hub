@@ -1,0 +1,7 @@
+# Prevent auto-detection of web servers
+caddy*
+Caddyfile*
+nginx*
+apache*
+httpd*
+traefik*
