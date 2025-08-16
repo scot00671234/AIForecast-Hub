@@ -11,10 +11,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 export const pool = new Pool({
-  user: 'runner',
-  host: '/run/postgresql',
-  database: 'commoditydb',
-  port: 5432,
+  connectionString: databaseUrl,
   max: 10,
   idleTimeoutMillis: 10000,
   connectionTimeoutMillis: 30000,
