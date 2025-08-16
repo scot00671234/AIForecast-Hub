@@ -4,10 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import StatsOverview from "@/components/dashboard/stats-overview";
-import LeagueTable from "@/components/dashboard/league-table";
+import OverallModelRankings from "@/components/dashboard/overall-model-rankings";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
-import { FuturePredictionsChart } from "@/components/dashboard/future-predictions-chart";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
@@ -144,8 +142,8 @@ export default function Dashboard() {
         </section>
 
         <div className="space-y-20">
-          {/* League Table */}
-          <LeagueTable />
+          {/* Overall Model Rankings */}
+          <OverallModelRankings />
           
           {/* All Commodities View */}
           <AllCommoditiesView filteredCommodities={searchQuery ? filteredCommodities : undefined} />

@@ -62,6 +62,17 @@ Preferred communication style: Simple, everyday language.
 - **Development Experience**: Hot reload, TypeScript checking, and runtime error modals
 
 ### Recent Changes (August 2025)
+- **Overall Model Rankings Dashboard (August 16, 2025)**: Added comprehensive model performance rankings to main dashboard
+  - **Clean Minimalist Design**: Replaced league table with streamlined ranking component showing overall AI model accuracy across all commodities
+  - **Real-Time Performance Metrics**: Displays accuracy percentages, prediction counts, and trend indicators for each AI model
+  - **Period Filtering**: Users can view rankings for 7-day, 30-day, or 90-day periods
+  - **Visual Consistency**: Matches UI theme with proper color coding (Claude green, ChatGPT blue, Deepseek purple)
+  - **Data-Driven Rankings**: Based on actual prediction accuracy calculations from database storage
+- **Enhanced Chart Visualization (August 16, 2025)**: Updated commodity price charts with professional styling
+  - **Bold Actual Price Line**: Yahoo Finance data displayed as prominent black/white line based on theme
+  - **AI Prediction Overlays**: Dotted colored lines for each AI model (Claude green, ChatGPT blue, Deepseek purple)
+  - **Professional Legend**: Clear chart header with model legend and data source attribution
+  - **Commodity-Specific Rankings**: Individual ranking components for each commodity chart dialog
 - **VPS Deployment Configuration (August 16, 2025)**: Prepared application for VPS deployment via nixpacks on dokploy
   - **NUCLEAR CADDY ELIMINATION**: Complete removal of Caddy detection with multiple failsafes
   - **Forced Node.js Detection**: nixpacks.toml, .nixpacks, Procfile, .buildpacks, runtime.txt all enforce Node.js
