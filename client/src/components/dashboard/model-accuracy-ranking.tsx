@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { AiModel, Commodity } from "@shared/schema";
 
 interface ModelAccuracyRankingProps {
@@ -51,28 +49,25 @@ export default function ModelAccuracyRanking({
 
   const rankingData = accuracyData || generateMockAccuracy();
 
-  const getRankNumber = (rank: number) => {
-    return <span className="text-sm font-semibold text-muted-foreground">#{rank}</span>;
-  };
-
-  const getTrendIcon = (trend: number) => {
-    if (trend > 0) return <TrendingUp className="w-3 h-3 text-green-500" />;
-    if (trend < 0) return <TrendingDown className="w-3 h-3 text-red-500" />;
-    return <Minus className="w-3 h-3 text-muted-foreground" />;
-  };
-
-
-
   if (isLoading) {
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground">Model Performance Rankings</h3>
-          <div className="text-xs text-muted-foreground">for {commodity.name}</div>
+          <h3 className="text-sm font-light text-foreground">Model Performance Rankings</h3>
+          <div className="text-xs text-muted-foreground font-light">for {commodity.name}</div>
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-1.5 h-1.5 bg-muted rounded-full"></div>
+                <div className="h-4 w-16 bg-muted rounded"></div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="h-4 w-12 bg-muted rounded"></div>
+                <div className="h-4 w-6 bg-muted rounded"></div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -82,35 +77,30 @@ export default function ModelAccuracyRanking({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-foreground">Model Performance Rankings</h3>
-        <div className="text-sm text-muted-foreground">for {commodity.name}</div>
+        <h3 className="text-sm font-light text-foreground">Model Performance Rankings</h3>
+        <div className="text-xs text-muted-foreground font-light">for {commodity.name}</div>
       </div>
       
       <div className="space-y-2">
         {rankingData.map((data, index) => (
-          <div key={data.aiModel.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-card/50 border border-border/30 hover:bg-card/70 transition-colors">
-            {/* Left side: Model info */}
+          <div key={data.aiModel.id} className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
             <div className="flex items-center space-x-3">
-              <span 
-                className={`w-3 h-3 rounded-full ${
-                  data.aiModel.name === 'Claude' ? 'bg-green-500' :
-                  data.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
-                  data.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
-                  'bg-gray-500'
-                }`}
-              />
-              <span className="font-medium text-foreground">
+              <div className={`w-1.5 h-1.5 rounded-full ${
+                data.aiModel.name === 'Claude' ? 'bg-green-500' :
+                data.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
+                data.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
+                'bg-gray-500'
+              }`}></div>
+              <span className="text-sm font-light text-foreground">
                 {data.aiModel.name}
               </span>
             </div>
 
-            {/* Right side: Performance and rank */}
-            <div className="flex items-center space-x-4">
-              <span className="font-medium text-foreground">
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-light text-foreground">
                 {data.accuracy}%
               </span>
-              
-              {getRankNumber(data.rank)}
+              <span className="text-xs font-light text-muted-foreground">#{data.rank}</span>
             </div>
           </div>
         ))}
