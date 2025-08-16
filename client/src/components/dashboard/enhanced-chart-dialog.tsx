@@ -33,7 +33,7 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
 
 
 export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiModels }: EnhancedChartDialogProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("6mo");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("3mo");
 
   const { data: latestPrice } = useQuery<LatestPrice>({
     queryKey: ["/api/commodities", commodity.id, "latest-price"],

@@ -279,7 +279,6 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
       {/* Chart Footer */}
       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
         <span>Data from Yahoo Finance • Updated {new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
-        <span>Use mouse wheel to zoom • Drag to pan</span>
       </div>
     </div>
   );
