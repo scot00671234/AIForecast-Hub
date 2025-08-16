@@ -163,16 +163,7 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
               </div>
             </div>
 
-            {/* Consensus and Market Info */}
-            <div className="pt-2 border-t border-border">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Market Status</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Live</span>
-                </div>
-              </div>
-            </div>
+
           </div>
         ) : (
           <div className="space-y-2">
@@ -184,7 +175,7 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
         
         <div className="pt-2 border-t border-border">
           <p className="text-xs text-muted-foreground text-center">
-            Real-time AI Predictions • Click for detailed analysis
+            Click for detailed analysis
           </p>
         </div>
       </CardContent>
