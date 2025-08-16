@@ -75,7 +75,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
             <div className="space-y-4">
               <DialogTitle className="text-2xl md:text-3xl font-normal tracking-wide flex items-center space-x-3">
                 {/* Triangle icon matching the logo */}
-                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-primary"></div>
+                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-black dark:border-b-white"></div>
                 <span>{commodity.name} Price Analysis</span>
               </DialogTitle>
               <div className="flex items-center space-x-8">
