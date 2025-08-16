@@ -1,12 +1,5 @@
 {
-  "providers": {
-    "node": true,
-    "caddy": false,
-    "nginx": false,
-    "apache": false
-  },
+  "providers": ["node"],
   "buildCommand": "npm run build",
-  "startCommand": "npm start",
-  "nodeVersion": "20",
-  "npmVersion": "9"
+  "startCommand": "npm start"
 }

@@ -1,4 +1,1 @@
-# FORCE NODE.JS PROVIDER - DISABLE CADDY/NGINX
 nodejs
-node
-package.json
