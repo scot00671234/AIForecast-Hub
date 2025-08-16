@@ -77,19 +77,25 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
       return Math.abs(hash);
     };
 
-    // Generate mock data that stays consistent across all time periods
+    // Generate mock data that stays completely consistent across all time periods
     const generateMockData = (startDate: Date, days: number, basePrice: number, volatility: number = 0.02) => {
       const data = [];
       const seed = createSeed(commodityName, 'base'); // Same seed regardless of period
       const rng = seededRandom(seed);
       
-      // Generate a large dataset (5 years) and then slice what we need
+      // Always generate from a fixed reference point (5 years ago from today)
+      const referenceDate = new Date();
+      referenceDate.setFullYear(referenceDate.getFullYear() - 5);
+      
+      // Generate complete price history from reference date
       const maxDays = 1825; // 5 years
-      const allPrices = [];
+      const allPricesWithDates = [];
       let currentPrice = basePrice;
       
-      // Generate complete price history deterministically
       for (let i = 0; i < maxDays; i++) {
+        const date = new Date(referenceDate);
+        date.setDate(date.getDate() + i);
+        
         const change = (rng() - 0.5) * volatility * currentPrice;
         currentPrice += change;
         
@@ -97,18 +103,31 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
         const trend = Math.sin(i / 10) * 0.001 * currentPrice;
         currentPrice += trend;
         
-        allPrices.push(parseFloat(currentPrice.toFixed(2)));
+        allPricesWithDates.push({
+          date: new Date(date),
+          price: parseFloat(currentPrice.toFixed(2))
+        });
       }
       
-      // Now slice the data we need for this time period
-      const startIndex = Math.max(0, maxDays - days);
+      // Now find the data that matches our requested time range
+      const endDate = new Date();
+      const actualStartDate = new Date(endDate);
+      actualStartDate.setDate(actualStartDate.getDate() - days);
+      
       for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
+        const targetDate = new Date(actualStartDate);
+        targetDate.setDate(targetDate.getDate() + i);
+        
+        // Find closest price in our generated data
+        const closestPriceData = allPricesWithDates.reduce((closest, current) => {
+          const currentDiff = Math.abs(current.date.getTime() - targetDate.getTime());
+          const closestDiff = Math.abs(closest.date.getTime() - targetDate.getTime());
+          return currentDiff < closestDiff ? current : closest;
+        });
         
         data.push({
-          time: Math.floor(date.getTime() / 1000) as Time,
-          value: allPrices[startIndex + i] || basePrice
+          time: Math.floor(targetDate.getTime() / 1000) as Time,
+          value: closestPriceData.price
         });
       }
       
@@ -167,30 +186,36 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
     });
     actualSeries.setData(actualData);
 
-    // Add Claude predictions (green dotted line)
+    // Add Claude predictions (green dotted line) - no visible markers by default
     const claudeSeries = chart.addSeries(LineSeries, {
       color: '#22c55e',
       lineWidth: 2,
       lineStyle: 2,
       title: 'Claude Prediction',
+      priceLineVisible: false,  // Hide price line labels
+      lastValueVisible: false,  // Hide last value labels
     });
     claudeSeries.setData(claudeData);
 
-    // Add ChatGPT predictions (blue dotted line)
+    // Add ChatGPT predictions (blue dotted line) - no visible markers by default
     const chatgptSeries = chart.addSeries(LineSeries, {
       color: '#3b82f6',
       lineWidth: 2,
       lineStyle: 2,
       title: 'ChatGPT Prediction',
+      priceLineVisible: false,  // Hide price line labels
+      lastValueVisible: false,  // Hide last value labels
     });
     chatgptSeries.setData(chatgptData);
 
-    // Add Deepseek predictions (purple dotted line)
+    // Add Deepseek predictions (purple dotted line) - no visible markers by default
     const deepseekSeries = chart.addSeries(LineSeries, {
       color: '#8b5cf6',
       lineWidth: 2,
       lineStyle: 2,
       title: 'Deepseek Prediction',
+      priceLineVisible: false,  // Hide price line labels
+      lastValueVisible: false,  // Hide last value labels
     });
     deepseekSeries.setData(deepseekData);
 
