@@ -1,11 +1,10 @@
-# PROFESSIONAL NODE.JS DEPLOYMENT - ZERO WEB SERVERS
+# FORCE NODE.JS - ELIMINATE ALL WEB SERVERS
 providers = ["node"]
 
-# Nuclear Caddy prevention
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
-# Disable ALL static site detection
+# Nuclear Caddy elimination
 NIXPACKS_NO_CADDY = "1"
 NIXPACKS_NO_STATIC_SITE = "1"
 NIXPACKS_NO_STATIC = "1"
@@ -13,7 +12,6 @@ NIXPACKS_DISABLE_STATIC = "1"
 NO_STATIC_ASSETS = "1"
 DISABLE_CADDY = "true"
 NO_CADDY = "true"
-FORCE_NODE_ONLY = "true"
 
 [phases.install]
 cmds = ["npm ci --production=false"]
@@ -21,10 +19,8 @@ cmds = ["npm ci --production=false"]
 [phases.build]
 cmds = [
   "npm run build",
-  "node fix-build.js",
-  "chmod +x start.sh",
-  "rm -rf dist/public/*.html"
+  "node fix-build.js"
 ]
 
 [start]
-cmd = "./start.sh"
+cmd = "node dist/index.js"
