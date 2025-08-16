@@ -24,8 +24,6 @@ import {
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { fallbackStorage } from "./services/fallbackStorage";
-import { HistoricalPredictionGenerator } from "./services/historicalPredictionGenerator";
 
 export interface IStorage {
   // AI Models
@@ -70,7 +68,6 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   private isDbConnected = false;
-  private historicalGenerator = new HistoricalPredictionGenerator();
 
   constructor() {
     this.testConnection();
@@ -83,9 +80,9 @@ export class DatabaseStorage implements IStorage {
       this.isDbConnected = true;
       console.log("Database connection successful");
     } catch (error) {
-      console.error("Database connection failed:", error);
+      console.error("Database connection failed:", (error as Error).message);
       this.isDbConnected = false;
-      throw new Error(`Database connection required for production deployment: ${error.message}`);
+      throw new Error(`Database connection required for production deployment: ${(error as Error).message}`);
     }
   }
 
@@ -137,11 +134,8 @@ export class DatabaseStorage implements IStorage {
       ];
 
       await db.insert(commodities).values(defaultCommodities);
-
-      // Initialize historical predictions for the past year
-      await this.initializeHistoricalPredictions();
       
-      console.log("Default data and historical predictions initialized successfully");
+      console.log("Default data initialized successfully");
     } catch (error) {
       console.error("Error initializing default data:", error);
     }
@@ -149,14 +143,9 @@ export class DatabaseStorage implements IStorage {
 
   async getAiModels(): Promise<AiModel[]> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getAiModels();
+      throw new Error("Database connection required");
     }
-    try {
-      return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
-    } catch (error) {
-      console.error("Database error, using fallback:", error);
-      return await fallbackStorage.getAiModels();
-    }
+    return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
   }
 
   async getAiModel(id: string): Promise<AiModel | undefined> {
@@ -171,27 +160,17 @@ export class DatabaseStorage implements IStorage {
 
   async getCommodities(): Promise<Commodity[]> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getCommodities();
+      throw new Error("Database connection required");
     }
-    try {
-      return await db.select().from(commodities);
-    } catch (error) {
-      console.error("Database error, using fallback:", error);
-      return await fallbackStorage.getCommodities();
-    }
+    return await db.select().from(commodities);
   }
 
   async getCommodity(id: string): Promise<Commodity | undefined> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getCommodity(id);
+      throw new Error("Database connection required");
     }
-    try {
-      const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
-      return commodity || undefined;
-    } catch (error) {
-      console.error("Database error, using fallback:", error);
-      return await fallbackStorage.getCommodity(id);
-    }
+    const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
+    return commodity || undefined;
   }
 
   async getCommodityBySymbol(symbol: string): Promise<Commodity | undefined> {
@@ -208,25 +187,19 @@ export class DatabaseStorage implements IStorage {
 
   async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
     if (!this.isDbConnected) {
-      console.log("Database not connected, using fallback storage for predictions");
-      return await fallbackStorage.getPredictions(commodityId, aiModelId);
+      throw new Error("Database connection required");
     }
-    try {
-      const conditions = [];
-      if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
-      if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
-      
-      let query = db.select().from(predictions);
-      
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions)) as any;
-      }
-      
-      return await query.orderBy(desc(predictions.createdAt));
-    } catch (error) {
-      console.error('Error fetching predictions, using fallback:', error);
-      return await fallbackStorage.getPredictions(commodityId, aiModelId);
+    const conditions = [];
+    if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+    if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+    
+    let query = db.select().from(predictions);
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
     }
+    
+    return await query.orderBy(desc(predictions.createdAt));
   }
 
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
@@ -242,50 +215,35 @@ export class DatabaseStorage implements IStorage {
 
   async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getActualPrices(commodityId, limit);
+      throw new Error("Database connection required");
     }
-    try {
-      let query = db.select().from(actualPrices)
-        .where(eq(actualPrices.commodityId, commodityId))
-        .orderBy(desc(actualPrices.date));
-      
-      if (limit) {
-        query = query.limit(limit) as any;
-      }
-      
-      return await query;
-    } catch (error) {
-      console.error('Error fetching actual prices:', error);
-      return await fallbackStorage.getActualPrices(commodityId, limit);
+    let query = db.select().from(actualPrices)
+      .where(eq(actualPrices.commodityId, commodityId))
+      .orderBy(desc(actualPrices.date));
+    
+    if (limit) {
+      query = query.limit(limit) as any;
     }
+    
+    return await query;
   }
 
   async createActualPrice(insertPrice: InsertActualPrice): Promise<ActualPrice> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.createActualPrice(insertPrice);
+      throw new Error("Database connection required");
     }
-    try {
-      const [price] = await db.insert(actualPrices).values(insertPrice).returning();
-      return price;
-    } catch (error) {
-      console.error("Database error, using fallback:", error);
-      return await fallbackStorage.createActualPrice(insertPrice);
-    }
+    const [price] = await db.insert(actualPrices).values(insertPrice).returning();
+    return price;
   }
 
 
 
   async getLatestPrice(commodityId: string): Promise<ActualPrice | undefined> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getLatestPrice(commodityId);
+      throw new Error("Database connection required");
     }
-    try {
-      const prices = await this.getActualPrices(commodityId, 1);
-      return prices[0];
-    } catch (error) {
-      console.error("Database error, using fallback:", error);
-      return await fallbackStorage.getLatestPrice(commodityId);
-    }
+    const prices = await this.getActualPrices(commodityId, 1);
+    return prices[0];
   }
 
   async getAccuracyMetrics(period: string): Promise<AccuracyMetric[]> {
@@ -331,35 +289,30 @@ export class DatabaseStorage implements IStorage {
 
   async getDashboardStats(): Promise<DashboardStats> {
     if (!this.isDbConnected) {
-      return await fallbackStorage.getDashboardStats();
+      throw new Error("Database connection required");
     }
-    try {
-      const allPredictions = await db.select().from(predictions);
-      const allCommodities = await this.getCommodities();
-      
-      // Get the best performing model using accuracy calculator rankings
-      const rankings = await this.getLeagueTable('30d');
-      const topRanking = rankings.find(r => r.rank === 1);
-      
-      const topModel = topRanking?.aiModel || "No predictions yet";
-      const topAccuracy = topRanking?.accuracy || 0;
-      
-      // Calculate average accuracy across all models
-      const avgAccuracy = rankings.length > 0 
-        ? rankings.reduce((sum, r) => sum + r.accuracy, 0) / rankings.length
-        : 0;
+    const allPredictions = await db.select().from(predictions);
+    const allCommodities = await this.getCommodities();
+    
+    // Get the best performing model using accuracy calculator rankings
+    const rankings = await this.getLeagueTable('30d');
+    const topRanking = rankings.find(r => r.rank === 1);
+    
+    const topModel = topRanking?.aiModel || "No predictions yet";
+    const topAccuracy = topRanking?.accuracy || 0;
+    
+    // Calculate average accuracy across all models
+    const avgAccuracy = rankings.length > 0 
+      ? rankings.reduce((sum, r) => sum + r.accuracy, 0) / rankings.length
+      : 0;
 
-      return {
-        totalPredictions: allPredictions.length,
-        topModel: typeof topModel === 'string' ? topModel : topModel.name,
-        topAccuracy: Number(topAccuracy.toFixed(1)),
-        activeCommodities: allCommodities.length,
-        avgAccuracy: Number(avgAccuracy.toFixed(2))
-      };
-    } catch (error) {
-      console.error("Database error in getDashboardStats, using fallback:", error);
-      return await fallbackStorage.getDashboardStats();
-    }
+    return {
+      totalPredictions: allPredictions.length,
+      topModel: typeof topModel === 'string' ? topModel : topModel.name,
+      topAccuracy: Number(topAccuracy.toFixed(1)),
+      activeCommodities: allCommodities.length,
+      avgAccuracy: Number(avgAccuracy.toFixed(2))
+    };
   }
 
   async getLeagueTable(period: string): Promise<LeagueTableEntry[]> {
@@ -511,73 +464,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  /**
-   * Initialize historical predictions for the past year
-   * Creates realistic AI predictions based on sample historical data
-   */
-  private async initializeHistoricalPredictions() {
-    if (!this.isDbConnected) {
-      console.log("Skipping historical predictions - database not connected");
-      return;
-    }
-
-    try {
-      // Check if historical predictions already exist
-      const existingPredictions = await db.select().from(predictions).limit(1);
-      if (existingPredictions.length > 0) {
-        console.log("Historical predictions already exist, skipping initialization");
-        return;
-      }
-
-      console.log("Generating historical predictions for the past year...");
-
-      // Get all AI models and commodities
-      const models = await this.getAiModels();
-      const allCommodities = await this.getCommodities();
-
-      // Focus on the main commodities that match your Yahoo Finance integration
-      const mainCommodities = allCommodities.filter(c => 
-        ['WTI', 'XAU', 'NG', 'HG', 'XAG', 'KC', 'SB', 'ZC', 'ZS', 'CT'].includes(c.symbol)
-      );
-
-      let totalPredictions = 0;
-
-      for (const commodity of mainCommodities) {
-        // Generate sample historical prices for this commodity
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        
-        const samplePrices = this.historicalGenerator.generateSampleHistoricalPrices(
-          commodity,
-          oneYearAgo,
-          365
-        );
-
-        // Generate historical predictions
-        const historicalPredictions = this.historicalGenerator.generateHistoricalPredictions(
-          commodity,
-          models,
-          samplePrices
-        );
-
-        // Insert predictions in batches to avoid overwhelming the database
-        const batchSize = 50;
-        for (let i = 0; i < historicalPredictions.length; i += batchSize) {
-          const batch = historicalPredictions.slice(i, i + batchSize);
-          await db.insert(predictions).values(batch);
-          totalPredictions += batch.length;
-        }
-
-        console.log(`Generated ${historicalPredictions.length} historical predictions for ${commodity.name}`);
-      }
-
-      console.log(`Historical prediction initialization complete. Generated ${totalPredictions} total predictions.`);
-
-    } catch (error) {
-      console.error("Error initializing historical predictions:", error);
-      // Don't throw - we want the app to continue even if historical data fails
-    }
-  }
+  // All methods below focus on real data only - no mock/fake data
 }
 
 export const storage = new DatabaseStorage();
