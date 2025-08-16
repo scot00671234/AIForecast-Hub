@@ -77,18 +77,19 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
       return Math.abs(hash);
     };
 
-    // Generate mock data that looks realistic for the specific commodity
+    // Generate mock data that stays consistent across all time periods
     const generateMockData = (startDate: Date, days: number, basePrice: number, volatility: number = 0.02) => {
       const data = [];
-      let currentPrice = basePrice;
-      const seed = createSeed(commodityName, selectedPeriod);
+      const seed = createSeed(commodityName, 'base'); // Same seed regardless of period
       const rng = seededRandom(seed);
       
-      for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        
-        // Add realistic price movement with deterministic random
+      // Generate a large dataset (5 years) and then slice what we need
+      const maxDays = 1825; // 5 years
+      const allPrices = [];
+      let currentPrice = basePrice;
+      
+      // Generate complete price history deterministically
+      for (let i = 0; i < maxDays; i++) {
         const change = (rng() - 0.5) * volatility * currentPrice;
         currentPrice += change;
         
@@ -96,23 +97,39 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
         const trend = Math.sin(i / 10) * 0.001 * currentPrice;
         currentPrice += trend;
         
+        allPrices.push(parseFloat(currentPrice.toFixed(2)));
+      }
+      
+      // Now slice the data we need for this time period
+      const startIndex = Math.max(0, maxDays - days);
+      for (let i = 0; i < days; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        
         data.push({
           time: Math.floor(date.getTime() / 1000) as Time,
-          value: parseFloat(currentPrice.toFixed(2))
+          value: allPrices[startIndex + i] || basePrice
         });
       }
+      
       return data;
     };
 
-    // Generate prediction data that stays close to actual prices
+    // Generate prediction data that stays consistent across time periods
     const generatePredictionData = (actualData: any[], variance: number, modelName: string, startOffset: number = 60) => {
-      const seed = createSeed(`${commodityName}-${modelName}`, selectedPeriod);
-      const rng = seededRandom(seed + 1000); // Different seed for predictions
+      const seed = createSeed(`${commodityName}-${modelName}`, 'predictions'); // Same seed regardless of period
+      const rng = seededRandom(seed + 1000);
+      
+      // Generate consistent prediction offsets for this model
+      const predictionOffsets: number[] = [];
+      for (let i = 0; i < 2000; i++) { // Generate enough offsets for any time period
+        predictionOffsets.push((rng() - 0.5) * variance * 0.3);
+      }
       
       return actualData.slice(startOffset).map((point, index) => {
-        // Much smaller variance to keep predictions realistic and close to actual
-        const randomVariance = (rng() - 0.5) * variance * point.value * 0.3; // Reduced variance
-        const trend = index * 0.0005 * point.value; // Smaller trend
+        // Use consistent offset based on index
+        const randomVariance = predictionOffsets[index % predictionOffsets.length] * point.value;
+        const trend = index * 0.0005 * point.value;
         const predictedValue = point.value + randomVariance + trend;
         
         // Keep predictions within ±10% of actual price
