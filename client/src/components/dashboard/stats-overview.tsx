@@ -31,34 +31,30 @@ export default function StatsOverview() {
 
   const statCards = [
     {
-      title: "30D VOLATILITY",
-      value: "12.5%",
-      trend: "",
-      trendLabel: "",
-      testId: "stat-volatility",
-      color: "text-orange-500",
+      title: "Total Predictions",
+      value: stats.totalPredictions.toLocaleString(),
+      trend: "+12%",
+      trendLabel: "vs last month",
+      testId: "stat-total-predictions",
     },
     {
-      title: "AVG VOLUME",
-      value: "2.8M",
-      subtitle: "",
-      testId: "stat-volume",
-      color: "text-blue-500",
-    },
-    {
-      title: "BEST MODEL",
+      title: "Top Performer",
       value: stats.topModel,
-      subtitle: "",
-      testId: "stat-best-model",
-      color: "text-green-600",
+      subtitle: `${stats.topAccuracy.toFixed(1)}% accuracy`,
+      testId: "stat-top-performer",
     },
     {
-      title: "ACCURACY",
-      value: `${stats.topAccuracy.toFixed(1)}%`,
-      trend: "",
-      trendLabel: "",
-      testId: "stat-accuracy",
-      color: "text-blue-500",
+      title: "Active Commodities",
+      value: stats.activeCommodities.toString(),
+      subtitle: "14 markets tracked",
+      testId: "stat-active-commodities",
+    },
+    {
+      title: "Average Accuracy",
+      value: `${stats.avgAccuracy.toFixed(1)}%`,
+      trend: "+3.2%",
+      trendLabel: "this week",
+      testId: "stat-avg-accuracy",
     },
   ];
 
@@ -73,10 +69,10 @@ export default function StatsOverview() {
         >
           <CardContent className="p-8">
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 tracking-wide uppercase">
+              <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
                 {stat.title}
               </p>
-              <p className={`text-3xl font-semibold tracking-tight ${stat.color || 'text-gray-800 dark:text-gray-200'}`} data-testid={`${stat.testId}-value`}>
+              <p className="text-3xl font-semibold text-foreground tracking-tight" data-testid={`${stat.testId}-value`}>
                 {stat.value}
               </p>
               <div className="flex items-center text-sm">
