@@ -26,12 +26,14 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
   { value: "1y", label: "1Y", group: "Long" },
   { value: "2y", label: "2Y", group: "Long" },
   { value: "5y", label: "5Y", group: "Long" },
+  { value: "10y", label: "10Y", group: "Historical" },
+  { value: "max", label: "MAX", group: "Historical" },
 ];
 
 
 
 export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiModels }: EnhancedChartDialogProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1mo");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("6mo");
 
   const { data: latestPrice } = useQuery<LatestPrice>({
     queryKey: ["/api/commodities", commodity.id, "latest-price"],

@@ -42,9 +42,13 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
       setIsLoading(false);
     }
     
-    if (!chartContainerRef.current || dataLoading) return;
-    
-    if (!chartData) return;
+    if (!chartContainerRef.current || dataLoading || !chartData) return;
+
+    // Clean up previous chart instance
+    if (chartRef.current) {
+      chartRef.current.remove();
+      chartRef.current = null;
+    }
 
     // Chart configuration
     const chartOptions = {
@@ -103,23 +107,32 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
       const predictionData: { [modelName: string]: ChartDataPoint[] } = {};
 
       chartData.forEach((item: any) => {
-        const timeStamp = Math.floor(new Date(item.date).getTime() / 1000); // Convert to Unix timestamp in seconds
+        try {
+          const timeStamp = Math.floor(new Date(item.date).getTime() / 1000); // Convert to Unix timestamp in seconds
+          
+          // Validate timestamp
+          if (!timeStamp || isNaN(timeStamp)) return;
 
-        if (item.type === 'historical' && item.actualPrice !== null && item.actualPrice !== undefined) {
-          historicalData.push({
-            time: timeStamp as Time,
-            value: item.actualPrice,
-          });
-        } else if (item.type === 'prediction' && item.predictions) {
-          Object.entries(item.predictions).forEach(([modelName, price]) => {
-            if (!predictionData[modelName]) {
-              predictionData[modelName] = [];
-            }
-            predictionData[modelName].push({
+          if (item.type === 'historical' && item.actualPrice !== null && item.actualPrice !== undefined && !isNaN(item.actualPrice)) {
+            historicalData.push({
               time: timeStamp as Time,
-              value: price as number,
+              value: Number(item.actualPrice),
             });
-          });
+          } else if (item.type === 'prediction' && item.predictions) {
+            Object.entries(item.predictions).forEach(([modelName, price]) => {
+              if (typeof price === 'number' && !isNaN(price)) {
+                if (!predictionData[modelName]) {
+                  predictionData[modelName] = [];
+                }
+                predictionData[modelName].push({
+                  time: timeStamp as Time,
+                  value: price,
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Error processing chart data point:', item, error);
         }
       });
 
@@ -134,8 +147,15 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         const sortedHistoricalData = historicalData.sort((a, b) => (a.time as number) - (b.time as number));
         historicalSeries.setData(sortedHistoricalData);
         
-        // Fit chart to data
+        // Fit chart to data with proper scaling
         chart.timeScale().fitContent();
+        
+        // Force chart to render with proper bounds
+        setTimeout(() => {
+          if (chartRef.current) {
+            chartRef.current.timeScale().scrollToPosition(0, false);
+          }
+        }, 100);
       }
 
       // Add prediction series for each AI model with distinct colors and dotted style
@@ -160,6 +180,9 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           predictionSeries.setData(sortedPredictionData);
         }
       });
+    } else {
+      // Handle case where no data is available
+      console.log('No chart data available for period:', period);
     }
 
     // Handle resize

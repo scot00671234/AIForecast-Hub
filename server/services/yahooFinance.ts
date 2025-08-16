@@ -133,12 +133,14 @@ class YahooFinanceService {
       "1d": "5m",
       "5d": "15m", 
       "1w": "30m",
-      "1mo": "1h",
+      "1mo": "1d",  // Changed from "1h" to "1d" for better data availability
       "3mo": "1d",
       "6mo": "1d",
       "1y": "1d",
       "2y": "1wk",
       "5y": "1mo",
+      "10y": "1mo", // Added 10-year period
+      "max": "1mo", // Added max period
     };
 
     const interval = intervalMap[period] || "1d";
