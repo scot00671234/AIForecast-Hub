@@ -1,0 +1,34 @@
+Initializing deployment
+Clonning Repo github.com/scot00671234/AIForecast-Hub.git to /etc/dokploy/applications/aiforecast-hub-app-ywa0gl/code: ✅
+Cloning into '/etc/dokploy/applications/aiforecast-hub-app-ywa0gl/code'...
+remote: Enumerating objects: 288, done.
+Cloned github.com/scot00671234/AIForecast-Hub.git: ✅
+Build nixpacks: ✅
+Source Type: github: ✅
+╔════════════════════════════ Nixpacks v1.39.0 ═══════════════════════════╗
+║ setup      │ pkgs: nodejs_20                                            ║
+║            │ cmds: echo 'NUCLEAR CADDY PREVENTION - Node.js only'       ║
+║            │ echo 'NO_CADDY=true' >> .env                               ║
+║            │ echo 'NIXPACKS_PROVIDER=node' >> .env                      ║
+║            │ echo 'DISABLE_CADDY=true' >> .env                          ║
+║─────────────────────────────────────────────────────────────────────────║
+║ caddy      │ pkgs: caddy                                                ║
+║            │ cmds: caddy fmt --overwrite /assets/Caddyfile              ║
+║─────────────────────────────────────────────────────────────────────────║
+║ install    │ npm ci --production                                        ║
+║            │ echo 'Installing Node.js dependencies only'                ║
+║─────────────────────────────────────────────────────────────────────────║
+║ build      │ npm run build                                              ║
+║            │ npm prune --production                                     ║
+║─────────────────────────────────────────────────────────────────────────║
+║ release    │ echo "NUCLEAR CADDY PREVENTION - Node.js only application" ║
+║─────────────────────────────────────────────────────────────────────────║
+║ start      │ npm start                                                  ║
+╚═════════════════════════════════════════════════════════════════════════╝
+Error: Writing app
+Caused by:
+Is a directory (os error 21)
+Error response from daemon: No such container: aiforecast-hub-app-ywa0gl-VdaY9DeuNF
+Error ❌
+Error response from daemon: No such container: aiforecast-hub-app-ywa0gl-VdaY9DeuNF
+tail error: tail: inotify cannot be used, reverting to polling: Too many open files
