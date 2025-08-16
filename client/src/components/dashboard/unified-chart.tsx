@@ -25,21 +25,14 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch chart data with predictions
-  const { data: chartData, isLoading: dataLoading, refetch } = useQuery({
+  const { data: chartData, isLoading: dataLoading } = useQuery({
     queryKey: [`/api/commodities/${commodityId}/chart-with-predictions`, period],
     queryFn: () => fetch(`/api/commodities/${commodityId}/chart-with-predictions/${period}`).then(res => res.json()),
     enabled: !!commodityId,
-    staleTime: 0, // Always fetch fresh data
-    refetchOnMount: true, // Force refetch when component mounts
+    staleTime: 60000, // Cache for 1 minute
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
-
-  // Force refetch when period changes
-  useEffect(() => {
-    if (commodityId) {
-      refetch();
-    }
-  }, [period, commodityId, refetch]);
 
   // Fetch AI models for colors
   const { data: aiModels } = useQuery({
@@ -47,17 +40,22 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   });
 
   useEffect(() => {
-    // Clear loading state as soon as data loading is complete
-    if (!dataLoading) {
-      setIsLoading(false);
-    }
-    
-    if (!chartContainerRef.current || dataLoading) return;
+    if (!chartContainerRef.current) return;
     
     // Log for debugging
-    console.log('Chart data for period', period, ':', chartData?.length, 'points');
+    console.log('Chart render attempt - Loading:', dataLoading, 'Data:', chartData?.length, 'points');
     
-    if (!chartData || !Array.isArray(chartData) || chartData.length === 0) return;
+    if (dataLoading) {
+      setIsLoading(true);
+      return;
+    }
+    
+    setIsLoading(false);
+    
+    if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+      console.log('No chart data available');
+      return;
+    }
 
     // Clean up previous chart instance
     if (chartRef.current) {

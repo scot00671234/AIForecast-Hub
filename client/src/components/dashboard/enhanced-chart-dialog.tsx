@@ -40,12 +40,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     enabled: isOpen && !!commodity.id,
   });
 
-  // Reset period when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedPeriod("3mo");
-    }
-  }, [isOpen]);
+
 
 
   const formatPrice = (price: number) => {
@@ -136,14 +131,11 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
           {/* Professional Trading Chart */}
           <div className="space-y-6">
             <div className="bg-card/50 border border-border/40 rounded-xl overflow-hidden backdrop-blur-sm p-6">
-              {isOpen && (
-                <UnifiedChart 
-                  key={`${commodity.id}-${selectedPeriod}-${isOpen}`} // Force remount when dialog opens or period changes
-                  commodityId={commodity.id} 
-                  period={selectedPeriod} 
-                  height={500}
-                />
-              )}
+              <UnifiedChart 
+                commodityId={commodity.id} 
+                period={selectedPeriod} 
+                height={500}
+              />
             </div>
 
             {/* Model Accuracy Rankings */}
