@@ -69,21 +69,28 @@ export class HistoricalPredictionGenerator {
     // Model-specific prediction characteristics
     const modelCharacteristics = this.getModelCharacteristics(aiModel.name);
     
-    // Generate realistic price variation based on commodity volatility
+    // Create deterministic seed from commodity, model, and date
+    const seed = this.createSeed(commodity.id, aiModel.id, predictionDate);
+    const rng = this.seededRandom(seed);
+    
+    // Generate realistic price variation based on commodity volatility (much smaller range)
     const volatility = this.getCommodityVolatility(commodity.symbol);
-    const baseVariation = (Math.random() - 0.5) * volatility * referencePrice;
+    const baseVariation = (rng() - 0.5) * volatility * referencePrice * 0.3; // Reduced from full volatility
     
     // Apply model bias and accuracy
     const modelBias = modelCharacteristics.bias;
     const accuracyFactor = modelCharacteristics.accuracy;
     
-    // Calculate predicted price with some realistic noise
+    // Calculate predicted price with minimal realistic noise - keep close to actual
     const predictedPrice = referencePrice + 
-      (baseVariation * accuracyFactor) + 
-      (referencePrice * modelBias * (Math.random() - 0.5));
+      (baseVariation * accuracyFactor * 0.5) + 
+      (referencePrice * modelBias * (rng() - 0.5) * 0.1); // Much smaller bias impact
     
-    // Ensure price is positive
-    const finalPrice = Math.max(predictedPrice, referencePrice * 0.1);
+    // Ensure price stays within reasonable bounds of actual price (±15%)
+    const finalPrice = Math.max(
+      Math.min(predictedPrice, referencePrice * 1.15), 
+      referencePrice * 0.85
+    );
     
     return {
       aiModelId: aiModel.id,
@@ -138,23 +145,23 @@ export class HistoricalPredictionGenerator {
   }
   
   /**
-   * Get commodity-specific volatility factors
+   * Get commodity-specific volatility factors (reduced for more realistic predictions)
    */
   private getCommodityVolatility(symbol: string): number {
     const volatilityMap: Record<string, number> = {
-      'WTI': 0.15, // Oil - high volatility
-      'GC': 0.08,  // Gold - moderate volatility
-      'NG': 0.25,  // Natural Gas - very high volatility
-      'HG': 0.12,  // Copper - moderate-high volatility
-      'SI': 0.18,  // Silver - high volatility
-      'KC': 0.20,  // Coffee - high volatility
-      'SB': 0.22,  // Sugar - very high volatility
-      'ZC': 0.14,  // Corn - moderate-high volatility
-      'ZS': 0.13,  // Soybeans - moderate-high volatility
-      'CT': 0.16   // Cotton - high volatility
+      'WTI': 0.08, // Oil - reduced volatility for predictions
+      'GC': 0.04,  // Gold - reduced volatility
+      'NG': 0.12,  // Natural Gas - reduced volatility
+      'HG': 0.06,  // Copper - reduced volatility
+      'SI': 0.09,  // Silver - reduced volatility
+      'KC': 0.10,  // Coffee - reduced volatility
+      'SB': 0.11,  // Sugar - reduced volatility
+      'ZC': 0.07,  // Corn - reduced volatility
+      'ZS': 0.065, // Soybeans - reduced volatility
+      'CT': 0.08   // Cotton - reduced volatility
     };
     
-    return volatilityMap[symbol] || 0.15;
+    return volatilityMap[symbol] || 0.08;
   }
   
   /**
@@ -189,6 +196,31 @@ export class HistoricalPredictionGenerator {
   }
   
   /**
+   * Create a deterministic seed from commodity, model, and date
+   */
+  private createSeed(commodityId: string, modelId: string, date: Date): number {
+    const str = `${commodityId}-${modelId}-${date.toISOString().split('T')[0]}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * Seeded random number generator for consistent predictions
+   */
+  private seededRandom(seed: number): () => number {
+    let currentSeed = seed;
+    return () => {
+      currentSeed = (currentSeed * 9301 + 49297) % 233280;
+      return currentSeed / 233280;
+    };
+  }
+
+  /**
    * Generate sample historical prices for development (when Yahoo Finance data is unavailable)
    */
   generateSampleHistoricalPrices(
@@ -199,14 +231,18 @@ export class HistoricalPredictionGenerator {
     const prices: HistoricalPrice[] = [];
     let currentPrice = this.getBasePrice(commodity.symbol);
     
+    // Use deterministic seed for price generation
+    const seed = this.createSeed(commodity.id, 'historical', startDate);
+    const rng = this.seededRandom(seed);
+    
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
-      // Generate realistic price movement
+      // Generate realistic price movement with smaller variations
       const volatility = this.getCommodityVolatility(commodity.symbol);
-      const dailyChange = (Math.random() - 0.5) * volatility * currentPrice * 0.1;
-      currentPrice = Math.max(currentPrice + dailyChange, currentPrice * 0.1);
+      const dailyChange = (rng() - 0.5) * volatility * currentPrice * 0.05; // Reduced daily variation
+      currentPrice = Math.max(currentPrice + dailyChange, currentPrice * 0.5);
       
       prices.push({
         date: new Date(date),

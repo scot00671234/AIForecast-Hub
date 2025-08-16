@@ -56,17 +56,40 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
       return periodMap[period] || 30;
     };
 
+    // Deterministic seeded random for consistent data
+    const seededRandom = (seed: number) => {
+      let currentSeed = seed;
+      return () => {
+        currentSeed = (currentSeed * 9301 + 49297) % 233280;
+        return currentSeed / 233280;
+      };
+    };
+
+    // Create seed from commodity and period for consistency
+    const createSeed = (commodityName: string, period: string) => {
+      const str = `${commodityName}-${period}`;
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash);
+    };
+
     // Generate mock data that looks realistic for the specific commodity
     const generateMockData = (startDate: Date, days: number, basePrice: number, volatility: number = 0.02) => {
       const data = [];
       let currentPrice = basePrice;
+      const seed = createSeed(commodityName, selectedPeriod);
+      const rng = seededRandom(seed);
       
       for (let i = 0; i < days; i++) {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
         
-        // Add realistic price movement
-        const change = (Math.random() - 0.5) * volatility * currentPrice;
+        // Add realistic price movement with deterministic random
+        const change = (rng() - 0.5) * volatility * currentPrice;
         currentPrice += change;
         
         // Add some trend and cycles to make it look more realistic
@@ -81,14 +104,26 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
       return data;
     };
 
-    // Generate prediction data that diverges from actual
-    const generatePredictionData = (actualData: any[], variance: number, startOffset: number = 60) => {
+    // Generate prediction data that stays close to actual prices
+    const generatePredictionData = (actualData: any[], variance: number, modelName: string, startOffset: number = 60) => {
+      const seed = createSeed(`${commodityName}-${modelName}`, selectedPeriod);
+      const rng = seededRandom(seed + 1000); // Different seed for predictions
+      
       return actualData.slice(startOffset).map((point, index) => {
-        const randomVariance = (Math.random() - 0.5) * variance * point.value;
-        const trend = index * 0.001 * point.value; // Add slight trend
+        // Much smaller variance to keep predictions realistic and close to actual
+        const randomVariance = (rng() - 0.5) * variance * point.value * 0.3; // Reduced variance
+        const trend = index * 0.0005 * point.value; // Smaller trend
+        const predictedValue = point.value + randomVariance + trend;
+        
+        // Keep predictions within ±10% of actual price
+        const boundedValue = Math.max(
+          Math.min(predictedValue, point.value * 1.1),
+          point.value * 0.9
+        );
+        
         return {
           time: point.time as Time,
-          value: parseFloat((point.value + randomVariance + trend).toFixed(2))
+          value: parseFloat(boundedValue.toFixed(2))
         };
       });
     };
@@ -103,9 +138,9 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
     // Generate AI prediction data with different characteristics
     // Start predictions from 2/3 through the data
     const predictionStart = Math.floor(days * 0.67);
-    const claudeData = generatePredictionData(actualData, 0.04, predictionStart);
-    const chatgptData = generatePredictionData(actualData, 0.05, predictionStart);
-    const deepseekData = generatePredictionData(actualData, 0.03, predictionStart);
+    const claudeData = generatePredictionData(actualData, 0.02, 'claude', predictionStart);
+    const chatgptData = generatePredictionData(actualData, 0.025, 'chatgpt', predictionStart);
+    const deepseekData = generatePredictionData(actualData, 0.018, 'deepseek', predictionStart);
 
     // Add actual price series (bold black line)
     const actualSeries = chart.addSeries(LineSeries, {
@@ -216,12 +251,12 @@ export default function MockChart({ commodityName, basePrice, selectedPeriod, on
       </div>
 
       {/* Chart container */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg relative">
         <div ref={chartContainerRef} className="w-full h-96" />
         
         {/* Data attribution footer */}
-        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 text-right">
-          Data from Yahoo Finance • Updated 22:16:40
+        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 text-right bg-gray-50 dark:bg-gray-800/50">
+          Data from Yahoo Finance • Updated {new Date().toLocaleTimeString('en-US', { hour12: false })}
         </div>
       </div>
     </div>
