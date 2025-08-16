@@ -15,27 +15,29 @@ export default function LeagueTable() {
 
   if (isLoading) {
     return (
-      <Card className="bg-card/30 border border-border/40 rounded-xl backdrop-blur-sm">
-        <CardHeader className="border-b border-border/30 pb-6">
+      <Card className="bg-transparent border-0 shadow-none">
+        <CardHeader className="border-0 pb-4">
           <div className="flex items-center justify-between">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-10 w-40" />
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-4">
+        <CardContent className="p-0 pt-2">
+          <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-5 rounded-lg border border-border/40">
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="w-8 h-8 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-3 w-16" />
+              <div key={i} className="px-6 py-5 rounded-2xl bg-white/5 dark:bg-black/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-6">
+                    <Skeleton className="w-8 h-6" />
+                    <div className="flex items-center space-x-4">
+                      <Skeleton className="w-4 h-4 rounded-full" />
+                      <Skeleton className="h-5 w-20" />
+                    </div>
                   </div>
-                </div>
-                <div className="text-right space-y-2">
-                  <Skeleton className="h-5 w-12" />
-                  <Skeleton className="h-3 w-20" />
+                  <div className="text-right space-y-1">
+                    <Skeleton className="h-7 w-16" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -46,14 +48,14 @@ export default function LeagueTable() {
   }
 
   return (
-    <Card className="bg-card/30 border border-border/40 rounded-xl backdrop-blur-sm" data-testid="league-table">
-      <CardHeader className="border-b border-border/30 pb-6">
+    <Card className="bg-transparent border-0 shadow-none" data-testid="league-table">
+      <CardHeader className="border-0 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium tracking-wide text-foreground">
+          <CardTitle className="text-xl font-semibold text-foreground">
             Model Rankings
           </CardTitle>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-36 bg-muted/30 border border-border/40 rounded-lg" data-testid="select-period">
+            <SelectTrigger className="w-40 bg-transparent border border-border/30 hover:border-border/60 rounded-lg transition-colors" data-testid="select-period">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -67,19 +69,19 @@ export default function LeagueTable() {
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
+      <CardContent className="p-0 pt-2">
         {!leagueTable || leagueTable.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-muted-foreground mb-4">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
+          <div className="text-center py-16">
+            <div className="text-muted-foreground mb-6">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-muted/30 to-muted/60 flex items-center justify-center">
+                <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[14px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
               </div>
-              <p className="text-lg font-medium">No ranking data available</p>
-              <p className="text-sm">Start making predictions to see model rankings</p>
+              <p className="text-xl font-semibold mb-2">No ranking data available</p>
+              <p className="text-sm text-muted-foreground/80">Start making predictions to see model rankings</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {leagueTable.map((entry, index) => {
               // Get model color indicator
               const getModelColor = (modelName: string) => {
@@ -91,31 +93,43 @@ export default function LeagueTable() {
                 }
               };
 
+              const getGlowColor = (modelName: string) => {
+                switch (modelName) {
+                  case 'Claude': return 'hover:shadow-green-500/20';
+                  case 'ChatGPT': return 'hover:shadow-blue-500/20';
+                  case 'Deepseek': return 'hover:shadow-purple-500/20';
+                  default: return 'hover:shadow-gray-500/20';
+                }
+              };
+
               return (
                 <div 
                   key={entry.aiModel.id} 
-                  className="group flex items-center justify-between p-4 rounded-lg border border-border/50 bg-card/30 hover:bg-card/60 hover:border-border/80 transition-all duration-300 hover:translate-y-[-1px] hover:shadow-sm cursor-pointer"
+                  className={`group relative flex items-center justify-between px-6 py-5 rounded-2xl bg-white/5 hover:bg-white/10 dark:bg-black/5 dark:hover:bg-black/10 border-0 hover:scale-[1.02] transition-all duration-300 hover:shadow-xl ${getGlowColor(entry.aiModel.name)} cursor-pointer backdrop-blur-sm`}
                   data-testid={`league-entry-${entry.rank}`}
                 >
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium text-muted-foreground min-w-[24px]">
+                  <div className="flex items-center space-x-6">
+                    <div className="text-lg font-bold text-muted-foreground/60 group-hover:text-muted-foreground transition-colors min-w-[32px]">
                       #{entry.rank}
-                    </span>
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${getModelColor(entry.aiModel.name)} group-hover:scale-110 transition-transform duration-200`}></div>
-                      <span className="font-medium text-foreground group-hover:text-foreground/90 transition-colors" data-testid={`model-name-${entry.rank}`}>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-4 h-4 rounded-full ${getModelColor(entry.aiModel.name)} group-hover:scale-125 group-hover:shadow-lg transition-all duration-300`}></div>
+                      <span className="text-lg font-semibold text-foreground group-hover:text-foreground transition-colors" data-testid={`model-name-${entry.rank}`}>
                         {entry.aiModel.name}
                       </span>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-foreground group-hover:text-foreground/90 transition-colors" 
+                    <div className="text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300" 
                          data-testid={`accuracy-${entry.rank}`}>
                       {entry.accuracy.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-muted-foreground">Accuracy</div>
+                    <div className="text-sm text-muted-foreground/80 font-medium">Accuracy</div>
                   </div>
+                  
+                  {/* Subtle gradient overlay on hover */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
               );
             })}
