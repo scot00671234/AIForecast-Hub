@@ -13,21 +13,48 @@ docs
 .replit
 replit.md
 
-# Block ALL Caddy files completely
+# NUCLEAR CADDY ELIMINATION - BLOCK EVERYTHING
 Caddyfile*
 caddy*
 *.caddy
+Caddy*
+*caddy*
+*Caddy*
 caddy.json
 caddy.conf
 caddy.config
+Caddyfile
+Caddyfile.json
+Caddyfile.yaml
+Caddyfile.toml
 /etc/caddy*
+/usr/bin/caddy*
+/opt/caddy*
+bin/caddy*
+sbin/caddy*
+.caddy*
+caddy/
+Caddy/
 
 # Allow nixpacks configuration but block others
 nixpacks.json
 .nixpacks.env
 
-# Block other potential conflicting files
+# BLOCK ALL WEB SERVERS AND CONFLICTING FILES
 docker-compose.yml
-nginx.conf
-apache.conf
-httpd.conf
+nginx*
+Nginx*
+apache*
+Apache*
+httpd*
+Http*
+traefik*
+Traefik*
+https.conf
+http.conf
+webserver*
+web-server*
+server.conf
+proxy.conf
+loadbalancer*
+load-balancer*

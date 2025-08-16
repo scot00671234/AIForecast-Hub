@@ -1,0 +1,7 @@
+# FORCE IGNORE ALL NON-NODE BUILDPACKS
+caddy
+static
+webserver
+apache
+nginx
+httpd

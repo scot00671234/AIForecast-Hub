@@ -1,23 +1,43 @@
-# FORCE NODE.JS ONLY - BLOCK ALL WEB SERVER DETECTION
+# NUCLEAR CADDY ELIMINATION - NODE.JS ONLY
 providers = ["node"]
 
+# FORCE NODE.JS ONLY - NO EXCEPTIONS
 [providers.node]
 enabledBuilders = ["nodejs"]
 
-# Explicitly disable all other providers
+# NUCLEAR DISABLE ALL NON-NODE PROVIDERS
 [providers.static]
 disabled = true
 [providers.deno]
 disabled = true
 [providers.caddy]
 disabled = true
+[providers.go]
+disabled = true
+[providers.rust]
+disabled = true
+[providers.python]
+disabled = true
+[providers.php]
+disabled = true
+[providers.ruby]
+disabled = true
+[providers.java]
+disabled = true
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
 NIXPACKS_NO_DEFAULT_CACHE_MOUNT = "1"
+# NUCLEAR CADDY BLOCK
 NIXPACKS_NO_CADDY = "1"
 NIXPACKS_DISABLE_STATIC = "1"
+NIXPACKS_DISABLE_CADDY = "1"
+NIXPACKS_FORCE_NODE = "1"
+NIXPACKS_NO_WEB_SERVER = "1"
+DISABLE_CADDY = "1"
+NO_CADDY = "1"
+FORCE_NODE_ONLY = "1"
 
 [phases.setup]
 nixPkgs = ["nodejs_20"]

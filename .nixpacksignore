@@ -1,7 +1,21 @@
-# Prevent auto-detection of web servers
+# NUCLEAR WEB SERVER DETECTION BLOCK
 caddy*
+Caddy*
+*caddy*
+*Caddy*
 Caddyfile*
+Caddyfile
 nginx*
+Nginx*
 apache*
+Apache*
 httpd*
+Httpd*
 traefik*
+Traefik*
+envoy*
+haproxy*
+istio*
+kong*
+zuul*
+gateway*
