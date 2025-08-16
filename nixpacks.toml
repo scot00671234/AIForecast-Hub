@@ -1,0 +1,21 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+dependsOn = []
+nixPkgs = ["nodejs_20", "npm-9_x"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = ["npm ci"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
+
+[staticAssets]
+# Serve static assets from the dist/public directory
+"dist/public" = "/"

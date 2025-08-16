@@ -25,8 +25,9 @@ Preferred communication style: Simple, everyday language.
 - **Runtime**: Node.js with Express.js server
 - **Language**: TypeScript with ES modules
 - **Development**: Hot module replacement via Vite middleware in development mode
-- **Build**: esbuild for production server bundling
+- **Build**: esbuild for production server bundling with nixpacks deployment support
 - **API Design**: RESTful endpoints with proper error handling and request logging
+- **Deployment**: VPS-ready with nixpacks.toml configuration for dokploy deployment
 
 ### Data Layer
 - **Database**: PostgreSQL using Neon serverless database (fully migrated from in-memory storage)
@@ -61,6 +62,12 @@ Preferred communication style: Simple, everyday language.
 - **Development Experience**: Hot reload, TypeScript checking, and runtime error modals
 
 ### Recent Changes (August 2025)
+- **VPS Deployment Configuration (August 16, 2025)**: Prepared application for VPS deployment via nixpacks on dokploy
+  - **Nixpacks Configuration**: Created nixpacks.toml for proper Node.js detection and build process
+  - **Environment Variables Setup**: Documented proper placement of API keys (PROJECT env), database config (DATABASE env), and app settings (APP env)
+  - **Deployment Documentation**: Created comprehensive DEPLOYMENT.md guide for VPS setup
+  - **Production Optimizations**: Configured .dockerignore and build process for efficient container deployment
+  - **Footer Updates**: Removed "Built with..." text and updated copyright to 2025
 - **Migration to Replit Environment Completed (August 16, 2025)**: Successfully migrated from Replit Agent to standard Replit environment
   - **Graceful API Key Handling**: All AI services (OpenAI, Claude, Deepseek) now handle missing API keys gracefully without application crashes
   - **Yahoo Finance Integration Verified**: Real-time commodity price data flows correctly for all 10 commodities (Oil, Gold, Gas, Copper, Silver, Coffee, Sugar, Corn, Soybeans, Cotton)
