@@ -114,6 +114,20 @@ export default function Dashboard() {
                 )}
               </div>
               
+              <Button
+                onClick={toggleTheme}
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 p-0 hover:bg-background/60 dark:hover:bg-white/10 transition-colors"
+                data-testid="button-theme-toggle"
+              >
+                {theme === "dark" ? (
+                  <SunIcon className="w-4 h-4" />
+                ) : (
+                  <MoonIcon className="w-4 h-4" />
+                )}
+              </Button>
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -129,20 +143,6 @@ export default function Dashboard() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
-              <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 p-0 hover:bg-background/60 dark:hover:bg-white/10 transition-colors"
-                data-testid="button-theme-toggle"
-              >
-                {theme === "dark" ? (
-                  <SunIcon className="w-4 h-4" />
-                ) : (
-                  <MoonIcon className="w-4 h-4" />
-                )}
-              </Button>
             </div>
           </div>
         </div>
