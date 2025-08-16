@@ -7,13 +7,19 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import EnhancedChartDialog from "./enhanced-chart-dialog";
 import type { ChartDataPoint, Commodity, AiModel, LatestPrice } from "@shared/schema";
 
-export default function CommodityChartGrid() {
+interface CommodityChartGridProps {
+  filteredCommodities?: Commodity[];
+}
+
+export default function CommodityChartGrid({ filteredCommodities }: CommodityChartGridProps) {
   const [selectedCommodity, setSelectedCommodity] = useState<Commodity | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: commodities } = useQuery<Commodity[]>({
+  const { data: allCommodities } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
   });
+
+  const commodities = filteredCommodities || allCommodities;
 
   const { data: aiModels } = useQuery<AiModel[]>({
     queryKey: ["/api/ai-models"],
@@ -46,12 +52,13 @@ export default function CommodityChartGrid() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {commodities.map(commodity => (
-          <CommodityChartCard
-            key={commodity.id}
-            commodity={commodity}
-            aiModels={aiModels}
-            onClick={() => handleChartClick(commodity)}
-          />
+          <div key={commodity.id} id={`commodity-${commodity.id}`}>
+            <CommodityChartCard
+              commodity={commodity}
+              aiModels={aiModels}
+              onClick={() => handleChartClick(commodity)}
+            />
+          </div>
         ))}
       </div>
 
