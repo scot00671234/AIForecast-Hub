@@ -51,18 +51,8 @@ export default function ModelAccuracyRanking({
 
   const rankingData = accuracyData || generateMockAccuracy();
 
-  const getRankBadge = (rank: number) => {
-    const baseClasses = "text-xs font-medium px-2 py-1 rounded";
-    switch (rank) {
-      case 1:
-        return <span className={`${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`}>Best</span>;
-      case 2:
-        return <span className={`${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400`}>Good</span>;
-      case 3:
-        return <span className={`${baseClasses} bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400`}>Fair</span>;
-      default:
-        return <span className={`${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400`}>#{rank}</span>;
-    }
+  const getRankNumber = (rank: number) => {
+    return <span className="text-sm font-semibold text-muted-foreground">#{rank}</span>;
   };
 
   const getTrendIcon = (trend: number) => {
@@ -112,26 +102,15 @@ export default function ModelAccuracyRanking({
               <span className="font-medium text-foreground">
                 {data.aiModel.name}
               </span>
-              <span className="text-sm text-muted-foreground">
-                {data.totalPredictions} predictions
-              </span>
             </div>
 
             {/* Right side: Performance and rank */}
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="font-medium text-foreground">
-                  {data.accuracy}%
-                </span>
-                <div className="flex items-center space-x-1">
-                  {getTrendIcon(data.trend)}
-                  <span className="text-xs text-muted-foreground">
-                    {data.trend > 0 ? "Rising" : data.trend < 0 ? "Falling" : "Stable"}
-                  </span>
-                </div>
-              </div>
+              <span className="font-medium text-foreground">
+                {data.accuracy}%
+              </span>
               
-              {getRankBadge(data.rank)}
+              {getRankNumber(data.rank)}
             </div>
           </div>
         ))}

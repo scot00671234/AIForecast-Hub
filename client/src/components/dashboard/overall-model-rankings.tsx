@@ -33,18 +33,8 @@ export default function OverallModelRankings() {
     return <Minus className="w-4 h-4 text-muted-foreground" />;
   };
 
-  const getRankBadge = (rank: number) => {
-    const baseClasses = "text-sm font-semibold px-3 py-1 rounded-full";
-    switch (rank) {
-      case 1:
-        return <span className={`${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`}>#{rank}</span>;
-      case 2:
-        return <span className={`${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400`}>#{rank}</span>;
-      case 3:
-        return <span className={`${baseClasses} bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400`}>#{rank}</span>;
-      default:
-        return <span className={`${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400`}>#{rank}</span>;
-    }
+  const getRankNumber = (rank: number) => {
+    return <span className="text-lg font-semibold text-muted-foreground">#{rank}</span>;
   };
 
   if (isLoading) {
@@ -117,7 +107,7 @@ export default function OverallModelRankings() {
           >
             {/* Left side: Rank and model info */}
             <div className="flex items-center space-x-4">
-              {getRankBadge(ranking.rank)}
+              {getRankNumber(ranking.rank)}
               
               <div className="flex items-center space-x-3">
                 <span 
@@ -128,30 +118,16 @@ export default function OverallModelRankings() {
                     'bg-gray-500'
                   }`}
                 />
-                <div>
-                  <div className="font-semibold text-foreground">{ranking.aiModel.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {ranking.totalPredictions} predictions
-                  </div>
-                </div>
+                <div className="font-semibold text-foreground">{ranking.aiModel.name}</div>
               </div>
             </div>
 
             {/* Right side: Performance metrics */}
-            <div className="flex items-center space-x-6">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-foreground">
-                  {ranking.overallAccuracy.toFixed(1)}%
-                </div>
-                <div className="text-xs text-muted-foreground">Accuracy</div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-foreground">
+                {ranking.overallAccuracy.toFixed(1)}%
               </div>
-              
-              <div className="flex items-center space-x-2">
-                {getTrendIcon(ranking.trend)}
-                <span className="text-sm text-muted-foreground">
-                  {ranking.trend > 0 ? "Rising" : ranking.trend < 0 ? "Falling" : "Stable"}
-                </span>
-              </div>
+              <div className="text-xs text-muted-foreground">Accuracy</div>
             </div>
           </div>
         ))}
