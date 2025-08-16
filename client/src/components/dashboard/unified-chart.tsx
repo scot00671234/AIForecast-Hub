@@ -29,6 +29,8 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
     queryKey: [`/api/commodities/${commodityId}/chart-with-predictions`, period],
     queryFn: () => fetch(`/api/commodities/${commodityId}/chart-with-predictions/${period}`).then(res => res.json()),
     enabled: !!commodityId,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Force refetch when component mounts
   });
 
   // Fetch AI models for colors
