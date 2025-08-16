@@ -64,18 +64,6 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
     return acc;
   }, {} as Record<string, typeof TIME_PERIODS>);
 
-  if (isLoading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-background border border-border/50 backdrop-blur-md">
-          <div className="space-y-6 p-8">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-80 w-full" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
