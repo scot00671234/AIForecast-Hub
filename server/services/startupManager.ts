@@ -51,19 +51,55 @@ export class StartupManager {
           try {
             await yahooFinanceService.updateCommodityPrices(commodity.id);
           } catch (error) {
-            console.log(`⚠️ Could not initialize prices for ${commodity.name}:`, error.message);
+            console.log(`⚠️ Could not initialize prices for ${commodity.name}:`, (error as Error).message);
           }
         }
         
         // Start prediction scheduler
-        const { PredictionScheduler } = await import('./predictionScheduler');
-        const scheduler = new PredictionScheduler();
-        scheduler.start();
+        const { predictionScheduler } = await import('./predictionScheduler');
+        predictionScheduler.start();
+        
+        // Run initial AI predictions on first deployment
+        await this.runInitialPredictions();
         
         console.log('✅ Background initialization complete');
       } catch (error) {
         console.error('❌ Background initialization failed:', error);
       }
     }, 5000); // 5 second delay to ensure app is fully started
+  }
+
+  // Run initial AI predictions on first deployment
+  private async runInitialPredictions(): Promise<void> {
+    try {
+      console.log('🤖 Checking for initial AI predictions...');
+      
+      // Check if we already have predictions
+      const allPredictions = await this.storage.getPredictions(); // Get all predictions
+      const existingPredictions = allPredictions.slice(0, 1); // Take first one
+      
+      if (existingPredictions.length === 0) {
+        console.log('🚀 First deployment detected - generating initial AI predictions...');
+        
+        // Import AI prediction service
+        const { aiPredictionService } = await import('./aiPredictionService');
+        
+        // Check if any AI service is configured
+        const isConfigured = await aiPredictionService.isAnyServiceConfigured();
+        
+        if (isConfigured) {
+          console.log('🔮 Starting initial prediction generation...');
+          await aiPredictionService.generateWeeklyPredictions();
+          console.log('✅ Initial AI predictions generated successfully');
+        } else {
+          console.log('⚠️ No AI services configured - skipping initial predictions');
+        }
+      } else {
+        console.log('📊 Existing predictions found - skipping initial generation');
+      }
+    } catch (error) {
+      console.error('❌ Initial prediction generation failed (non-critical):', error);
+      // Don't throw - this is non-critical for app startup
+    }
   }
 }
