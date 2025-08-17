@@ -46,7 +46,7 @@ docs/
 .git/
 .gitignore
 
-# NUCLEAR CADDY ELIMINATION - Block ALL Caddy files
+# NUCLEAR CADDY ELIMINATION - Block ALL Caddy files and static detection
 Caddyfile*
 caddy.*
 *.caddy
@@ -54,6 +54,19 @@ caddy/
 static/
 public/*.html
 public/index.html
+assets/
+www/
+html/
+# Block any static site indicators
+index.html
+*.html
+dist/index.html
+dist/public/
+dist/public/index.html
+# Block web server detection
+nginx.conf
+apache.*
+httpd.*
 
 # Force Node.js detection
 !package.json

@@ -1,2 +1,1 @@
-# Force Node.js detection
-providers = ["nodejs"]
+nodejs

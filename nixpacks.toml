@@ -1,17 +1,22 @@
-# FORCE NODE.JS - ELIMINATE ALL WEB SERVERS
+# FORCE NODE.JS - NUCLEAR CADDY ELIMINATION
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
-# Nuclear Caddy elimination
+# NUCLEAR CADDY ELIMINATION - MAXIMUM FORCE
 NIXPACKS_NO_CADDY = "1"
-NIXPACKS_NO_STATIC_SITE = "1"
+NIXPACKS_NO_STATIC_SITE = "1" 
 NIXPACKS_NO_STATIC = "1"
 NIXPACKS_DISABLE_STATIC = "1"
 NO_STATIC_ASSETS = "1"
 DISABLE_CADDY = "true"
 NO_CADDY = "true"
+FORCE_NODE = "true"
+NIXPACKS_NO_DEFAULT_CACHE_MOUNT = "1"
+NO_WEB_SERVER = "1"
+NIXPACKS_DISABLE_PROVIDERS = "staticsite,caddy"
+NIXPACKS_FORCE_NODE = "1"
 
 [phases.install]
 cmds = ["npm ci --production=false"]
@@ -19,8 +24,12 @@ cmds = ["npm ci --production=false"]
 [phases.build]
 cmds = [
   "npm run build",
-  "node fix-build.js"
+  "node fix-build.js",
+  "rm -f dist/index.html",
+  "rm -f dist/public/index.html",
+  "rm -rf dist/public",
+  "echo 'FORCE NODE.JS ONLY - NO STATIC SITE' > dist/.force-node"
 ]
 
 [start]
-cmd = "node dist/index.js"
+cmd = "./start.sh"

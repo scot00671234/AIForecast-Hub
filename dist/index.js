@@ -155,539 +155,6 @@ var init_db = __esm({
   }
 });
 
-// server/services/historicalPredictionGenerator.ts
-var HistoricalPredictionGenerator;
-var init_historicalPredictionGenerator = __esm({
-  "server/services/historicalPredictionGenerator.ts"() {
-    "use strict";
-    HistoricalPredictionGenerator = class {
-      /**
-       * Generate historical predictions for a commodity over the past year
-       * @param commodity The commodity to generate predictions for
-       * @param aiModels Array of AI models to generate predictions for
-       * @param historicalPrices Actual historical prices for reference
-       * @returns Array of historical predictions
-       */
-      generateHistoricalPredictions(commodity, aiModels2, historicalPrices) {
-        const predictions2 = [];
-        const oneYearAgo = /* @__PURE__ */ new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        for (let weekOffset = 0; weekOffset < 52; weekOffset++) {
-          const predictionDate = new Date(oneYearAgo);
-          predictionDate.setDate(predictionDate.getDate() + weekOffset * 7);
-          const targetDate = new Date(predictionDate);
-          targetDate.setDate(targetDate.getDate() + 7);
-          const referencePrice = this.findClosestPrice(historicalPrices, predictionDate);
-          if (!referencePrice) continue;
-          for (const aiModel of aiModels2) {
-            const prediction = this.generateSinglePrediction(
-              commodity,
-              aiModel,
-              predictionDate,
-              targetDate,
-              referencePrice.price
-            );
-            predictions2.push(prediction);
-          }
-        }
-        return predictions2;
-      }
-      /**
-       * Generate a single prediction with model-specific characteristics
-       */
-      generateSinglePrediction(commodity, aiModel, predictionDate, targetDate, referencePrice) {
-        const modelCharacteristics = this.getModelCharacteristics(aiModel.name);
-        const seed = this.createSeed(commodity.id, aiModel.id, predictionDate);
-        const rng = this.seededRandom(seed);
-        const volatility = this.getCommodityVolatility(commodity.symbol);
-        const baseVariation = (rng() - 0.5) * volatility * referencePrice * 0.3;
-        const modelBias = modelCharacteristics.bias;
-        const accuracyFactor = modelCharacteristics.accuracy;
-        const predictedPrice = referencePrice + baseVariation * accuracyFactor * 0.5 + referencePrice * modelBias * (rng() - 0.5) * 0.1;
-        const finalPrice = Math.max(
-          Math.min(predictedPrice, referencePrice * 1.15),
-          referencePrice * 0.85
-        );
-        return {
-          aiModelId: aiModel.id,
-          commodityId: commodity.id,
-          predictionDate,
-          targetDate,
-          predictedPrice: finalPrice.toString(),
-          confidence: (85 + Math.random() * 10).toString(),
-          // 85-95% confidence
-          metadata: {
-            generated: true,
-            historical: true,
-            basePrice: referencePrice,
-            modelVersion: this.getModelVersion(aiModel.name, predictionDate)
-          }
-        };
-      }
-      /**
-       * Get model-specific characteristics for realistic predictions
-       */
-      getModelCharacteristics(modelName) {
-        switch (modelName.toLowerCase()) {
-          case "claude":
-            return {
-              bias: 0.02,
-              // Slightly optimistic
-              accuracy: 0.92,
-              // High accuracy
-              volatility: 0.8
-              // Lower volatility predictions
-            };
-          case "chatgpt":
-            return {
-              bias: -0.01,
-              // Slightly conservative
-              accuracy: 0.89,
-              // Good accuracy
-              volatility: 1
-              // Moderate volatility predictions
-            };
-          case "deepseek":
-            return {
-              bias: 5e-3,
-              // Nearly neutral
-              accuracy: 0.86,
-              // Decent accuracy
-              volatility: 1.2
-              // Higher volatility predictions
-            };
-          default:
-            return {
-              bias: 0,
-              accuracy: 0.85,
-              volatility: 1
-            };
-        }
-      }
-      /**
-       * Get commodity-specific volatility factors (reduced for more realistic predictions)
-       */
-      getCommodityVolatility(symbol) {
-        const volatilityMap = {
-          "WTI": 0.08,
-          // Oil - reduced volatility for predictions
-          "GC": 0.04,
-          // Gold - reduced volatility
-          "NG": 0.12,
-          // Natural Gas - reduced volatility
-          "HG": 0.06,
-          // Copper - reduced volatility
-          "SI": 0.09,
-          // Silver - reduced volatility
-          "KC": 0.1,
-          // Coffee - reduced volatility
-          "SB": 0.11,
-          // Sugar - reduced volatility
-          "ZC": 0.07,
-          // Corn - reduced volatility
-          "ZS": 0.065,
-          // Soybeans - reduced volatility
-          "CT": 0.08
-          // Cotton - reduced volatility
-        };
-        return volatilityMap[symbol] || 0.08;
-      }
-      /**
-       * Find the closest historical price to a given date
-       */
-      findClosestPrice(prices, targetDate) {
-        if (prices.length === 0) return null;
-        return prices.reduce((closest, current) => {
-          const currentDiff = Math.abs(current.date.getTime() - targetDate.getTime());
-          const closestDiff = Math.abs(closest.date.getTime() - targetDate.getTime());
-          return currentDiff < closestDiff ? current : closest;
-        });
-      }
-      /**
-       * Get model version based on date (simulate model improvements over time)
-       */
-      getModelVersion(modelName, date) {
-        const monthsAgo = Math.floor((Date.now() - date.getTime()) / (1e3 * 60 * 60 * 24 * 30));
-        switch (modelName.toLowerCase()) {
-          case "claude":
-            return monthsAgo > 6 ? "claude-3" : "claude-3.5";
-          case "chatgpt":
-            return monthsAgo > 8 ? "gpt-4" : "gpt-4o";
-          case "deepseek":
-            return monthsAgo > 4 ? "deepseek-v2" : "deepseek-v2.5";
-          default:
-            return "v1.0";
-        }
-      }
-      /**
-       * Create a deterministic seed from commodity, model, and date
-       */
-      createSeed(commodityId, modelId, date) {
-        const str = `${commodityId}-${modelId}-${date.toISOString().split("T")[0]}`;
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-          const char = str.charCodeAt(i);
-          hash = (hash << 5) - hash + char;
-          hash = hash & hash;
-        }
-        return Math.abs(hash);
-      }
-      /**
-       * Seeded random number generator for consistent predictions
-       */
-      seededRandom(seed) {
-        let currentSeed = seed;
-        return () => {
-          currentSeed = (currentSeed * 9301 + 49297) % 233280;
-          return currentSeed / 233280;
-        };
-      }
-      /**
-       * Generate sample historical prices for development (when Yahoo Finance data is unavailable)
-       */
-      generateSampleHistoricalPrices(commodity, startDate, days = 365) {
-        const prices = [];
-        let currentPrice = this.getBasePrice(commodity.symbol);
-        const seed = this.createSeed(commodity.id, "historical", startDate);
-        const rng = this.seededRandom(seed);
-        for (let i = 0; i < days; i++) {
-          const date = new Date(startDate);
-          date.setDate(date.getDate() + i);
-          const volatility = this.getCommodityVolatility(commodity.symbol);
-          const dailyChange = (rng() - 0.5) * volatility * currentPrice * 0.05;
-          currentPrice = Math.max(currentPrice + dailyChange, currentPrice * 0.5);
-          prices.push({
-            date: new Date(date),
-            price: currentPrice
-          });
-        }
-        return prices;
-      }
-      /**
-       * Get base prices for commodities (current market ranges)
-       */
-      getBasePrice(symbol) {
-        const basePrices = {
-          "WTI": 75,
-          // Oil ~$75/barrel
-          "GC": 2e3,
-          // Gold ~$2000/oz
-          "NG": 3.5,
-          // Natural Gas ~$3.50/MMBtu
-          "HG": 4,
-          // Copper ~$4.00/lb
-          "SI": 25,
-          // Silver ~$25/oz
-          "KC": 150,
-          // Coffee ~150 cents/lb
-          "SB": 20,
-          // Sugar ~20 cents/lb
-          "ZC": 450,
-          // Corn ~450 cents/bushel
-          "ZS": 1100,
-          // Soybeans ~1100 cents/bushel
-          "CT": 70
-          // Cotton ~70 cents/lb
-        };
-        return basePrices[symbol] || 100;
-      }
-    };
-  }
-});
-
-// server/services/fallbackStorage.ts
-import { randomUUID } from "crypto";
-var FallbackStorage, fallbackStorage;
-var init_fallbackStorage = __esm({
-  "server/services/fallbackStorage.ts"() {
-    "use strict";
-    init_historicalPredictionGenerator();
-    FallbackStorage = class {
-      aiModels = [
-        { id: "1", name: "Claude", provider: "Anthropic", color: "#10B981", isActive: 1 },
-        { id: "2", name: "ChatGPT", provider: "OpenAI", color: "#3B82F6", isActive: 1 },
-        { id: "3", name: "Deepseek", provider: "Deepseek AI", color: "#8B5CF6", isActive: 1 }
-      ];
-      commodities = [
-        // Hard Commodities
-        { id: "c1", name: "Crude Oil", symbol: "WTI", category: "hard", yahooSymbol: "CL=F", unit: "USD/barrel" },
-        { id: "c2", name: "Gold", symbol: "XAU", category: "hard", yahooSymbol: "GC=F", unit: "USD/oz" },
-        { id: "c3", name: "Natural Gas", symbol: "NG", category: "hard", yahooSymbol: "NG=F", unit: "USD/MMBtu" },
-        { id: "c4", name: "Copper", symbol: "HG", category: "hard", yahooSymbol: "HG=F", unit: "USD/lb" },
-        { id: "c5", name: "Silver", symbol: "XAG", category: "hard", yahooSymbol: "SI=F", unit: "USD/oz" },
-        // Soft Commodities
-        { id: "c6", name: "Coffee", symbol: "KC", category: "soft", yahooSymbol: "KC=F", unit: "USD/lb" },
-        { id: "c7", name: "Sugar", symbol: "SB", category: "soft", yahooSymbol: "SB=F", unit: "USD/lb" },
-        { id: "c8", name: "Corn", symbol: "ZC", category: "soft", yahooSymbol: "ZC=F", unit: "USD/bushel" },
-        { id: "c9", name: "Soybeans", symbol: "ZS", category: "soft", yahooSymbol: "ZS=F", unit: "USD/bushel" },
-        { id: "c10", name: "Cotton", symbol: "CT", category: "soft", yahooSymbol: "CT=F", unit: "USD/lb" }
-      ];
-      actualPrices = [];
-      predictions = [];
-      accuracyMetrics = [];
-      marketAlerts = [];
-      historicalGenerator = new HistoricalPredictionGenerator();
-      historicalDataInitialized = false;
-      // AI Models
-      async getAiModels() {
-        return this.aiModels.filter((m) => m.isActive === 1);
-      }
-      async getAiModel(id) {
-        return this.aiModels.find((m) => m.id === id);
-      }
-      async createAiModel(model) {
-        const newModel = {
-          id: randomUUID(),
-          ...model,
-          isActive: model.isActive ?? 1
-        };
-        this.aiModels.push(newModel);
-        return newModel;
-      }
-      // Commodities
-      async getCommodities() {
-        return this.commodities;
-      }
-      async getCommodity(id) {
-        return this.commodities.find((c) => c.id === id);
-      }
-      async getCommodityBySymbol(symbol) {
-        return this.commodities.find((c) => c.symbol === symbol);
-      }
-      async createCommodity(commodity) {
-        const newCommodity = {
-          id: randomUUID(),
-          ...commodity,
-          yahooSymbol: commodity.yahooSymbol ?? null,
-          unit: commodity.unit ?? null
-        };
-        this.commodities.push(newCommodity);
-        return newCommodity;
-      }
-      // Actual Prices
-      async getActualPrices(commodityId, limit) {
-        const prices = this.actualPrices.filter((p) => p.commodityId === commodityId).sort((a, b) => b.date.getTime() - a.date.getTime());
-        return limit ? prices.slice(0, limit) : prices;
-      }
-      async createActualPrice(price) {
-        const newPrice = {
-          id: randomUUID(),
-          ...price,
-          date: new Date(price.date),
-          volume: price.volume ?? null,
-          source: price.source ?? null,
-          createdAt: /* @__PURE__ */ new Date()
-        };
-        this.actualPrices = this.actualPrices.filter(
-          (p) => !(p.commodityId === price.commodityId && p.date.toISOString().split("T")[0] === new Date(price.date).toISOString().split("T")[0])
-        );
-        this.actualPrices.push(newPrice);
-        return newPrice;
-      }
-      async insertActualPrice(price) {
-        return this.createActualPrice(price);
-      }
-      async getLatestPrice(commodityId) {
-        const prices = await this.getActualPrices(commodityId, 1);
-        return prices[0];
-      }
-      // Predictions
-      async getPredictions(commodityId, aiModelId) {
-        if (!this.historicalDataInitialized) {
-          await this.initializeHistoricalPredictions();
-        }
-        let filtered = this.predictions;
-        if (commodityId) {
-          filtered = filtered.filter((p) => p.commodityId === commodityId);
-        }
-        if (aiModelId) {
-          filtered = filtered.filter((p) => p.aiModelId === aiModelId);
-        }
-        return filtered.sort((a, b) => b.predictionDate.getTime() - a.predictionDate.getTime());
-      }
-      async getPredictionsByCommodity(commodityId) {
-        return this.getPredictions(commodityId);
-      }
-      async createPrediction(prediction) {
-        const newPrediction = {
-          id: randomUUID(),
-          ...prediction,
-          predictionDate: new Date(prediction.predictionDate),
-          targetDate: new Date(prediction.targetDate),
-          confidence: prediction.confidence ?? null,
-          metadata: prediction.metadata ?? null,
-          createdAt: /* @__PURE__ */ new Date()
-        };
-        this.predictions.push(newPrediction);
-        return newPrediction;
-      }
-      async insertPrediction(prediction) {
-        return this.createPrediction(prediction);
-      }
-      // Dashboard Stats
-      async getDashboardStats() {
-        const totalCommodities = this.commodities.length;
-        const totalPredictions = this.predictions.length;
-        const activeAlerts = this.marketAlerts.filter((a) => a.isActive === 1).length;
-        const commoditiesWithPrices = await Promise.all(
-          this.commodities.map(async (c) => {
-            const prices = await this.getActualPrices(c.id, 2);
-            if (prices.length >= 2) {
-              const current = parseFloat(prices[0].price);
-              const previous = parseFloat(prices[1].price);
-              const change = (current - previous) / previous * 100;
-              return { commodity: c, change };
-            }
-            return null;
-          })
-        );
-        const validChanges = commoditiesWithPrices.filter(Boolean);
-        const avgMarketChange = validChanges.length > 0 ? validChanges.reduce((sum, item) => sum + item.change, 0) / validChanges.length : 0;
-        const leagueTable = await this.getLeagueTable("30d");
-        const topRanking = leagueTable.find((r) => r.rank === 1);
-        return {
-          totalPredictions,
-          topModel: topRanking?.aiModel?.name || "Deepseek",
-          topAccuracy: topRanking?.accuracy || 84.2,
-          activeCommodities: totalCommodities,
-          avgAccuracy: leagueTable.length > 0 ? leagueTable.reduce((sum, r) => sum + r.accuracy, 0) / leagueTable.length : 80.5
-        };
-      }
-      // League Table
-      async getLeagueTable(period) {
-        const models = await this.getAiModels();
-        const modelPerformance = models.map((model) => {
-          let baseAccuracy;
-          switch (model.name.toLowerCase()) {
-            case "deepseek":
-              baseAccuracy = 84.2;
-              break;
-            case "claude":
-              baseAccuracy = 82.7;
-              break;
-            case "chatgpt":
-              baseAccuracy = 81.3;
-              break;
-            default:
-              baseAccuracy = 80;
-          }
-          const variance = (Math.random() - 0.5) * 2;
-          const finalAccuracy = Math.max(75, Math.min(95, baseAccuracy + variance));
-          return {
-            aiModel: model,
-            accuracy: Math.round(finalAccuracy * 10) / 10,
-            // Round to 1 decimal
-            totalPredictions: Math.floor(45 + Math.random() * 30),
-            // 45-75 predictions
-            trend: Math.random() > 0.6 ? 1 : Math.random() > 0.3 ? -1 : 0
-          };
-        });
-        return modelPerformance.sort((a, b) => b.accuracy - a.accuracy).map((entry, index) => ({
-          ...entry,
-          rank: index + 1
-        }));
-      }
-      // Chart Data
-      async getChartData(commodityId, days) {
-        const prices = await this.getActualPrices(commodityId, days);
-        const predictions2 = await this.getPredictions(commodityId);
-        const chartData = [];
-        for (const price of prices) {
-          const dayPredictions = {};
-          const matchingPredictions = predictions2.filter(
-            (p) => p.targetDate.toISOString().split("T")[0] === price.date.toISOString().split("T")[0]
-          );
-          for (const pred of matchingPredictions) {
-            dayPredictions[`${pred.aiModelId}_prediction`] = parseFloat(pred.predictedPrice);
-          }
-          chartData.push({
-            date: price.date.toISOString().split("T")[0],
-            actualPrice: parseFloat(price.price),
-            predictions: dayPredictions
-          });
-        }
-        return chartData;
-      }
-      // Other required methods
-      async getAccuracyMetrics(period) {
-        return this.accuracyMetrics;
-      }
-      async updateAccuracyMetric(metric) {
-        const newMetric = {
-          id: randomUUID(),
-          ...metric,
-          avgError: metric.avgError ?? null,
-          lastUpdated: /* @__PURE__ */ new Date()
-        };
-        this.accuracyMetrics.push(newMetric);
-        return newMetric;
-      }
-      async getActiveAlerts() {
-        return this.marketAlerts.filter((a) => a.isActive === 1);
-      }
-      async createAlert(alert) {
-        const newAlert = {
-          id: randomUUID(),
-          ...alert,
-          isActive: alert.isActive ?? 1,
-          aiModelId: alert.aiModelId ?? null,
-          commodityId: alert.commodityId ?? null,
-          createdAt: /* @__PURE__ */ new Date()
-        };
-        this.marketAlerts.push(newAlert);
-        return newAlert;
-      }
-      async rawQuery(query, params) {
-        return { rows: [] };
-      }
-      /**
-       * Initialize historical predictions for the past year in fallback storage
-       */
-      async initializeHistoricalPredictions() {
-        if (this.historicalDataInitialized) {
-          return;
-        }
-        try {
-          console.log("Generating historical predictions for fallback storage...");
-          for (const commodity of this.commodities) {
-            const oneYearAgo = /* @__PURE__ */ new Date();
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-            const samplePrices = this.historicalGenerator.generateSampleHistoricalPrices(
-              commodity,
-              oneYearAgo,
-              365
-            );
-            const historicalPredictions = this.historicalGenerator.generateHistoricalPredictions(
-              commodity,
-              this.aiModels,
-              samplePrices
-            );
-            for (const predictionData of historicalPredictions) {
-              const newPrediction = {
-                id: randomUUID(),
-                ...predictionData,
-                predictionDate: new Date(predictionData.predictionDate),
-                targetDate: new Date(predictionData.targetDate),
-                confidence: predictionData.confidence ?? null,
-                metadata: predictionData.metadata ?? null,
-                createdAt: /* @__PURE__ */ new Date()
-              };
-              this.predictions.push(newPrediction);
-            }
-            console.log(`Generated ${historicalPredictions.length} historical predictions for ${commodity.name}`);
-          }
-          this.historicalDataInitialized = true;
-          console.log(`Historical prediction initialization complete for fallback storage. Generated ${this.predictions.length} total predictions.`);
-        } catch (error) {
-          console.error("Error initializing historical predictions in fallback storage:", error);
-          this.historicalDataInitialized = true;
-        }
-      }
-    };
-    fallbackStorage = new FallbackStorage();
-  }
-});
-
 // server/storage.ts
 import { eq, desc, and, sql as sql2 } from "drizzle-orm";
 var DatabaseStorage, storage;
@@ -696,11 +163,8 @@ var init_storage = __esm({
     "use strict";
     init_schema();
     init_db();
-    init_fallbackStorage();
-    init_historicalPredictionGenerator();
     DatabaseStorage = class {
       isDbConnected = false;
-      historicalGenerator = new HistoricalPredictionGenerator();
       constructor() {
         this.testConnection();
         this.initializeDefaultData();
@@ -711,7 +175,7 @@ var init_storage = __esm({
           this.isDbConnected = true;
           console.log("Database connection successful");
         } catch (error) {
-          console.error("Database connection failed:", error);
+          console.error("Database connection failed:", error.message);
           this.isDbConnected = false;
           throw new Error(`Database connection required for production deployment: ${error.message}`);
         }
@@ -755,22 +219,16 @@ var init_storage = __esm({
             { name: "Wheat", symbol: "ZW", category: "soft", yahooSymbol: "ZW=F", unit: "USD/bushel" }
           ];
           await db.insert(commodities).values(defaultCommodities);
-          await this.initializeHistoricalPredictions();
-          console.log("Default data and historical predictions initialized successfully");
+          console.log("Default data initialized successfully");
         } catch (error) {
           console.error("Error initializing default data:", error);
         }
       }
       async getAiModels() {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getAiModels();
+          throw new Error("Database connection required");
         }
-        try {
-          return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
-        } catch (error) {
-          console.error("Database error, using fallback:", error);
-          return await fallbackStorage.getAiModels();
-        }
+        return await db.select().from(aiModels).where(eq(aiModels.isActive, 1));
       }
       async getAiModel(id) {
         const [model] = await db.select().from(aiModels).where(eq(aiModels.id, id));
@@ -782,26 +240,16 @@ var init_storage = __esm({
       }
       async getCommodities() {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getCommodities();
+          throw new Error("Database connection required");
         }
-        try {
-          return await db.select().from(commodities);
-        } catch (error) {
-          console.error("Database error, using fallback:", error);
-          return await fallbackStorage.getCommodities();
-        }
+        return await db.select().from(commodities);
       }
       async getCommodity(id) {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getCommodity(id);
+          throw new Error("Database connection required");
         }
-        try {
-          const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
-          return commodity || void 0;
-        } catch (error) {
-          console.error("Database error, using fallback:", error);
-          return await fallbackStorage.getCommodity(id);
-        }
+        const [commodity] = await db.select().from(commodities).where(eq(commodities.id, id));
+        return commodity || void 0;
       }
       async getCommodityBySymbol(symbol) {
         const [commodity] = await db.select().from(commodities).where(
@@ -815,22 +263,16 @@ var init_storage = __esm({
       }
       async getPredictions(commodityId, aiModelId) {
         if (!this.isDbConnected) {
-          console.log("Database not connected, using fallback storage for predictions");
-          return await fallbackStorage.getPredictions(commodityId, aiModelId);
+          throw new Error("Database connection required");
         }
-        try {
-          const conditions = [];
-          if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
-          if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
-          let query = db.select().from(predictions);
-          if (conditions.length > 0) {
-            query = query.where(and(...conditions));
-          }
-          return await query.orderBy(desc(predictions.createdAt));
-        } catch (error) {
-          console.error("Error fetching predictions, using fallback:", error);
-          return await fallbackStorage.getPredictions(commodityId, aiModelId);
+        const conditions = [];
+        if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+        if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+        let query = db.select().from(predictions);
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions));
         }
+        return await query.orderBy(desc(predictions.createdAt));
       }
       async createPrediction(insertPrediction) {
         const [prediction] = await db.insert(predictions).values(insertPrediction).returning();
@@ -841,42 +283,27 @@ var init_storage = __esm({
       }
       async getActualPrices(commodityId, limit) {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getActualPrices(commodityId, limit);
+          throw new Error("Database connection required");
         }
-        try {
-          let query = db.select().from(actualPrices).where(eq(actualPrices.commodityId, commodityId)).orderBy(desc(actualPrices.date));
-          if (limit) {
-            query = query.limit(limit);
-          }
-          return await query;
-        } catch (error) {
-          console.error("Error fetching actual prices:", error);
-          return await fallbackStorage.getActualPrices(commodityId, limit);
+        let query = db.select().from(actualPrices).where(eq(actualPrices.commodityId, commodityId)).orderBy(desc(actualPrices.date));
+        if (limit) {
+          query = query.limit(limit);
         }
+        return await query;
       }
       async createActualPrice(insertPrice) {
         if (!this.isDbConnected) {
-          return await fallbackStorage.createActualPrice(insertPrice);
+          throw new Error("Database connection required");
         }
-        try {
-          const [price] = await db.insert(actualPrices).values(insertPrice).returning();
-          return price;
-        } catch (error) {
-          console.error("Database error, using fallback:", error);
-          return await fallbackStorage.createActualPrice(insertPrice);
-        }
+        const [price] = await db.insert(actualPrices).values(insertPrice).returning();
+        return price;
       }
       async getLatestPrice(commodityId) {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getLatestPrice(commodityId);
+          throw new Error("Database connection required");
         }
-        try {
-          const prices = await this.getActualPrices(commodityId, 1);
-          return prices[0];
-        } catch (error) {
-          console.error("Database error, using fallback:", error);
-          return await fallbackStorage.getLatestPrice(commodityId);
-        }
+        const prices = await this.getActualPrices(commodityId, 1);
+        return prices[0];
       }
       async getAccuracyMetrics(period) {
         return await db.select().from(accuracyMetrics).where(eq(accuracyMetrics.period, period)).orderBy(desc(sql2`CAST(${accuracyMetrics.accuracy} AS DECIMAL)`));
@@ -906,27 +333,22 @@ var init_storage = __esm({
       }
       async getDashboardStats() {
         if (!this.isDbConnected) {
-          return await fallbackStorage.getDashboardStats();
+          throw new Error("Database connection required");
         }
-        try {
-          const allPredictions = await db.select().from(predictions);
-          const allCommodities = await this.getCommodities();
-          const rankings = await this.getLeagueTable("30d");
-          const topRanking = rankings.find((r) => r.rank === 1);
-          const topModel = topRanking?.aiModel || "No predictions yet";
-          const topAccuracy = topRanking?.accuracy || 0;
-          const avgAccuracy = rankings.length > 0 ? rankings.reduce((sum, r) => sum + r.accuracy, 0) / rankings.length : 0;
-          return {
-            totalPredictions: allPredictions.length,
-            topModel: typeof topModel === "string" ? topModel : topModel.name,
-            topAccuracy: Number(topAccuracy.toFixed(1)),
-            activeCommodities: allCommodities.length,
-            avgAccuracy: Number(avgAccuracy.toFixed(2))
-          };
-        } catch (error) {
-          console.error("Database error in getDashboardStats, using fallback:", error);
-          return await fallbackStorage.getDashboardStats();
-        }
+        const allPredictions = await db.select().from(predictions);
+        const allCommodities = await this.getCommodities();
+        const rankings = await this.getLeagueTable("30d");
+        const topRanking = rankings.find((r) => r.rank === 1);
+        const topModel = topRanking?.aiModel || "No predictions yet";
+        const topAccuracy = topRanking?.accuracy || 0;
+        const avgAccuracy = rankings.length > 0 ? rankings.reduce((sum, r) => sum + r.accuracy, 0) / rankings.length : 0;
+        return {
+          totalPredictions: allPredictions.length,
+          topModel: typeof topModel === "string" ? topModel : topModel.name,
+          topAccuracy: Number(topAccuracy.toFixed(1)),
+          activeCommodities: allCommodities.length,
+          avgAccuracy: Number(avgAccuracy.toFixed(2))
+        };
       }
       async getLeagueTable(period) {
         const aiModels2 = await this.getAiModels();
@@ -1044,54 +466,7 @@ var init_storage = __esm({
           console.error(`Yahoo Finance update failed for ${commodity.name}:`, error);
         }
       }
-      /**
-       * Initialize historical predictions for the past year
-       * Creates realistic AI predictions based on sample historical data
-       */
-      async initializeHistoricalPredictions() {
-        if (!this.isDbConnected) {
-          console.log("Skipping historical predictions - database not connected");
-          return;
-        }
-        try {
-          const existingPredictions = await db.select().from(predictions).limit(1);
-          if (existingPredictions.length > 0) {
-            console.log("Historical predictions already exist, skipping initialization");
-            return;
-          }
-          console.log("Generating historical predictions for the past year...");
-          const models = await this.getAiModels();
-          const allCommodities = await this.getCommodities();
-          const mainCommodities = allCommodities.filter(
-            (c) => ["WTI", "XAU", "NG", "HG", "XAG", "KC", "SB", "ZC", "ZS", "CT"].includes(c.symbol)
-          );
-          let totalPredictions = 0;
-          for (const commodity of mainCommodities) {
-            const oneYearAgo = /* @__PURE__ */ new Date();
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-            const samplePrices = this.historicalGenerator.generateSampleHistoricalPrices(
-              commodity,
-              oneYearAgo,
-              365
-            );
-            const historicalPredictions = this.historicalGenerator.generateHistoricalPredictions(
-              commodity,
-              models,
-              samplePrices
-            );
-            const batchSize = 50;
-            for (let i = 0; i < historicalPredictions.length; i += batchSize) {
-              const batch = historicalPredictions.slice(i, i + batchSize);
-              await db.insert(predictions).values(batch);
-              totalPredictions += batch.length;
-            }
-            console.log(`Generated ${historicalPredictions.length} historical predictions for ${commodity.name}`);
-          }
-          console.log(`Historical prediction initialization complete. Generated ${totalPredictions} total predictions.`);
-        } catch (error) {
-          console.error("Error initializing historical predictions:", error);
-        }
-      }
+      // All methods below focus on real data only - no mock/fake data
     };
     storage = new DatabaseStorage();
   }
@@ -1195,12 +570,17 @@ var init_yahooFinance = __esm({
           "1d": "5m",
           "5d": "15m",
           "1w": "30m",
-          "1mo": "1h",
+          "1mo": "1d",
+          // Changed from "1h" to "1d" for better data availability
           "3mo": "1d",
           "6mo": "1d",
           "1y": "1d",
           "2y": "1wk",
-          "5y": "1mo"
+          "5y": "1mo",
+          "10y": "1mo",
+          // Added 10-year period
+          "max": "1mo"
+          // Added max period
         };
         const interval = intervalMap[period] || "1d";
         try {
@@ -3113,12 +2493,8 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
-  const port = parseInt(process.env.PORT || "3000", 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true
-  }, () => {
+  const port = parseInt(process.env.PORT || "5000", 10);
+  server.listen(port, "0.0.0.0", () => {
     log(`\u2705 Server running on port ${port}`);
     console.log("\u{1F3AF} Application ready - all systems operational");
     startupManager.initializeHeavy().catch((error) => {

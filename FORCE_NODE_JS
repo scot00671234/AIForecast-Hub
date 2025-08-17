@@ -1,0 +1,2 @@
+This file forces nixpacks to use Node.js provider only.
+NO CADDY. NO STATIC SITE. NODE.JS ONLY.

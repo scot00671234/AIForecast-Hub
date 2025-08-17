@@ -1,0 +1,10 @@
+[build]
+builder = "heroku/nodejs"
+
+[[build.env]]
+name = "NODE_ENV"
+value = "production"
+
+[[build.env]]
+name = "NO_CADDY"
+value = "true"
