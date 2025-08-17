@@ -25,96 +25,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // League Table with Enhanced Dynamic Ranking
+  // League Table with Real Accuracy Calculation
   app.get("/api/league-table/:period", async (req, res) => {
     try {
       const period = req.params.period || "30d";
       
-      // Since database is not available, generate realistic rankings directly
-      const aiModels = await storage.getAiModels();
-      const mockRankings = aiModels.map((model, index) => {
-        // Generate realistic accuracy percentages for each model
-        let accuracy: number;
-        let totalPredictions: number;
-        let trend: number;
+      // Calculate real accuracy based on predictions vs actual prices
+      const rankings = await accuracyCalculator.calculateModelRankings(period);
+      
+      if (rankings.length > 0) {
+        // Transform to match frontend expected format
+        const rankedTable = rankings.map(ranking => ({
+          rank: ranking.rank,
+          aiModel: ranking.aiModel,
+          accuracy: Math.round(ranking.overallAccuracy * 10) / 10,
+          totalPredictions: ranking.totalPredictions,
+          trend: ranking.trend
+        }));
         
-        if (model.name === 'Claude') {
-          accuracy = 78.5 + Math.random() * 6; // 78-84%
-          totalPredictions = 42;
-          trend = 1; // Rising
-        } else if (model.name === 'ChatGPT') {
-          accuracy = 74.2 + Math.random() * 5; // 74-79%
-          totalPredictions = 39;
-          trend = 0; // Stable
-        } else if (model.name === 'Deepseek') {
-          accuracy = 81.1 + Math.random() * 4; // 81-85%
-          totalPredictions = 35;
-          trend = 1; // Rising
-        } else {
-          accuracy = 70 + Math.random() * 8; // 70-78%
-          totalPredictions = 30;
-          trend = -1; // Falling
-        }
-        
-        return {
-          rank: 0, // Will be set after sorting
+        res.json(rankedTable);
+      } else {
+        // No predictions yet - return empty rankings with zero accuracy
+        const aiModels = await storage.getAiModels();
+        const emptyRankings = aiModels.map((model, index) => ({
+          rank: index + 1,
           aiModel: model,
-          accuracy: Math.round(accuracy * 10) / 10,
-          totalPredictions,
-          trend
-        };
-      });
-      
-      // Sort by accuracy and assign ranks
-      const rankedTable = mockRankings
-        .sort((a, b) => b.accuracy - a.accuracy)
-        .map((item, index) => ({ ...item, rank: index + 1 }));
-      
-      res.json(rankedTable);
+          accuracy: 0,
+          totalPredictions: 0,
+          trend: 0
+        }));
+        
+        res.json(emptyRankings);
+      }
     } catch (error) {
-      console.error("Error fetching league table:", error);
+      console.error("Error calculating league table:", error);
       
-      // Generate realistic rankings with actual accuracy data when database is unavailable
+      // Fallback: return empty rankings
       const aiModels = await storage.getAiModels();
-      const mockRankings = aiModels.map((model, index) => {
-        // Generate realistic accuracy percentages for each model
-        let accuracy: number;
-        let totalPredictions: number;
-        let trend: number;
-        
-        if (model.name === 'Claude') {
-          accuracy = 78.5 + Math.random() * 6; // 78-84%
-          totalPredictions = 42;
-          trend = 1; // Rising
-        } else if (model.name === 'ChatGPT') {
-          accuracy = 74.2 + Math.random() * 5; // 74-79%
-          totalPredictions = 39;
-          trend = 0; // Stable
-        } else if (model.name === 'Deepseek') {
-          accuracy = 81.1 + Math.random() * 4; // 81-85%
-          totalPredictions = 35;
-          trend = 1; // Rising
-        } else {
-          accuracy = 70 + Math.random() * 8; // 70-78%
-          totalPredictions = 30;
-          trend = -1; // Falling
-        }
-        
-        return {
-          rank: 0, // Will be set after sorting
-          aiModel: model,
-          accuracy: Math.round(accuracy * 10) / 10,
-          totalPredictions,
-          trend
-        };
-      });
+      const emptyRankings = aiModels.map((model, index) => ({
+        rank: index + 1,
+        aiModel: model,
+        accuracy: 0,
+        totalPredictions: 0,
+        trend: 0
+      }));
       
-      // Sort by accuracy and assign ranks
-      const rankedTable = mockRankings
-        .sort((a, b) => b.accuracy - a.accuracy)
-        .map((item, index) => ({ ...item, rank: index + 1 }));
-      
-      res.json(rankedTable);
+      res.json(emptyRankings);
     }
   });
 
@@ -126,18 +82,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all AI models first
       const aiModels = await storage.getAiModels();
       
-      // Calculate accuracy for each model for this specific commodity
+      // Calculate real accuracy for each model for this specific commodity
       const modelAccuracies = await Promise.all(
-        aiModels.map(async (model, index) => {
-          // Get realistic accuracy with commodity-specific variation
-          const baseAccuracy = accuracyCalculator.calculateModelAccuracy(model.name, commodityId);
-          const accuracy = Math.round(baseAccuracy * 10) / 10;
+        aiModels.map(async (model) => {
+          // Get predictions for this model and commodity
+          const predictions = await storage.getPredictions(commodityId, model.id);
+          const actualPrices = await storage.getActualPrices(commodityId, 1000);
+          
+          // Filter by period
+          const filteredPredictions = period === "all" ? predictions : 
+            predictions.filter(pred => {
+              const createdAt = new Date(pred.createdAt!);
+              const cutoffDate = new Date();
+              
+              switch (period) {
+                case "7d":
+                  cutoffDate.setDate(cutoffDate.getDate() - 7);
+                  break;
+                case "30d":
+                  cutoffDate.setDate(cutoffDate.getDate() - 30);
+                  break;
+                case "90d":
+                  cutoffDate.setDate(cutoffDate.getDate() - 90);
+                  break;
+                default:
+                  return true;
+              }
+              
+              return createdAt >= cutoffDate;
+            });
+
+          // Calculate accuracy
+          const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices);
           
           return {
             aiModel: model,
-            accuracy,
-            totalPredictions: Math.floor(15 + Math.random() * 20), // 15-35 predictions
-            trend: Math.random() > 0.6 ? 1 : (Math.random() > 0.3 ? -1 : 0),
+            accuracy: accuracyResult ? Math.round(accuracyResult.accuracy * 10) / 10 : 0,
+            totalPredictions: accuracyResult ? accuracyResult.totalPredictions : 0,
+            trend: 0, // Could be calculated based on historical data
             rank: 0 // Will be set after sorting
           };
         })
