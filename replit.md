@@ -6,6 +6,13 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 2025)
+- **Real Accuracy System**: Implemented comprehensive accuracy calculation based on actual AI predictions vs real historical prices
+- **Production-Ready**: League table and scoreboards now use authentic prediction data instead of mock data
+- **Initial Deployment Trigger**: Added automatic AI prediction generation on first deployment
+- **Database Migration**: Successfully migrated from Replit Agent environment with PostgreSQL setup
+- **API Integration**: Full integration ready for OpenAI, Claude, and Deepseek API keys in production
+
 ## System Architecture
 ### Frontend
 - **Framework**: React with TypeScript (Vite)
@@ -42,6 +49,8 @@ Preferred communication style: Simple, everyday language.
 - **Minimalist Aesthetic**: Clean typography, ample whitespace, subtle geometric patterns, triangle logo system.
 - **Consistent Branding**: Unified design language across the application.
 - **Deployment Architecture**: Three-phase startup system (initialization, server startup, background processing) with a StartupManager service for robust deployment.
+- **Real-time Accuracy**: Comprehensive accuracy calculation using MAPE, directional accuracy, and threshold-based methods.
+- **Production Predictions**: Automatic weekly prediction generation with rate limiting and error handling.
 
 ## External Dependencies
 - **Yahoo Finance API**: Real-time commodity price data.
