@@ -96,6 +96,18 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
     queryKey: ["/api/commodities", commodity.id, "latest-price"],
   });
 
+  // Fetch accuracy data for this commodity
+  const { data: accuracyData } = useQuery<{
+    aiModel: AiModel;
+    accuracy: number;
+    totalPredictions: number;
+    trend: number;
+    rank: number;
+  }[]>({
+    queryKey: ["/api/accuracy-metrics", commodity.id, "30d"],
+    enabled: !!commodity.id,
+  });
+
   const calculateChange = () => {
     if (!latestPrice?.changePercent) return { percentage: 0 };
     return { percentage: latestPrice.changePercent };
@@ -136,19 +148,31 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
         {/* Current Price and AI Predictions */}
         {latestPrice ? (
           <div className="space-y-3">
-            {/* AI Predictions Section */}
+            {/* Model Accuracy Scores Section */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">AI Price Predictions</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">Model Accuracy Scores</h4>
               <div className="grid grid-cols-1 gap-2">
-                {aiModels.slice(0, 3).map(model => {
-                  // Generate realistic prediction based on current price
-                  const variance = model.name === 'Claude' ? 0.98 + Math.random() * 0.04 :
-                                 model.name === 'ChatGPT' ? 0.96 + Math.random() * 0.08 :
-                                 model.name === 'Deepseek' ? 0.99 + Math.random() * 0.02 : 1.0;
-                  const prediction = latestPrice.price * variance;
-                  const predictionChange = ((prediction - latestPrice.price) / latestPrice.price) * 100;
-                  
-                  return (
+                {accuracyData && accuracyData.length > 0 ? (
+                  accuracyData.slice(0, 3).map(modelData => (
+                    <div key={modelData.aiModel.id} className="flex items-center justify-between py-1.5 px-2 bg-muted/30 rounded-md">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-2 h-2 rounded-full" 
+                          style={{ backgroundColor: getModelColor(modelData.aiModel.name) }}
+                        />
+                        <span className="text-sm font-medium">{modelData.aiModel.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold">{modelData.accuracy.toFixed(1)}%</div>
+                        <div className="text-xs text-muted-foreground">
+                          Rank #{modelData.rank}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  // Fallback when no accuracy data is available
+                  aiModels.slice(0, 3).map(model => (
                     <div key={model.id} className="flex items-center justify-between py-1.5 px-2 bg-muted/30 rounded-md">
                       <div className="flex items-center space-x-2">
                         <div 
@@ -158,15 +182,12 @@ function CommodityChartCard({ commodity, aiModels, onClick }: CommodityChartCard
                         <span className="text-sm font-medium">{model.name}</span>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold">${prediction.toFixed(2)}</div>
-                        <div className={`text-xs flex items-center ${predictionChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {predictionChange >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                          {predictionChange >= 0 ? '+' : ''}{predictionChange.toFixed(1)}%
-                        </div>
+                        <div className="text-sm font-semibold text-muted-foreground">--</div>
+                        <div className="text-xs text-muted-foreground">No data</div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))
+                )}
               </div>
             </div>
 
