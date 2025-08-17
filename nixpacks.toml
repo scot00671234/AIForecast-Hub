@@ -1,5 +1,6 @@
-# FORCE NODE.JS - NUCLEAR CADDY ELIMINATION
+# FORCE NODE.JS - NUCLEAR CADDY ELIMINATION - ABSOLUTE OVERRIDE
 providers = ["node"]
+staticAssets = false
 
 [variables]
 NODE_ENV = "production"

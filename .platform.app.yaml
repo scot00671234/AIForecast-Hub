@@ -1,0 +1,22 @@
+# Platform.sh configuration (alternative to nixpacks)
+name: aiforecast-hub
+type: nodejs:20
+
+disk: 512
+
+build:
+  flavor: none
+
+hooks:
+  build: |
+    npm ci --production=false
+    npm run build
+    node fix-build.js
+
+web:
+  commands:
+    start: "node dist/index.js"
+  locations:
+    "/":
+      root: "dist"
+      passthru: true
