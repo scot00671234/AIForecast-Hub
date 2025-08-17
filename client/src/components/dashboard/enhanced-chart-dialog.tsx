@@ -24,10 +24,6 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
   { value: "3mo", label: "3M", group: "Medium" },
   { value: "6mo", label: "6M", group: "Medium" },
   { value: "1y", label: "1Y", group: "Long" },
-  { value: "2y", label: "2Y", group: "Long" },
-  { value: "5y", label: "5Y", group: "Long" },
-  { value: "10y", label: "10Y", group: "Historical" },
-  { value: "max", label: "MAX", group: "Historical" },
 ];
 
 
@@ -61,12 +57,6 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
       </span>
     );
   };
-
-  const groupedPeriods = TIME_PERIODS.reduce((acc, period) => {
-    if (!acc[period.group]) acc[period.group] = [];
-    acc[period.group].push(period);
-    return acc;
-  }, {} as Record<string, typeof TIME_PERIODS>);
 
   
   return (
@@ -111,20 +101,16 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
         <div className="space-y-6 py-8">
           {/* Time Period Selection */}
           <div className="flex items-center justify-center space-x-2">
-            {Object.entries(groupedPeriods).map(([group, periods]) => (
-              <div key={group} className="flex space-x-1">
-                {periods.map(period => (
-                  <Button
-                    key={period.value}
-                    variant={selectedPeriod === period.value ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setSelectedPeriod(period.value)}
-                    className="h-8 px-3"
-                  >
-                    {period.label}
-                  </Button>
-                ))}
-              </div>
+            {TIME_PERIODS.map(period => (
+              <Button
+                key={period.value}
+                variant={selectedPeriod === period.value ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedPeriod(period.value)}
+                className="h-8 px-3"
+              >
+                {period.label}
+              </Button>
             ))}
           </div>
 
