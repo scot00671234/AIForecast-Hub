@@ -91,6 +91,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { commodityId, period } = req.params;
       
+      console.log(`📊 Calculating accuracy metrics for commodity: ${commodityId}, period: ${period}`);
+      
       // Get all AI models first
       const aiModels = await storage.getAiModels();
       
@@ -100,6 +102,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Get predictions for this model and commodity
           const predictions = await storage.getPredictions(commodityId, model.id);
           const actualPrices = await storage.getActualPrices(commodityId, 1000);
+          
+          console.log(`🔍 Model ${model.name}: ${predictions.length} predictions, ${actualPrices.length} actual prices`);
           
           // Filter by period
           const filteredPredictions = period === "all" ? predictions : 
@@ -124,8 +128,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return createdAt >= cutoffDate;
             });
 
-          // Calculate accuracy
+          console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions after period filter`);
+
+          // Calculate accuracy using improved date matching
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices);
+          
+          console.log(`🎯 Model ${model.name} accuracy result:`, accuracyResult ? 
+            `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches)` : 'No matches');
           
           return {
             aiModel: model,
@@ -141,6 +150,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rankedAccuracies = modelAccuracies
         .sort((a, b) => b.accuracy - a.accuracy)
         .map((item, index) => ({ ...item, rank: index + 1 }));
+
+      console.log(`✅ Final accuracy rankings for ${commodityId}:`, 
+        rankedAccuracies.map(r => `${r.aiModel.name}: ${r.accuracy}% (#${r.rank})`));
 
       res.json(rankedAccuracies);
     } catch (error) {
