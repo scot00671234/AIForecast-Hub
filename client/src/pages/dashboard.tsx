@@ -55,7 +55,7 @@ export default function Dashboard() {
 
       {/* Minimal Header - matching landing page */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
-        <div className="max-w-6xl mx-auto px-8 py-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Link href="/">
@@ -70,7 +70,7 @@ export default function Dashboard() {
             </div>
             
             {/* Search Bar and Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <div className="relative">
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -78,7 +78,7 @@ export default function Dashboard() {
                   placeholder="Search commodities..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-64 bg-background/60 dark:bg-white/10 border-border dark:border-white/20 focus:border-border/80 dark:focus:border-white/30 placeholder:text-muted-foreground"
+                  className="pl-10 pr-4 py-2 w-48 md:w-64 bg-background/60 dark:bg-white/10 border-border dark:border-white/20 focus:border-border/80 dark:focus:border-white/30 placeholder:text-muted-foreground"
                   data-testid="input-search-commodities"
                 />
                 {searchQuery && (
@@ -149,21 +149,21 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-6xl mx-auto px-8 py-16">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-16">
         
         {/* Hero Section */}
-        <section className="mb-20">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground mb-6 tracking-wide">
+        <section className="mb-12 md:mb-20">
+          <div className="text-center mb-8 md:mb-16">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal text-foreground mb-4 md:mb-6 tracking-wide">
               AI Prediction Performance
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
               Real-time tracking of AI model accuracy in commodity price forecasting
             </p>
           </div>
         </section>
 
-        <div className="space-y-20">
+        <div className="space-y-12 md:space-y-20">
           {/* Overall Model Rankings */}
           <OverallModelRankings />
           
@@ -173,8 +173,8 @@ export default function Dashboard() {
       </main>
 
       {/* Minimal Footer - matching landing page */}
-      <footer className="relative z-10 border-t border-border/50 mt-32">
-        <div className="max-w-6xl mx-auto px-8 py-16">
+      <footer className="relative z-10 border-t border-border/50 mt-16 md:mt-32">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-16">
           <div className="text-center space-y-6">
             <div className="flex items-center justify-center space-x-3">
               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>

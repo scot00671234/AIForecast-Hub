@@ -65,7 +65,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
@@ -79,7 +79,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 md:py-24 px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="space-y-8">
             <div className="space-y-4">
@@ -109,18 +109,18 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-6 bg-muted/30">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-light text-foreground mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
               How It Works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Our platform provides comprehensive AI prediction analysis with real market data
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
@@ -144,18 +144,18 @@ export default function Landing() {
       </section>
 
       {/* AI Models Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 md:py-20 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-light text-foreground mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
               AI Models Compared
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Track and compare prediction accuracy across leading AI models
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {Object.entries(AI_MODELS).map(([key, model]) => (
               <div key={key} className="text-center p-6">
                 <div 
@@ -173,13 +173,13 @@ export default function Landing() {
       </section>
 
       {/* Commodities Section */}
-      <section className="py-20 px-6 bg-muted/30">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-light text-foreground mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
               Tracked Commodities
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Real-time price data and AI predictions for major commodity markets
             </p>
           </div>

@@ -61,16 +61,16 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-background border border-border/50 backdrop-blur-md">
+      <DialogContent className="max-w-7xl w-[95vw] max-h-[95vh] overflow-y-auto bg-background border border-border/50 backdrop-blur-md">
         <DialogHeader className="border-b border-border/30 pb-8">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col md:flex-row md:items-start justify-between space-y-4 md:space-y-0">
             <div className="space-y-4">
-              <DialogTitle className="text-2xl md:text-3xl font-normal tracking-wide flex items-center space-x-3">
+              <DialogTitle className="text-xl md:text-2xl lg:text-3xl font-normal tracking-wide flex items-center space-x-3">
                 {/* Triangle icon matching the logo */}
                 <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-black dark:border-b-white"></div>
                 <span>{commodity.name} Price Analysis</span>
               </DialogTitle>
-              <div className="flex items-center space-x-8">
+              <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8">
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-muted-foreground font-light">Symbol:</span>
                   <span className="font-mono text-sm bg-muted/50 px-3 py-1 rounded-md font-medium border border-border/50">{commodity.symbol}</span>
@@ -83,7 +83,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                       </div>
                       <div className="text-sm text-muted-foreground font-light">Current Price</div>
                     </div>
-                    {latestPrice.changePercent !== 0 && (
+                    {latestPrice.changePercent != null && latestPrice.changePercent !== 0 && (
                       <div className="text-right">
                         <div className="text-lg font-medium">
                           {formatChange(latestPrice.changePercent)}
@@ -100,7 +100,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
 
         <div className="space-y-6 py-8">
           {/* Time Period Selection */}
-          <div className="flex items-center justify-center space-x-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {TIME_PERIODS.map(period => (
               <Button
                 key={period.value}

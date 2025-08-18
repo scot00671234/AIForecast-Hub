@@ -110,6 +110,11 @@
     font-optical-sizing: auto;
     font-weight: 400;
     line-height: 1.6;
+    
+    /* Mobile-specific improvements */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
   }
   
   /* Enhanced Typography */
@@ -269,5 +274,32 @@
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+  
+  /* Mobile-specific touch improvements */
+  .mobile-touch {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+    min-width: 44px;
+  }
+  
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better mobile interactions */
+  .mobile-friendly {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Responsive text sizing */
+  @media (max-width: 640px) {
+    .text-responsive {
+      font-size: 0.9rem;
+    }
+    
+    .heading-responsive {
+      font-size: 1.5rem;
+    }
   }
 }
