@@ -86,8 +86,14 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`SELECT 1`);
       console.log("✅ Database connection established");
       
-      // Then check if schema exists, if not create it
-      await this.ensureDatabaseSchema();
+      // Check if we're in production and run migration first
+      if (process.env.NODE_ENV === 'production') {
+        console.log("🔧 Production environment detected - ensuring database schema...");
+        await this.runProductionMigration();
+      } else {
+        // Development environment - use existing schema check
+        await this.ensureDatabaseSchema();
+      }
       
       // Finally test table access
       await db.select().from(aiModels).limit(1);
@@ -96,18 +102,18 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("❌ Database connection failed:", (error as Error).message);
       
-      // In production, try to run migration automatically
+      // If initial schema creation failed, try emergency migration
       if (process.env.NODE_ENV === 'production') {
-        console.log("🔧 Attempting automatic production migration...");
+        console.log("🚨 Emergency migration attempt...");
         try {
-          await this.runProductionMigration();
-          // Retry connection after migration
+          await this.runEmergencyMigration();
+          // Retry connection after emergency migration
           await db.select().from(aiModels).limit(1);
           this.isDbConnected = true;
-          console.log("✅ Database connection successful after migration");
+          console.log("✅ Database connection successful after emergency migration");
           return;
         } catch (migrationError) {
-          console.error("❌ Production migration failed:", (migrationError as Error).message);
+          console.error("❌ Emergency migration failed:", (migrationError as Error).message);
         }
       }
       
@@ -275,6 +281,33 @@ export class DatabaseStorage implements IStorage {
     `);
     
     console.log('✅ Production data inserted');
+  }
+
+  private async runEmergencyMigration() {
+    console.log('🚨 Running emergency database migration...');
+    
+    try {
+      // Drop existing tables if they exist (in case of partial creation)
+      const tableNames = ['market_alerts', 'accuracy_metrics', 'actual_prices', 'predictions', 'commodities', 'ai_models'];
+      
+      for (const tableName of tableNames) {
+        try {
+          await db.execute(sql.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`));
+          console.log(`🗑️ Dropped table: ${tableName}`);
+        } catch (dropError) {
+          // Continue if drop fails
+          console.log(`Note: Could not drop ${tableName}`);
+        }
+      }
+      
+      // Run fresh migration
+      await this.runProductionMigration();
+      
+      console.log('✅ Emergency migration completed');
+    } catch (error) {
+      console.error('❌ Emergency migration failed:', error);
+      throw error;
+    }
   }
 
   private async ensureDatabaseSchema() {
