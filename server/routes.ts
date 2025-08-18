@@ -31,10 +31,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const period = req.params.period || "30d";
       
+      console.log(`🏆 Calculating league table for period: ${period}`);
+      
       // Calculate real accuracy based on predictions vs actual prices
       const rankings = await accuracyCalculator.calculateModelRankings(period);
       
-      if (rankings.length > 0) {
+      console.log(`📊 Found ${rankings.length} model rankings with data`);
+      
+      if (rankings.length > 0 && rankings.some(r => r.totalPredictions > 0)) {
         // Transform to match frontend expected format
         const rankedTable = rankings.map(ranking => ({
           rank: ranking.rank,
@@ -44,8 +48,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trend: ranking.trend
         }));
         
+        console.log(`✅ Returning league table with real data:`, rankedTable.map(r => `${r.aiModel.name}: ${r.accuracy}% (${r.totalPredictions} predictions)`));
         res.json(rankedTable);
       } else {
+        // Debug: Check if we have any predictions at all
+        const allPredictions = await storage.getPredictions();
+        const allActualPrices = await storage.getActualPrices(undefined, 100);
+        console.log(`🔍 Debug: Total predictions in DB: ${allPredictions.length}, Total actual prices: ${allActualPrices.length}`);
+        
         // No predictions yet - return empty rankings with zero accuracy
         const aiModels = await storage.getAiModels();
         const emptyRankings = aiModels.map((model, index) => ({
@@ -56,6 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trend: 0
         }));
         
+        console.log(`⚠️ Returning empty rankings - no matching predictions found`);
         res.json(emptyRankings);
       }
     } catch (error) {

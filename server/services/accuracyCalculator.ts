@@ -41,13 +41,34 @@ export class AccuracyCalculator {
 
     const matches: Array<{ predicted: number; actual: number; date: Date }> = [];
 
-    // Match predictions with actual prices by date
+    // Match predictions with actual prices by date (with flexible matching)
     predictions.forEach(pred => {
-      const actualPrice = actualPrices.find(price => {
-        const predDate = new Date(pred.targetDate).toDateString();
-        const priceDate = new Date(price.date).toDateString();
-        return predDate === priceDate;
+      const predDate = new Date(pred.targetDate);
+      
+      // Try exact date match first
+      let actualPrice = actualPrices.find(price => {
+        const priceDate = new Date(price.date);
+        return Math.abs(predDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1000; // Within 24 hours
       });
+      
+      // If no exact match, find closest price within 7 days
+      if (!actualPrice) {
+        let closestPrice = null;
+        let minDiff = Infinity;
+        
+        actualPrices.forEach(price => {
+          const priceDate = new Date(price.date);
+          const diff = Math.abs(predDate.getTime() - priceDate.getTime());
+          const daysDiff = diff / (24 * 60 * 60 * 1000);
+          
+          if (daysDiff <= 7 && diff < minDiff) {
+            minDiff = diff;
+            closestPrice = price;
+          }
+        });
+        
+        actualPrice = closestPrice || undefined;
+      }
 
       if (actualPrice) {
         matches.push({

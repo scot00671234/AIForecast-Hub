@@ -565,13 +565,17 @@ export class DatabaseStorage implements IStorage {
     return this.getPredictions(commodityId);
   }
 
-  async getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]> {
+  async getActualPrices(commodityId?: string, limit?: number): Promise<ActualPrice[]> {
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
-    let query = db.select().from(actualPrices)
-      .where(eq(actualPrices.commodityId, commodityId))
-      .orderBy(desc(actualPrices.date));
+    let query = db.select().from(actualPrices);
+    
+    if (commodityId) {
+      query = query.where(eq(actualPrices.commodityId, commodityId)) as any;
+    }
+    
+    query = query.orderBy(desc(actualPrices.date)) as any;
     
     if (limit) {
       query = query.limit(limit) as any;
