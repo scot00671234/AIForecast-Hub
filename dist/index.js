@@ -171,6 +171,8 @@ var init_storage = __esm({
       }
       async testConnection() {
         try {
+          await db.execute(sql2`SELECT 1`);
+          await this.ensureDatabaseSchema();
           await db.select().from(aiModels).limit(1);
           this.isDbConnected = true;
           console.log("Database connection successful");
@@ -179,6 +181,108 @@ var init_storage = __esm({
           this.isDbConnected = false;
           throw new Error(`Database connection required for production deployment: ${error.message}`);
         }
+      }
+      async ensureDatabaseSchema() {
+        try {
+          const tableExists = await db.execute(sql2`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'ai_models'
+        );
+      `);
+          const exists = tableExists.rows[0]?.exists;
+          if (!exists) {
+            console.log("\u{1F527} Database schema not found, creating tables...");
+            await this.createDatabaseSchema();
+            console.log("\u2705 Database schema created successfully");
+          }
+        } catch (error) {
+          console.error("Error ensuring database schema:", error);
+          throw error;
+        }
+      }
+      async createDatabaseSchema() {
+        await db.execute(sql2`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
+        await db.execute(sql2`
+      CREATE TABLE "ai_models" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "name" text NOT NULL,
+        "provider" text NOT NULL,
+        "color" text NOT NULL,
+        "is_active" integer DEFAULT 1 NOT NULL,
+        CONSTRAINT "ai_models_name_unique" UNIQUE("name")
+      )
+    `);
+        await db.execute(sql2`
+      CREATE TABLE "commodities" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "name" text NOT NULL,
+        "symbol" text NOT NULL,
+        "category" text NOT NULL,
+        "yahoo_symbol" text,
+        "unit" text DEFAULT 'USD',
+        CONSTRAINT "commodities_name_unique" UNIQUE("name"),
+        CONSTRAINT "commodities_symbol_unique" UNIQUE("symbol")
+      )
+    `);
+        await db.execute(sql2`
+      CREATE TABLE "predictions" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "ai_model_id" varchar NOT NULL,
+        "commodity_id" varchar NOT NULL,
+        "prediction_date" timestamp NOT NULL,
+        "target_date" timestamp NOT NULL,
+        "predicted_price" numeric(10,4) NOT NULL,
+        "confidence" numeric(5,2),
+        "metadata" jsonb,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+        await db.execute(sql2`
+      CREATE TABLE "actual_prices" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "commodity_id" varchar NOT NULL,
+        "date" timestamp NOT NULL,
+        "price" numeric(10,4) NOT NULL,
+        "volume" numeric(15,2),
+        "source" text DEFAULT 'yahoo_finance',
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+        await db.execute(sql2`
+      CREATE TABLE "accuracy_metrics" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "ai_model_id" varchar NOT NULL,
+        "commodity_id" varchar NOT NULL,
+        "period" text NOT NULL,
+        "accuracy" numeric(5,2) NOT NULL,
+        "total_predictions" integer NOT NULL,
+        "correct_predictions" integer NOT NULL,
+        "avg_error" numeric(10,4),
+        "last_updated" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+        await db.execute(sql2`
+      CREATE TABLE "market_alerts" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "type" text NOT NULL,
+        "severity" text NOT NULL,
+        "title" text NOT NULL,
+        "description" text NOT NULL,
+        "commodity_id" varchar,
+        "ai_model_id" varchar,
+        "is_active" integer DEFAULT 1 NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+        await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "actual_prices" ADD CONSTRAINT "actual_prices_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+        await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
       }
       // Public wrapper for startup manager
       async ensureConnection() {
@@ -483,8 +587,8 @@ var init_yahooFinance = __esm({
     "use strict";
     init_storage();
     YahooFinanceService = class {
-      rateLimitDelay = 1e3;
-      // 1 second between requests
+      rateLimitDelay = 2e3;
+      // 2 seconds between requests to avoid rate limiting
       lastRequestTime = 0;
       async delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -503,7 +607,11 @@ var init_yahooFinance = __esm({
           const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?range=${period}&interval=${interval}`;
           const response = await fetch(url, {
             headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cache-Control": "no-cache",
+              "Pragma": "no-cache"
             }
           });
           if (!response.ok) {
@@ -571,37 +679,63 @@ var init_yahooFinance = __esm({
           "5d": "15m",
           "1w": "30m",
           "1mo": "1d",
-          // Changed from "1h" to "1d" for better data availability
           "3mo": "1d",
           "6mo": "1d",
           "1y": "1d",
           "2y": "1wk",
           "5y": "1mo",
           "10y": "1mo",
-          // Added 10-year period
           "max": "1mo"
-          // Added max period
         };
         const interval = intervalMap[period] || "1d";
-        try {
-          const data = await this.fetchHistoricalData(yahooSymbol, period, interval);
-          if (data?.chart?.result?.[0]) {
-            const result = data.chart.result[0];
-            const timestamps = result.timestamp || [];
-            const quotes = result.indicators?.quote?.[0];
-            if (quotes?.close) {
-              return timestamps.map((timestamp2, i) => ({
-                date: new Date(timestamp2 * 1e3).toISOString(),
-                price: quotes.close[i],
-                volume: quotes.volume?.[i] || 0
-              })).filter((item) => item.price && !isNaN(item.price));
+        const alternativeSymbols = {
+          "CL=F": ["CL=F", "USO", "DBOIL"],
+          // Crude oil alternatives
+          "GC=F": ["GC=F", "GLD", "IAU"],
+          // Gold alternatives
+          "NG=F": ["NG=F", "UNG", "BOIL"],
+          // Natural gas alternatives
+          "HG=F": ["HG=F", "CPER"],
+          // Copper alternatives
+          "SI=F": ["SI=F", "SLV"]
+          // Silver alternatives
+        };
+        const symbolsToTry = alternativeSymbols[yahooSymbol] || [yahooSymbol];
+        for (const symbol of symbolsToTry) {
+          try {
+            console.log(`Attempting to fetch ${period} data for ${symbol}`);
+            const data = await this.fetchHistoricalData(symbol, period, interval);
+            if (data?.chart?.result?.[0]) {
+              const result = data.chart.result[0];
+              const timestamps = result.timestamp || [];
+              const quotes = result.indicators?.quote?.[0];
+              if (quotes?.close && timestamps.length > 0) {
+                const processedData = timestamps.map((timestamp2, i) => ({
+                  date: new Date(timestamp2 * 1e3).toISOString(),
+                  price: quotes.close[i],
+                  volume: quotes.volume?.[i] || 0
+                })).filter((item) => item.price && !isNaN(item.price));
+                if (processedData.length > 0) {
+                  console.log(`Successfully fetched ${processedData.length} data points from ${symbol} for period ${period}`);
+                  return processedData;
+                }
+              }
             }
+            console.log(`No data available for ${symbol}, trying next alternative...`);
+            if (symbolsToTry.indexOf(symbol) < symbolsToTry.length - 1) {
+              await this.delay(2e3);
+            }
+          } catch (error) {
+            console.error(`Error fetching data for ${symbol}:`, error);
+            if (error.message?.includes("Too Many Requests") || error.message?.includes("429")) {
+              console.log("Rate limit detected, waiting 5 seconds...");
+              await this.delay(5e3);
+            }
+            continue;
           }
-          return [];
-        } catch (error) {
-          console.error(`Error fetching detailed data for ${yahooSymbol}:`, error);
-          return [];
         }
+        console.warn(`Failed to fetch data for all alternatives of ${yahooSymbol} for period ${period}`);
+        return [];
       }
     };
     yahooFinanceService = new YahooFinanceService();
@@ -898,6 +1032,11 @@ var init_yahooFinanceIntegration = __esm({
 });
 
 // server/services/aiPredictionService.ts
+var aiPredictionService_exports = {};
+__export(aiPredictionService_exports, {
+  AIPredictionService: () => AIPredictionService,
+  aiPredictionService: () => aiPredictionService
+});
 import { OpenAI } from "openai";
 var openai, AIPredictionService, aiPredictionService;
 var init_aiPredictionService = __esm({
@@ -1053,6 +1192,15 @@ Respond in JSON format:
               }
             } catch (error) {
               console.error(`Error generating ${model.name} prediction for ${commodity.name}:`, error);
+              if (error instanceof Error) {
+                if (error.message.includes("quota") || error.message.includes("insufficient_quota")) {
+                  console.log(`\u26A0\uFE0F ${model.name} quota exceeded for ${commodity.name} - consider upgrading API plan`);
+                } else if (error.message.includes("credit") || error.message.includes("billing")) {
+                  console.log(`\u26A0\uFE0F ${model.name} billing issue for ${commodity.name} - check account status`);
+                } else if (error.message.includes("402") || error.message.includes("Payment Required")) {
+                  console.log(`\u26A0\uFE0F ${model.name} payment required for ${commodity.name} - add credits to account`);
+                }
+              }
             }
           }
           console.log(`Completed AI predictions for ${commodity.name}`);
@@ -1082,6 +1230,39 @@ Respond in JSON format:
         } catch (error) {
           console.error("Error in generateDailyPredictions:", error);
         }
+      }
+      async generatePredictionsForAllCommodities() {
+        console.log("Starting comprehensive AI prediction generation for all commodities...");
+        try {
+          const commodities2 = await storage.getCommodities();
+          const workingServices = await this.getWorkingServices();
+          if (workingServices.length === 0) {
+            console.log("\u26A0\uFE0F No AI services are currently working - all have quota/billing issues");
+            console.log("\u{1F4A1} Please add credits to your AI service accounts to enable predictions");
+            return;
+          }
+          console.log(`\u{1F916} Found ${workingServices.length} working AI service(s): ${workingServices.join(", ")}`);
+          for (const commodity of commodities2) {
+            await this.generatePredictionsForCommodity(commodity.id);
+            await new Promise((resolve) => setTimeout(resolve, 1e3));
+          }
+          console.log("\u2705 Completed comprehensive AI prediction generation for all commodities");
+        } catch (error) {
+          console.error("\u274C Error in generatePredictionsForAllCommodities:", error);
+        }
+      }
+      async getWorkingServices() {
+        const workingServices = [];
+        if (this.isOpenAIConfigured()) {
+          workingServices.push("OpenAI");
+        }
+        if (claudeService.isConfigured()) {
+          workingServices.push("Claude");
+        }
+        if (deepseekService.isConfigured()) {
+          workingServices.push("DeepSeek");
+        }
+        return workingServices;
       }
       async isAnyServiceConfigured() {
         return !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.DEEPSEEK_API_KEY);
@@ -1340,17 +1521,38 @@ var init_predictionScheduler = __esm({
           console.log("Prediction scheduler is already running");
           return;
         }
-        cron.schedule("0 2 * * 1", async () => {
-          console.log("Running weekly AI prediction update...");
+        cron.schedule("0 2 * * *", async () => {
+          console.log("Running daily AI prediction update...");
+          try {
+            await aiPredictionService.generateDailyPredictions();
+            console.log("Daily AI prediction update completed successfully");
+          } catch (error) {
+            console.error("Daily AI prediction update failed:", error);
+          }
+        });
+        cron.schedule("0 3 * * 1", async () => {
+          console.log("Running weekly comprehensive AI prediction update...");
           try {
             await aiPredictionService.generateWeeklyPredictions();
-            console.log("Weekly AI prediction update completed successfully");
+            console.log("Weekly comprehensive AI prediction update completed successfully");
           } catch (error) {
-            console.error("Weekly AI prediction update failed:", error);
+            console.error("Weekly comprehensive AI prediction update failed:", error);
+          }
+        });
+        cron.schedule("0 9-17 * * 1-5", async () => {
+          console.log("Running hourly market prediction update...");
+          try {
+            await cachedPredictionService.generateAllCachedPredictions();
+            console.log("Hourly market prediction update completed successfully");
+          } catch (error) {
+            console.error("Hourly market prediction update failed:", error);
           }
         });
         this.isScheduled = true;
-        console.log("Prediction scheduler started - will run every Monday at 2 AM");
+        console.log("Prediction scheduler started with multiple schedules:");
+        console.log("- Daily predictions: Every day at 2 AM");
+        console.log("- Weekly comprehensive: Every Monday at 3 AM");
+        console.log("- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri");
       }
       async runNow() {
         console.log("Running weekly AI prediction update manually...");
@@ -1436,14 +1638,38 @@ var init_startupManager = __esm({
                 console.log(`\u26A0\uFE0F Could not initialize prices for ${commodity.name}:`, error.message);
               }
             }
-            const { PredictionScheduler: PredictionScheduler2 } = await Promise.resolve().then(() => (init_predictionScheduler(), predictionScheduler_exports));
-            const scheduler = new PredictionScheduler2();
-            scheduler.start();
+            const { predictionScheduler: predictionScheduler2 } = await Promise.resolve().then(() => (init_predictionScheduler(), predictionScheduler_exports));
+            predictionScheduler2.start();
+            await this.runInitialPredictions();
             console.log("\u2705 Background initialization complete");
           } catch (error) {
             console.error("\u274C Background initialization failed:", error);
           }
         }, 5e3);
+      }
+      // Run initial AI predictions on first deployment
+      async runInitialPredictions() {
+        try {
+          console.log("\u{1F916} Checking for initial AI predictions...");
+          const allPredictions = await this.storage.getPredictions();
+          const existingPredictions = allPredictions.slice(0, 1);
+          if (existingPredictions.length === 0) {
+            console.log("\u{1F680} First deployment detected - generating initial AI predictions...");
+            const { aiPredictionService: aiPredictionService2 } = await Promise.resolve().then(() => (init_aiPredictionService(), aiPredictionService_exports));
+            const isConfigured = await aiPredictionService2.isAnyServiceConfigured();
+            if (isConfigured) {
+              console.log("\u{1F52E} Starting initial prediction generation...");
+              await aiPredictionService2.generateWeeklyPredictions();
+              console.log("\u2705 Initial AI predictions generated successfully");
+            } else {
+              console.log("\u26A0\uFE0F No AI services configured - skipping initial predictions");
+            }
+          } else {
+            console.log("\u{1F4CA} Existing predictions found - skipping initial generation");
+          }
+        } catch (error) {
+          console.error("\u274C Initial prediction generation failed (non-critical):", error);
+        }
       }
     };
   }
@@ -1456,6 +1682,155 @@ import express2 from "express";
 init_storage();
 init_yahooFinance();
 import { createServer } from "http";
+
+// server/services/historicalDataService.ts
+init_storage();
+init_yahooFinance();
+var HistoricalDataService = class {
+  isRunning = false;
+  BATCH_DELAY = 3e3;
+  // 3 seconds between batches to avoid rate limiting
+  /**
+   * Fetch and store historical data for all commodities
+   * This will populate the database with years of historical data
+   */
+  async populateHistoricalData() {
+    if (this.isRunning) {
+      console.log("Historical data population already in progress");
+      return;
+    }
+    this.isRunning = true;
+    console.log("\u{1F504} Starting comprehensive historical data population...");
+    try {
+      const commodities2 = await storage.getCommodities();
+      const periods = ["5y", "10y", "max"];
+      for (const commodity of commodities2) {
+        if (!commodity.yahooSymbol) {
+          console.log(`Skipping ${commodity.name} - no Yahoo symbol`);
+          continue;
+        }
+        console.log(`\u{1F4CA} Processing historical data for ${commodity.name} (${commodity.yahooSymbol})`);
+        const existingData = await storage.getActualPrices(commodity.id, 1e3);
+        if (existingData.length > 500) {
+          console.log(`${commodity.name} already has ${existingData.length} data points, skipping...`);
+          continue;
+        }
+        for (const period of periods) {
+          try {
+            console.log(`  \u{1F4C5} Fetching ${period} data for ${commodity.name}`);
+            const historicalData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+            if (historicalData.length > 0) {
+              console.log(`  \u2705 Got ${historicalData.length} data points for ${period}`);
+              await this.storeHistoricalDataBatch(commodity, historicalData);
+              if (historicalData.length > 1e3) {
+                console.log(`  \u{1F3AF} Sufficient data obtained for ${commodity.name}`);
+                break;
+              }
+            } else {
+              console.log(`  \u26A0\uFE0F No data returned for ${period}`);
+            }
+            await this.delay(this.BATCH_DELAY);
+          } catch (error) {
+            console.error(`  \u274C Error fetching ${period} data for ${commodity.name}:`, error);
+            continue;
+          }
+        }
+        console.log(`  \u23F3 Waiting before next commodity...`);
+        await this.delay(this.BATCH_DELAY);
+      }
+      console.log("\u2705 Historical data population completed");
+    } catch (error) {
+      console.error("\u274C Error during historical data population:", error);
+    } finally {
+      this.isRunning = false;
+    }
+  }
+  /**
+   * Store historical data in the database, avoiding duplicates
+   */
+  async storeHistoricalDataBatch(commodity, historicalData) {
+    let stored = 0;
+    let skipped = 0;
+    for (const dataPoint of historicalData) {
+      try {
+        const actualPrice = {
+          commodityId: commodity.id,
+          date: new Date(dataPoint.date),
+          price: dataPoint.price.toString(),
+          volume: dataPoint.volume ? dataPoint.volume.toString() : null,
+          source: "yahoo_finance_historical"
+        };
+        const existingPrice = await storage.getActualPrices(commodity.id, 1).then((prices) => prices.find(
+          (p) => p.date.toDateString() === actualPrice.date.toDateString()
+        ));
+        if (existingPrice) {
+          skipped++;
+          continue;
+        }
+        await storage.createActualPrice(actualPrice);
+        stored++;
+        if (stored % 50 === 0) {
+          await this.delay(100);
+        }
+      } catch (error) {
+        if (!error.message?.includes("duplicate") && !error.message?.includes("unique")) {
+          console.error(`Error storing data point for ${commodity.name}:`, error);
+        }
+        skipped++;
+      }
+    }
+    console.log(`  \u{1F4DD} Stored: ${stored}, Skipped: ${skipped} data points for ${commodity.name}`);
+  }
+  /**
+   * Get summary of available historical data coverage
+   */
+  async getDataCoverageSummary() {
+    const commodities2 = await storage.getCommodities();
+    const summary = [];
+    for (const commodity of commodities2) {
+      const prices = await storage.getActualPrices(commodity.id, 1e4);
+      if (prices.length > 0) {
+        const sortedPrices = prices.sort((a, b) => a.date.getTime() - b.date.getTime());
+        summary.push({
+          commodity: commodity.name,
+          earliestDate: sortedPrices[0].date.toISOString().split("T")[0],
+          latestDate: sortedPrices[sortedPrices.length - 1].date.toISOString().split("T")[0],
+          totalPoints: prices.length
+        });
+      }
+    }
+    return summary;
+  }
+  async delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  /**
+   * Manual trigger for specific commodity
+   */
+  async populateForCommodity(commodityId) {
+    const commodity = await storage.getCommodity(commodityId);
+    if (!commodity?.yahooSymbol) {
+      throw new Error("Commodity not found or missing Yahoo symbol");
+    }
+    console.log(`\u{1F504} Fetching extensive historical data for ${commodity.name}`);
+    const periods = ["max", "10y", "5y"];
+    for (const period of periods) {
+      try {
+        const data = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+        if (data.length > 0) {
+          await this.storeHistoricalDataBatch(commodity, data);
+          console.log(`\u2705 Successfully stored ${data.length} data points for ${commodity.name} (${period})`);
+          return;
+        }
+      } catch (error) {
+        console.error(`Error fetching ${period} data:`, error);
+        continue;
+      }
+    }
+    throw new Error(`Failed to fetch historical data for ${commodity.name}`);
+  }
+};
+var historicalDataService = new HistoricalDataService();
 
 // server/services/accuracyCalculator.ts
 init_storage();
@@ -1697,74 +2072,38 @@ async function registerRoutes(app2) {
   app2.get("/api/league-table/:period", async (req, res) => {
     try {
       const period = req.params.period || "30d";
-      const aiModels2 = await storage.getAiModels();
-      const mockRankings = aiModels2.map((model, index) => {
-        let accuracy;
-        let totalPredictions;
-        let trend;
-        if (model.name === "Claude") {
-          accuracy = 78.5 + Math.random() * 6;
-          totalPredictions = 42;
-          trend = 1;
-        } else if (model.name === "ChatGPT") {
-          accuracy = 74.2 + Math.random() * 5;
-          totalPredictions = 39;
-          trend = 0;
-        } else if (model.name === "Deepseek") {
-          accuracy = 81.1 + Math.random() * 4;
-          totalPredictions = 35;
-          trend = 1;
-        } else {
-          accuracy = 70 + Math.random() * 8;
-          totalPredictions = 30;
-          trend = -1;
-        }
-        return {
-          rank: 0,
-          // Will be set after sorting
+      const rankings = await accuracyCalculator.calculateModelRankings(period);
+      if (rankings.length > 0) {
+        const rankedTable = rankings.map((ranking) => ({
+          rank: ranking.rank,
+          aiModel: ranking.aiModel,
+          accuracy: Math.round(ranking.overallAccuracy * 10) / 10,
+          totalPredictions: ranking.totalPredictions,
+          trend: ranking.trend
+        }));
+        res.json(rankedTable);
+      } else {
+        const aiModels2 = await storage.getAiModels();
+        const emptyRankings = aiModels2.map((model, index) => ({
+          rank: index + 1,
           aiModel: model,
-          accuracy: Math.round(accuracy * 10) / 10,
-          totalPredictions,
-          trend
-        };
-      });
-      const rankedTable = mockRankings.sort((a, b) => b.accuracy - a.accuracy).map((item, index) => ({ ...item, rank: index + 1 }));
-      res.json(rankedTable);
+          accuracy: 0,
+          totalPredictions: 0,
+          trend: 0
+        }));
+        res.json(emptyRankings);
+      }
     } catch (error) {
-      console.error("Error fetching league table:", error);
+      console.error("Error calculating league table:", error);
       const aiModels2 = await storage.getAiModels();
-      const mockRankings = aiModels2.map((model, index) => {
-        let accuracy;
-        let totalPredictions;
-        let trend;
-        if (model.name === "Claude") {
-          accuracy = 78.5 + Math.random() * 6;
-          totalPredictions = 42;
-          trend = 1;
-        } else if (model.name === "ChatGPT") {
-          accuracy = 74.2 + Math.random() * 5;
-          totalPredictions = 39;
-          trend = 0;
-        } else if (model.name === "Deepseek") {
-          accuracy = 81.1 + Math.random() * 4;
-          totalPredictions = 35;
-          trend = 1;
-        } else {
-          accuracy = 70 + Math.random() * 8;
-          totalPredictions = 30;
-          trend = -1;
-        }
-        return {
-          rank: 0,
-          // Will be set after sorting
-          aiModel: model,
-          accuracy: Math.round(accuracy * 10) / 10,
-          totalPredictions,
-          trend
-        };
-      });
-      const rankedTable = mockRankings.sort((a, b) => b.accuracy - a.accuracy).map((item, index) => ({ ...item, rank: index + 1 }));
-      res.json(rankedTable);
+      const emptyRankings = aiModels2.map((model, index) => ({
+        rank: index + 1,
+        aiModel: model,
+        accuracy: 0,
+        totalPredictions: 0,
+        trend: 0
+      }));
+      res.json(emptyRankings);
     }
   });
   app2.get("/api/accuracy-metrics/:commodityId/:period", async (req, res) => {
@@ -1772,15 +2111,34 @@ async function registerRoutes(app2) {
       const { commodityId, period } = req.params;
       const aiModels2 = await storage.getAiModels();
       const modelAccuracies = await Promise.all(
-        aiModels2.map(async (model, index) => {
-          const baseAccuracy = accuracyCalculator.calculateModelAccuracy(model.name, commodityId);
-          const accuracy = Math.round(baseAccuracy * 10) / 10;
+        aiModels2.map(async (model) => {
+          const predictions2 = await storage.getPredictions(commodityId, model.id);
+          const actualPrices2 = await storage.getActualPrices(commodityId, 1e3);
+          const filteredPredictions = period === "all" ? predictions2 : predictions2.filter((pred) => {
+            const createdAt = new Date(pred.createdAt);
+            const cutoffDate = /* @__PURE__ */ new Date();
+            switch (period) {
+              case "7d":
+                cutoffDate.setDate(cutoffDate.getDate() - 7);
+                break;
+              case "30d":
+                cutoffDate.setDate(cutoffDate.getDate() - 30);
+                break;
+              case "90d":
+                cutoffDate.setDate(cutoffDate.getDate() - 90);
+                break;
+              default:
+                return true;
+            }
+            return createdAt >= cutoffDate;
+          });
+          const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices2);
           return {
             aiModel: model,
-            accuracy,
-            totalPredictions: Math.floor(15 + Math.random() * 20),
-            // 15-35 predictions
-            trend: Math.random() > 0.6 ? 1 : Math.random() > 0.3 ? -1 : 0,
+            accuracy: accuracyResult ? Math.round(accuracyResult.accuracy * 10) / 10 : 0,
+            totalPredictions: accuracyResult ? accuracyResult.totalPredictions : 0,
+            trend: 0,
+            // Could be calculated based on historical data
             rank: 0
             // Will be set after sorting
           };
@@ -1834,8 +2192,8 @@ async function registerRoutes(app2) {
       const chartData = [];
       if (commodity.yahooSymbol) {
         try {
-          console.log(`Fetching data for ${commodity.yahooSymbol} with period ${period}`);
-          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+          console.log(`Fetching maximum historical data for ${commodity.yahooSymbol}`);
+          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, "max");
           console.log(`Received ${realTimeData.length} data points for ${commodity.yahooSymbol}`);
           if (realTimeData.length > 0) {
             realTimeData.forEach((item) => {
@@ -1903,7 +2261,7 @@ async function registerRoutes(app2) {
       const aiModels2 = await storage.getAiModels();
       if (commodity.yahooSymbol) {
         try {
-          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, "max");
           if (realTimeData.length > 0) {
             const enhancedData = realTimeData.map((item, index) => {
               const predictions2 = {};
@@ -1941,6 +2299,34 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Error fetching detailed chart data:", error);
       res.status(500).json({ message: "Failed to fetch detailed chart data" });
+    }
+  });
+  app2.post("/api/historical-data/populate", async (req, res) => {
+    try {
+      historicalDataService.populateHistoricalData().catch(console.error);
+      res.json({ message: "Historical data population started" });
+    } catch (error) {
+      console.error("Error starting historical data population:", error);
+      res.status(500).json({ message: "Failed to start historical data population" });
+    }
+  });
+  app2.post("/api/historical-data/populate/:commodityId", async (req, res) => {
+    try {
+      const commodityId = req.params.commodityId;
+      await historicalDataService.populateForCommodity(commodityId);
+      res.json({ message: "Historical data populated successfully" });
+    } catch (error) {
+      console.error("Error populating commodity historical data:", error);
+      res.status(500).json({ message: "Failed to populate historical data" });
+    }
+  });
+  app2.get("/api/historical-data/coverage", async (req, res) => {
+    try {
+      const coverage = await historicalDataService.getDataCoverageSummary();
+      res.json(coverage);
+    } catch (error) {
+      console.error("Error getting data coverage:", error);
+      res.status(500).json({ message: "Failed to get data coverage" });
     }
   });
   app2.get("/api/commodities/:id/latest-price", async (req, res) => {
@@ -2356,14 +2742,14 @@ var vite_config_default = defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(process.cwd(), "client", "src"),
-      "@shared": path.resolve(process.cwd(), "shared"),
-      "@assets": path.resolve(process.cwd(), "attached_assets")
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets")
     }
   },
-  root: path.resolve(process.cwd(), "client"),
+  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(process.cwd(), "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
   },
   server: {
@@ -2410,7 +2796,7 @@ async function setupVite(app2, server) {
     const url = req.originalUrl;
     try {
       const clientTemplate = path2.resolve(
-        process.cwd(),
+        import.meta.dirname,
         "..",
         "client",
         "index.html"
@@ -2429,7 +2815,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path.resolve(process.cwd(), "dist", "public");
+  const distPath = path2.resolve(import.meta.dirname, "public");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`

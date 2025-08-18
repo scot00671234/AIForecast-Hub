@@ -1,8 +1,8 @@
 #!/bin/bash
-# Force Node.js startup script
-export NODE_ENV=production
-export PORT=${PORT:-3000}
-export NO_CADDY=true
-export DISABLE_CADDY=true
-echo "🚀 Starting Node.js server (NO CADDY, NO STATIC SITE)"
-exec node dist/index.js
+
+# Production Startup Script for AIForecast Hub
+echo "🚀 Starting AIForecast Hub Production Server"
+echo "⚡ Environment: $NODE_ENV"
+
+# Start the application
+NODE_ENV=production node dist/index.js
