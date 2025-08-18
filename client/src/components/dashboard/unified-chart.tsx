@@ -14,10 +14,11 @@ interface ChartDataPoint {
   value: number;
 }
 
-// Utility function to filter data based on time period
-const filterDataByPeriod = (data: any[], period: string) => {
-  if (!data || data.length === 0) return data;
+// Utility function to prepare data with proper zoom focus
+const prepareDataWithZoom = (data: any[], period: string) => {
+  if (!data || data.length === 0) return { data, focusRange: null };
   
+  // Always return all data, but calculate focus range for chart zoom
   const now = new Date();
   const periodToMilliseconds: Record<string, number | null> = {
     '1d': 24 * 60 * 60 * 1000,
@@ -30,18 +31,25 @@ const filterDataByPeriod = (data: any[], period: string) => {
     '2y': 2 * 365 * 24 * 60 * 60 * 1000,
     '5y': 5 * 365 * 24 * 60 * 60 * 1000,
     '10y': 10 * 365 * 24 * 60 * 60 * 1000,
-    'max': null // null means no filtering, show all data
+    'max': null // null means no specific focus, show all data
   };
   
   const filterMs = periodToMilliseconds[period];
-  if (filterMs === null) return data; // Show all data for 'max'
   
+  if (filterMs === null) {
+    // MAX period - show all data without specific focus
+    return { data, focusRange: null };
+  }
+  
+  // Calculate focus range but return all data
   const cutoffDate = new Date(now.getTime() - filterMs);
+  const focusStartTime = Math.floor(cutoffDate.getTime() / 1000);
+  const focusEndTime = Math.floor(now.getTime() / 1000);
   
-  return data.filter(item => {
-    const itemDate = new Date(item.date);
-    return itemDate >= cutoffDate;
-  });
+  return { 
+    data, // Always return ALL data
+    focusRange: { from: focusStartTime, to: focusEndTime }
+  };
 };
 
 const UnifiedChart: React.FC<UnifiedChartProps> = ({ 
@@ -64,8 +72,8 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
     refetchOnWindowFocus: false,
   });
 
-  // Filter data based on selected period for display
-  const chartData = filterDataByPeriod(rawChartData, period);
+  // Prepare data with zoom focus (always show all data, but with focus range)
+  const { data: chartData, focusRange } = prepareDataWithZoom(rawChartData, period);
 
   // Fetch AI models for colors
   const { data: aiModels } = useQuery({
@@ -193,15 +201,17 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         const sortedHistoricalData = historicalData.sort((a, b) => (a.time as number) - (b.time as number));
         historicalSeries.setData(sortedHistoricalData);
         
-        // Fit chart to data with proper scaling
-        chart.timeScale().fitContent();
-        
-        // Force chart to render with proper bounds
-        setTimeout(() => {
-          if (chartRef.current) {
-            chartRef.current.timeScale().scrollToPosition(0, false);
-          }
-        }, 100);
+        // Apply zoom focus if specified
+        if (focusRange) {
+          // Set visible range to focus on the selected period
+          chart.timeScale().setVisibleRange({
+            from: focusRange.from as Time,
+            to: focusRange.to as Time,
+          });
+        } else {
+          // Fit chart to all available data
+          chart.timeScale().fitContent();
+        }
       }
 
       // Add prediction series for each AI model with distinct colors and dotted style
@@ -249,7 +259,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         chartRef.current = null;
       }
     };
-  }, [chartData, theme, height, dataLoading, commodityId]);
+  }, [chartData, focusRange, theme, height, dataLoading, commodityId, period]);
 
   // Update chart theme when theme changes
   useEffect(() => {
