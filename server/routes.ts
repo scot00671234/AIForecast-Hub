@@ -194,11 +194,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         predictions?: Record<string, number>;
       }> = [];
 
-      // Get historical data
+      // Get historical data - always fetch maximum available data
       if (commodity.yahooSymbol) {
         try {
-          console.log(`Fetching data for ${commodity.yahooSymbol} with period ${period}`);
-          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+          console.log(`Fetching maximum historical data for ${commodity.yahooSymbol}`);
+          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, 'max');
           console.log(`Received ${realTimeData.length} data points for ${commodity.yahooSymbol}`);
           
           if (realTimeData.length > 0) {
@@ -288,8 +288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (commodity.yahooSymbol) {
         try {
-          // Fetch real-time data from Yahoo Finance
-          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, period);
+          // Fetch real-time data from Yahoo Finance - always get maximum data
+          const realTimeData = await yahooFinanceService.fetchDetailedHistoricalData(commodity.yahooSymbol, 'max');
           
           if (realTimeData.length > 0) {
             // Map real Yahoo Finance data with AI predictions

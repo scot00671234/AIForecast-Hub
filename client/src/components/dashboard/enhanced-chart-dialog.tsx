@@ -28,7 +28,6 @@ const TIME_PERIODS: Array<{ value: TimePeriod; label: string; group: string }> =
   { value: "5y", label: "5Y", group: "Long" },
   { value: "10y", label: "10Y", group: "Long" },
   { value: "max", label: "MAX", group: "Long" },
-  { value: "max", label: "MAX", group: "Long" },
 ];
 
 

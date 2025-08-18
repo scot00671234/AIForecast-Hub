@@ -14,6 +14,36 @@ interface ChartDataPoint {
   value: number;
 }
 
+// Utility function to filter data based on time period
+const filterDataByPeriod = (data: any[], period: string) => {
+  if (!data || data.length === 0) return data;
+  
+  const now = new Date();
+  const periodToMilliseconds: Record<string, number | null> = {
+    '1d': 24 * 60 * 60 * 1000,
+    '5d': 5 * 24 * 60 * 60 * 1000,
+    '1w': 7 * 24 * 60 * 60 * 1000,
+    '1mo': 30 * 24 * 60 * 60 * 1000,
+    '3mo': 90 * 24 * 60 * 60 * 1000,
+    '6mo': 180 * 24 * 60 * 60 * 1000,
+    '1y': 365 * 24 * 60 * 60 * 1000,
+    '2y': 2 * 365 * 24 * 60 * 60 * 1000,
+    '5y': 5 * 365 * 24 * 60 * 60 * 1000,
+    '10y': 10 * 365 * 24 * 60 * 60 * 1000,
+    'max': null // null means no filtering, show all data
+  };
+  
+  const filterMs = periodToMilliseconds[period];
+  if (filterMs === null) return data; // Show all data for 'max'
+  
+  const cutoffDate = new Date(now.getTime() - filterMs);
+  
+  return data.filter(item => {
+    const itemDate = new Date(item.date);
+    return itemDate >= cutoffDate;
+  });
+};
+
 const UnifiedChart: React.FC<UnifiedChartProps> = ({ 
   commodityId, 
   period = "1mo", 
@@ -24,15 +54,18 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch chart data with predictions
-  const { data: chartData, isLoading: dataLoading } = useQuery({
-    queryKey: [`/api/commodities/${commodityId}/chart-with-predictions`, period],
-    queryFn: () => fetch(`/api/commodities/${commodityId}/chart-with-predictions/${period}`).then(res => res.json()),
+  // Fetch chart data with predictions - always fetch max data
+  const { data: rawChartData, isLoading: dataLoading } = useQuery({
+    queryKey: [`/api/commodities/${commodityId}/chart-with-predictions/max`],
+    queryFn: () => fetch(`/api/commodities/${commodityId}/chart-with-predictions/max`).then(res => res.json()),
     enabled: !!commodityId,
-    staleTime: 60000, // Cache for 1 minute
+    staleTime: 300000, // Cache for 5 minutes since we're fetching max data
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
+
+  // Filter data based on selected period for display
+  const chartData = filterDataByPeriod(rawChartData, period);
 
   // Fetch AI models for colors
   const { data: aiModels } = useQuery({
