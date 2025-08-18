@@ -188,6 +188,17 @@ Respond in JSON format:
           }
         } catch (error) {
           console.error(`Error generating ${model.name} prediction for ${commodity.name}:`, error);
+          
+          // Log specific error types for better monitoring
+          if (error instanceof Error) {
+            if (error.message.includes('quota') || error.message.includes('insufficient_quota')) {
+              console.log(`⚠️ ${model.name} quota exceeded for ${commodity.name} - consider upgrading API plan`);
+            } else if (error.message.includes('credit') || error.message.includes('billing')) {
+              console.log(`⚠️ ${model.name} billing issue for ${commodity.name} - check account status`);
+            } else if (error.message.includes('402') || error.message.includes('Payment Required')) {
+              console.log(`⚠️ ${model.name} payment required for ${commodity.name} - add credits to account`);
+            }
+          }
         }
       }
       
@@ -230,6 +241,55 @@ Respond in JSON format:
     } catch (error) {
       console.error("Error in generateDailyPredictions:", error);
     }
+  }
+
+  async generatePredictionsForAllCommodities(): Promise<void> {
+    console.log("Starting comprehensive AI prediction generation for all commodities...");
+    
+    try {
+      const commodities = await storage.getCommodities();
+      const workingServices = await this.getWorkingServices();
+      
+      if (workingServices.length === 0) {
+        console.log("⚠️ No AI services are currently working - all have quota/billing issues");
+        console.log("💡 Please add credits to your AI service accounts to enable predictions");
+        return;
+      }
+      
+      console.log(`🤖 Found ${workingServices.length} working AI service(s): ${workingServices.join(', ')}`);
+      
+      for (const commodity of commodities) {
+        await this.generatePredictionsForCommodity(commodity.id);
+        
+        // Add small delay between commodities to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      console.log("✅ Completed comprehensive AI prediction generation for all commodities");
+    } catch (error) {
+      console.error("❌ Error in generatePredictionsForAllCommodities:", error);
+    }
+  }
+
+  async getWorkingServices(): Promise<string[]> {
+    const workingServices: string[] = [];
+    
+    // Check OpenAI
+    if (this.isOpenAIConfigured()) {
+      workingServices.push('OpenAI');
+    }
+    
+    // Check Claude
+    if (claudeService.isConfigured()) {
+      workingServices.push('Claude');
+    }
+    
+    // Check DeepSeek
+    if (deepseekService.isConfigured()) {
+      workingServices.push('DeepSeek');
+    }
+    
+    return workingServices;
   }
 
   async isAnyServiceConfigured(): Promise<boolean> {

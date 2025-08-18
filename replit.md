@@ -11,8 +11,10 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Compatibility**: Enhanced responsive design across all components for optimal mobile viewing experience
 - **Real Accuracy System**: Implemented comprehensive accuracy calculation based on actual AI predictions vs real historical prices
 - **Production-Ready**: League table and scoreboards now use authentic prediction data instead of mock data
-- **Initial Deployment Trigger**: Added automatic AI prediction generation on first deployment
-- **API Integration**: Full integration ready for OpenAI, Claude, and Deepseek API keys in production
+- **AI Prediction Automation**: Fully automated AI prediction system with multiple scheduling options and no manual triggers required
+- **Advanced Scheduling**: Daily (2 AM), weekly (3 AM Monday), and hourly (9 AM-5 PM, Mon-Fri) automatic prediction generation
+- **Multi-Service Integration**: Simultaneous prediction generation using OpenAI, Anthropic, and DeepSeek APIs with robust error handling
+- **API Management**: Comprehensive manual trigger endpoints for all prediction operations and service status monitoring
 
 ## System Architecture
 ### Frontend

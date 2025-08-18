@@ -11,19 +11,44 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule weekly AI prediction updates every Monday at 2 AM
-    cron.schedule('0 2 * * 1', async () => {
-      console.log('Running weekly AI prediction update...');
+    // Schedule daily AI prediction updates at 2 AM
+    cron.schedule('0 2 * * *', async () => {
+      console.log('Running daily AI prediction update...');
+      try {
+        await aiPredictionService.generateDailyPredictions();
+        console.log('Daily AI prediction update completed successfully');
+      } catch (error) {
+        console.error('Daily AI prediction update failed:', error);
+      }
+    });
+
+    // Schedule weekly comprehensive updates every Monday at 3 AM
+    cron.schedule('0 3 * * 1', async () => {
+      console.log('Running weekly comprehensive AI prediction update...');
       try {
         await aiPredictionService.generateWeeklyPredictions();
-        console.log('Weekly AI prediction update completed successfully');
+        console.log('Weekly comprehensive AI prediction update completed successfully');
       } catch (error) {
-        console.error('Weekly AI prediction update failed:', error);
+        console.error('Weekly comprehensive AI prediction update failed:', error);
+      }
+    });
+
+    // Schedule hourly prediction updates during market hours (9 AM - 5 PM EST, Mon-Fri)
+    cron.schedule('0 9-17 * * 1-5', async () => {
+      console.log('Running hourly market prediction update...');
+      try {
+        await cachedPredictionService.generateAllCachedPredictions();
+        console.log('Hourly market prediction update completed successfully');
+      } catch (error) {
+        console.error('Hourly market prediction update failed:', error);
       }
     });
 
     this.isScheduled = true;
-    console.log('Prediction scheduler started - will run every Monday at 2 AM');
+    console.log('Prediction scheduler started with multiple schedules:');
+    console.log('- Daily predictions: Every day at 2 AM');
+    console.log('- Weekly comprehensive: Every Monday at 3 AM');
+    console.log('- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri');
   }
 
   async runNow(): Promise<void> {
