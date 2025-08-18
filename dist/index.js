@@ -165,9 +165,13 @@ var init_storage = __esm({
     init_db();
     DatabaseStorage = class {
       isDbConnected = false;
+      initializationPromise;
       constructor() {
-        this.testConnection();
-        this.initializeDefaultData();
+        this.initializationPromise = this.initialize();
+      }
+      async initialize() {
+        await this.testConnection();
+        await this.initializeDefaultData();
       }
       async testConnection() {
         try {
@@ -284,13 +288,13 @@ var init_storage = __esm({
         await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
         await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
       }
-      // Public wrapper for startup manager
+      // Public wrapper for startup manager - ensures full initialization is complete
       async ensureConnection() {
-        await this.testConnection();
+        await this.initializationPromise;
       }
-      // Public wrapper for startup manager
+      // Public wrapper for startup manager - ensures full initialization is complete  
       async ensureDefaultData() {
-        await this.initializeDefaultData();
+        await this.initializationPromise;
       }
       async initializeDefaultData() {
         try {
@@ -329,6 +333,7 @@ var init_storage = __esm({
         }
       }
       async getAiModels() {
+        await this.initializationPromise;
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
@@ -343,6 +348,7 @@ var init_storage = __esm({
         return model;
       }
       async getCommodities() {
+        await this.initializationPromise;
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }

@@ -1,0 +1,64 @@
+🚀 Starting AIForecast Hub (Professional Edition)
+🔧 Initializing critical services...
+Database connected successfully
+Database connection successful
+✅ Database connection verified
+Database connection successful
+✅ Database schema and default data initialized
+✅ Critical initialization complete
+🔧 Initializing critical services...
+Database connection successful
+✅ Database connection verified
+✅ Database schema and default data initialized
+⚡ Starting heavy initialization (background)...
+6:46:20 PM [express] ✅ Server running on port 3000
+🎯 Application ready - all systems operational
+⚡ Starting heavy initialization (background)...
+❌ Heavy initialization failed (non-critical): error: relation "commodities" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:349:16)
+at async StartupManager.initializeHeavy (file:///app/dist/index.js:1622:32) {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+❌ Heavy initialization failed (non-critical): error: relation "commodities" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:349:16)
+at async StartupManager.initializeHeavy (file:///app/dist/index.js:1622:32) {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}

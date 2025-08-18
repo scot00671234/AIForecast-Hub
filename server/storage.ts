@@ -68,10 +68,16 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   private isDbConnected = false;
+  private initializationPromise: Promise<void>;
 
   constructor() {
-    this.testConnection();
-    this.initializeDefaultData();
+    // Start initialization but don't block constructor
+    this.initializationPromise = this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
+    await this.testConnection();
+    await this.initializeDefaultData();
   }
 
   private async testConnection() {
@@ -215,14 +221,14 @@ export class DatabaseStorage implements IStorage {
     await db.execute(sql`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
   }
 
-  // Public wrapper for startup manager
+  // Public wrapper for startup manager - ensures full initialization is complete
   async ensureConnection(): Promise<void> {
-    await this.testConnection();
+    await this.initializationPromise;
   }
 
-  // Public wrapper for startup manager
+  // Public wrapper for startup manager - ensures full initialization is complete  
   async ensureDefaultData(): Promise<void> {
-    await this.initializeDefaultData();
+    await this.initializationPromise;
   }
 
   private async initializeDefaultData() {
@@ -271,6 +277,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAiModels(): Promise<AiModel[]> {
+    // Ensure initialization is complete before accessing database
+    await this.initializationPromise;
+    
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
@@ -288,6 +297,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCommodities(): Promise<Commodity[]> {
+    // Ensure initialization is complete before accessing database
+    await this.initializationPromise;
+    
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
