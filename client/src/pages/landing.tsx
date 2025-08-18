@@ -65,7 +65,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4">
+        <div className="max-w-6xl mx-auto px-6 md:px-6 py-6 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
@@ -79,7 +79,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24 px-4 md:px-6">
+      <section className="py-16 md:py-24 px-6 md:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="space-y-8">
             <div className="space-y-4">
@@ -98,7 +98,7 @@ export default function Landing() {
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-8 py-3 text-base font-medium"
+                className="px-8 py-4 text-base font-medium min-h-[48px]"
                 data-testid="get-started-button"
               >
                 Get Started <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -109,7 +109,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-muted/30">
+      <section className="py-12 md:py-20 px-6 md:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
