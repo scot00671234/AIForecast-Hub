@@ -7,6 +7,9 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- **Production Migration System**: Created comprehensive database migration system with automatic production deployment
+- **Robust Error Handling**: Fixed critical production issue (42P01 - relation 'commodities' does not exist) with multi-layer migration approach
+- **Enhanced Deployment**: Added automatic schema creation, conflict resolution, and production-ready scripts (deploy.sh, production-migrate.ts)
 - **Replit Migration Complete**: Successfully migrated from Replit Agent to standard Replit environment with PostgreSQL setup
 - **Mobile Compatibility**: Enhanced responsive design across all components for optimal mobile viewing experience
 - **Real Accuracy System**: Implemented comprehensive accuracy calculation based on actual AI predictions vs real historical prices

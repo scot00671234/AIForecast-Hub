@@ -84,6 +84,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // First test basic database connection
       await db.execute(sql`SELECT 1`);
+      console.log("✅ Database connection established");
       
       // Then check if schema exists, if not create it
       await this.ensureDatabaseSchema();
@@ -91,12 +92,189 @@ export class DatabaseStorage implements IStorage {
       // Finally test table access
       await db.select().from(aiModels).limit(1);
       this.isDbConnected = true;
-      console.log("Database connection successful");
+      console.log("✅ Database connection verified");
     } catch (error) {
-      console.error("Database connection failed:", (error as Error).message);
+      console.error("❌ Database connection failed:", (error as Error).message);
+      
+      // In production, try to run migration automatically
+      if (process.env.NODE_ENV === 'production') {
+        console.log("🔧 Attempting automatic production migration...");
+        try {
+          await this.runProductionMigration();
+          // Retry connection after migration
+          await db.select().from(aiModels).limit(1);
+          this.isDbConnected = true;
+          console.log("✅ Database connection successful after migration");
+          return;
+        } catch (migrationError) {
+          console.error("❌ Production migration failed:", (migrationError as Error).message);
+        }
+      }
+      
       this.isDbConnected = false;
       throw new Error(`Database connection required for production deployment: ${(error as Error).message}`);
     }
+  }
+
+  private async runProductionMigration() {
+    console.log('🔧 Running production database migration...');
+    
+    // Enable UUID generation extension
+    await db.execute(sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
+
+    // Create tables that don't exist
+    const tables = [
+      {
+        name: 'ai_models',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "ai_models" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "name" text NOT NULL,
+            "provider" text NOT NULL,
+            "color" text NOT NULL,
+            "is_active" integer DEFAULT 1 NOT NULL,
+            CONSTRAINT "ai_models_name_unique" UNIQUE("name")
+          )
+        `
+      },
+      {
+        name: 'commodities',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "commodities" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "name" text NOT NULL,
+            "symbol" text NOT NULL,
+            "category" text NOT NULL,
+            "yahoo_symbol" text,
+            "unit" text DEFAULT 'USD',
+            CONSTRAINT "commodities_name_unique" UNIQUE("name"),
+            CONSTRAINT "commodities_symbol_unique" UNIQUE("symbol")
+          )
+        `
+      },
+      {
+        name: 'predictions',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "predictions" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "ai_model_id" varchar NOT NULL,
+            "commodity_id" varchar NOT NULL,
+            "prediction_date" timestamp NOT NULL,
+            "target_date" timestamp NOT NULL,
+            "predicted_price" numeric(10,4) NOT NULL,
+            "confidence" numeric(5,2),
+            "metadata" jsonb,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+      },
+      {
+        name: 'actual_prices',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "actual_prices" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "commodity_id" varchar NOT NULL,
+            "date" timestamp NOT NULL,
+            "price" numeric(10,4) NOT NULL,
+            "volume" numeric(15,2),
+            "source" text DEFAULT 'yahoo_finance',
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+      },
+      {
+        name: 'accuracy_metrics',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "accuracy_metrics" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "ai_model_id" varchar NOT NULL,
+            "commodity_id" varchar NOT NULL,
+            "period" text NOT NULL,
+            "accuracy" numeric(5,2) NOT NULL,
+            "total_predictions" integer NOT NULL,
+            "correct_predictions" integer NOT NULL,
+            "avg_error" numeric(10,4),
+            "last_updated" timestamp DEFAULT now() NOT NULL
+          )
+        `
+      },
+      {
+        name: 'market_alerts',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "market_alerts" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "type" text NOT NULL,
+            "severity" text NOT NULL,
+            "title" text NOT NULL,
+            "description" text NOT NULL,
+            "commodity_id" varchar,
+            "ai_model_id" varchar,
+            "is_active" integer DEFAULT 1 NOT NULL,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+      }
+    ];
+
+    // Create all tables
+    for (const table of tables) {
+      console.log(`🔧 Creating table: ${table.name}`);
+      await db.execute(table.query);
+    }
+
+    // Add foreign key constraints (only if they don't exist)
+    try {
+      await db.execute(sql`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "actual_prices" ADD CONSTRAINT "actual_prices_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+      await db.execute(sql`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+    } catch (error) {
+      // Constraints might already exist, continue
+      console.log('Note: Some constraints may already exist');
+    }
+
+    // Insert initial data
+    await this.insertProductionData();
+    
+    console.log('✅ Production migration completed');
+  }
+
+  private async insertProductionData() {
+    console.log('🔧 Inserting production data...');
+    
+    // Insert AI models with conflict handling
+    await db.execute(sql`
+      INSERT INTO "ai_models" ("name", "provider", "color", "is_active") VALUES
+      ('ChatGPT', 'OpenAI', '#10B981', 1),
+      ('Claude', 'Anthropic', '#8B5CF6', 1),
+      ('Deepseek', 'DeepSeek', '#F59E0B', 1)
+      ON CONFLICT (name) DO NOTHING
+    `);
+
+    // Insert commodities with conflict handling
+    await db.execute(sql`
+      INSERT INTO "commodities" ("name", "symbol", "category", "yahoo_symbol") VALUES
+      ('Crude Oil', 'CL', 'hard', 'CL=F'),
+      ('Gold', 'AU', 'hard', 'GC=F'),
+      ('Natural Gas', 'NG', 'hard', 'NG=F'),
+      ('Copper', 'CU', 'hard', 'HG=F'),
+      ('Silver', 'AG', 'hard', 'SI=F'),
+      ('Aluminum', 'AL', 'hard', 'ALI=F'),
+      ('Platinum', 'PT', 'hard', 'PL=F'),
+      ('Palladium', 'PD', 'hard', 'PA=F'),
+      ('Coffee', 'KC', 'soft', 'KC=F'),
+      ('Sugar', 'SB', 'soft', 'SB=F'),
+      ('Corn', 'ZC', 'soft', 'ZC=F'),
+      ('Soybeans', 'ZS', 'soft', 'ZS=F'),
+      ('Cotton', 'CT', 'soft', 'CT=F'),
+      ('Wheat', 'ZW', 'soft', 'ZW=F')
+      ON CONFLICT (name) DO NOTHING
+    `);
+    
+    console.log('✅ Production data inserted');
   }
 
   private async ensureDatabaseSchema() {
