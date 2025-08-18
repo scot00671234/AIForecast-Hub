@@ -175,14 +175,6 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
           if (!timeStamp || isNaN(timeStamp)) return;
 
           if (item.type === 'historical' && item.actualPrice !== null && item.actualPrice !== undefined && !isNaN(item.actualPrice)) {
-            // Debug logging for the data processing
-            if (index < 3 || index >= chartData.length - 3) {
-              console.log(`Chart data point ${index}:`, {
-                date: item.date,
-                actualPrice: item.actualPrice,
-                timestamp: timeStamp
-              });
-            }
             
             historicalData.push({
               time: timeStamp as Time,
@@ -216,10 +208,7 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
         });
         const sortedHistoricalData = historicalData.sort((a, b) => (a.time as number) - (b.time as number));
         
-        // Debug: Log first and last few data points
-        console.log('First few historical data points:', sortedHistoricalData.slice(0, 3));
-        console.log('Last few historical data points:', sortedHistoricalData.slice(-3));
-        console.log('Total historical points for chart:', sortedHistoricalData.length);
+
         
         historicalSeries.setData(sortedHistoricalData);
         
