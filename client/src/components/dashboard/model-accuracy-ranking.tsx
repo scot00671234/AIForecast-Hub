@@ -28,26 +28,9 @@ export default function ModelAccuracyRanking({
   });
 
   // Generate mock data with realistic accuracy patterns if no data available
-  const generateMockAccuracy = (): ModelAccuracy[] => {
-    const baseAccuracies: Record<string, number> = {
-      "Claude": 86.4 + (Math.random() - 0.5) * 4,
-      "ChatGPT": 84.1 + (Math.random() - 0.5) * 4,  
-      "Deepseek": 88.2 + (Math.random() - 0.5) * 4
-    };
+  // Mock data generation removed - using authentic data only
 
-    return aiModels
-      .map(model => ({
-        aiModel: model,
-        accuracy: Math.round((baseAccuracies[model.name] || 80) * 10) / 10,
-        totalPredictions: Math.floor(15 + Math.random() * 20), // 15-35 predictions
-        trend: Math.random() > 0.6 ? 1 : (Math.random() > 0.3 ? -1 : 0),
-        rank: 0 // Will be set after sorting
-      }))
-      .sort((a, b) => b.accuracy - a.accuracy)
-      .map((item, index) => ({ ...item, rank: index + 1 }));
-  };
-
-  const rankingData = accuracyData || generateMockAccuracy();
+  const rankingData = accuracyData || [];
 
   if (isLoading) {
     return (
@@ -82,7 +65,7 @@ export default function ModelAccuracyRanking({
       </div>
       
       <div className="space-y-2">
-        {rankingData.map((data, index) => (
+        {rankingData.map((data: ModelAccuracy, index: number) => (
           <div key={data.aiModel.id} className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
             <div className="flex items-center space-x-3">
               <div className={`w-1.5 h-1.5 rounded-full ${
