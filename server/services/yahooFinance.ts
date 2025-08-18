@@ -195,7 +195,7 @@ class YahooFinanceService {
         console.error(`Error fetching data for ${symbol}:`, error);
         
         // If it's a rate limit error, wait longer
-        if (error.message?.includes('Too Many Requests') || error.message?.includes('429')) {
+        if ((error as Error).message?.includes('Too Many Requests') || (error as Error).message?.includes('429')) {
           console.log('Rate limit detected, waiting 5 seconds...');
           await this.delay(5000);
         }

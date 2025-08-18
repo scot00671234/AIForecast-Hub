@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { yahooFinanceService } from "./services/yahooFinance";
+import { historicalDataService } from "./services/historicalDataService";
 import { accuracyCalculator } from "./services/accuracyCalculator";
 import { aiPredictionService } from "./services/aiPredictionService";
 import { predictionScheduler } from "./services/predictionScheduler";
@@ -336,6 +337,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching detailed chart data:", error);
       res.status(500).json({ message: "Failed to fetch detailed chart data" });
+    }
+  });
+
+  // Historical Data Management APIs
+  app.post("/api/historical-data/populate", async (req, res) => {
+    try {
+      // Start historical data population in background
+      historicalDataService.populateHistoricalData().catch(console.error);
+      res.json({ message: "Historical data population started" });
+    } catch (error) {
+      console.error("Error starting historical data population:", error);
+      res.status(500).json({ message: "Failed to start historical data population" });
+    }
+  });
+
+  app.post("/api/historical-data/populate/:commodityId", async (req, res) => {
+    try {
+      const commodityId = req.params.commodityId;
+      await historicalDataService.populateForCommodity(commodityId);
+      res.json({ message: "Historical data populated successfully" });
+    } catch (error) {
+      console.error("Error populating commodity historical data:", error);
+      res.status(500).json({ message: "Failed to populate historical data" });
+    }
+  });
+
+  app.get("/api/historical-data/coverage", async (req, res) => {
+    try {
+      const coverage = await historicalDataService.getDataCoverageSummary();
+      res.json(coverage);
+    } catch (error) {
+      console.error("Error getting data coverage:", error);
+      res.status(500).json({ message: "Failed to get data coverage" });
     }
   });
 
