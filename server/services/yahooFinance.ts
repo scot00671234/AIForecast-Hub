@@ -23,7 +23,7 @@ interface YahooFinanceResponse {
 }
 
 class YahooFinanceService {
-  private rateLimitDelay = 1000; // 1 second between requests
+  private rateLimitDelay = 2000; // 2 seconds between requests to avoid rate limiting
   private lastRequestTime = 0;
 
   private async delay(ms: number): Promise<void> {
@@ -49,7 +49,11 @@ class YahooFinanceService {
       
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
 
@@ -133,40 +137,75 @@ class YahooFinanceService {
       "1d": "5m",
       "5d": "15m", 
       "1w": "30m",
-      "1mo": "1d",  // Changed from "1h" to "1d" for better data availability
+      "1mo": "1d",
       "3mo": "1d",
       "6mo": "1d",
       "1y": "1d",
       "2y": "1wk",
       "5y": "1mo",
-      "10y": "1mo", // Added 10-year period
-      "max": "1mo", // Added max period
+      "10y": "1mo",
+      "max": "1mo",
     };
 
     const interval = intervalMap[period] || "1d";
 
-    try {
-      const data = await this.fetchHistoricalData(yahooSymbol, period, interval);
-      
-      if (data?.chart?.result?.[0]) {
-        const result = data.chart.result[0];
-        const timestamps = result.timestamp || [];
-        const quotes = result.indicators?.quote?.[0];
+    // Alternative symbols for commodities with better historical data
+    const alternativeSymbols: Record<string, string[]> = {
+      "CL=F": ["CL=F", "USO", "DBOIL"], // Crude oil alternatives
+      "GC=F": ["GC=F", "GLD", "IAU"],   // Gold alternatives
+      "NG=F": ["NG=F", "UNG", "BOIL"],  // Natural gas alternatives
+      "HG=F": ["HG=F", "CPER"],        // Copper alternatives
+      "SI=F": ["SI=F", "SLV"],         // Silver alternatives
+    };
+
+    const symbolsToTry = alternativeSymbols[yahooSymbol] || [yahooSymbol];
+    
+    for (const symbol of symbolsToTry) {
+      try {
+        console.log(`Attempting to fetch ${period} data for ${symbol}`);
+        const data = await this.fetchHistoricalData(symbol, period, interval);
         
-        if (quotes?.close) {
-          return timestamps.map((timestamp: number, i: number) => ({
-            date: new Date(timestamp * 1000).toISOString(),
-            price: quotes.close[i],
-            volume: quotes.volume?.[i] || 0,
-          })).filter(item => item.price && !isNaN(item.price));
+        if (data?.chart?.result?.[0]) {
+          const result = data.chart.result[0];
+          const timestamps = result.timestamp || [];
+          const quotes = result.indicators?.quote?.[0];
+          
+          if (quotes?.close && timestamps.length > 0) {
+            const processedData = timestamps.map((timestamp: number, i: number) => ({
+              date: new Date(timestamp * 1000).toISOString(),
+              price: quotes.close[i],
+              volume: quotes.volume?.[i] || 0,
+            })).filter(item => item.price && !isNaN(item.price));
+
+            if (processedData.length > 0) {
+              console.log(`Successfully fetched ${processedData.length} data points from ${symbol} for period ${period}`);
+              return processedData;
+            }
+          }
         }
+        
+        console.log(`No data available for ${symbol}, trying next alternative...`);
+        
+        // Add delay between attempts to avoid rate limiting
+        if (symbolsToTry.indexOf(symbol) < symbolsToTry.length - 1) {
+          await this.delay(2000);
+        }
+        
+      } catch (error) {
+        console.error(`Error fetching data for ${symbol}:`, error);
+        
+        // If it's a rate limit error, wait longer
+        if (error.message?.includes('Too Many Requests') || error.message?.includes('429')) {
+          console.log('Rate limit detected, waiting 5 seconds...');
+          await this.delay(5000);
+        }
+        
+        continue; // Try next symbol
       }
-      
-      return [];
-    } catch (error) {
-      console.error(`Error fetching detailed data for ${yahooSymbol}:`, error);
-      return [];
     }
+    
+    console.warn(`Failed to fetch data for all alternatives of ${yahooSymbol} for period ${period}`);
+    return [];
   }
 }
 
