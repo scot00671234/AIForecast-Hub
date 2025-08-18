@@ -1,0 +1,108 @@
+Logs
+Watch the logs of the application in real time
+
+Select a container to view logs
+Native
+
+
+aiforecast-hub-app-ywa0gl.1.tyxs7wpaej7q7du2ywxp3ttbz (699d73b9e140) 
+Search logs...
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:355:16)
+at async file:///app/dist/index.js:2171:28 {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+6:59:18 PM [express] GET /api/commodities 500 in 23ms :: {"message":"Failed to fetch commodities"}
+Error calculating league table: error: relation "commodities" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:355:16)
+at async AccuracyCalculator.calculateModelRankings (file:///app/dist/index.js:1907:26)
+at async file:///app/dist/index.js:2081:24 {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+6:59:18 PM [express] GET /api/league-table/30d 304 in 36ms :: [{"rank":1,"aiModel":{"id":"d5aded35-b…
+Error calculating league table: error: relation "commodities" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:355:16)
+at async AccuracyCalculator.calculateModelRankings (file:///app/dist/index.js:1907:26)
+at async file:///app/dist/index.js:2081:24 {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+6:59:39 PM [express] GET /api/ai-models 304 in 42ms :: [{"id":"d5aded35-b813-4cf4-9e82-017065be0cbe"…
+Error fetching commodities: error: relation "commodities" does not exist
+at /app/node_modules/pg-pool/index.js:45:11
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+at async DatabaseStorage.getCommodities (file:///app/dist/index.js:355:16)
+at async file:///app/dist/index.js:2171:28 {
+length: 110,
+severity: 'ERROR',
+code: '42P01',
+detail: undefined,
+hint: undefined,
+position: '72',
+internalPosition: undefined,
+internalQuery: undefined,
+where: undefined,
+schema: undefined,
+table: undefined,
+column: undefined,
+dataType: undefined,
+constraint: undefined,
+file: 'parse_relation.c',
+line: '1392',
+routine: 'parserOpenTable'
+}
+6:59:39 PM [express] GET /api/commodities 500 in 41ms :: {"message":"Failed to fetch commodities"}
+6:59:39 PM [express] GET /api/league-table/30d 304 in 55ms :: [{"rank":1,"aiModel":{"id":"d5aded35-b…
