@@ -80,6 +80,13 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
     queryKey: ['/api/ai-models'],
   });
 
+  // Fetch the true current price (separate from historical data)
+  const { data: currentPrice } = useQuery({
+    queryKey: [`/api/commodities/${commodityId}/latest-price`],
+    enabled: !!commodityId,
+    staleTime: 60000, // Cache for 1 minute
+  });
+
   useEffect(() => {
     if (!chartContainerRef.current) return;
     
