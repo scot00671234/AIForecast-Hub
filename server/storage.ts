@@ -11,6 +11,8 @@ import {
   type InsertAccuracyMetric,
   type MarketAlert,
   type InsertMarketAlert,
+  type CompositeIndex,
+  type InsertCompositeIndex,
   type DashboardStats,
   type LeagueTableEntry,
   type ChartDataPoint,
@@ -19,7 +21,8 @@ import {
   predictions,
   actualPrices,
   accuracyMetrics,
-  marketAlerts
+  marketAlerts,
+  compositeIndex
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -56,6 +59,11 @@ export interface IStorage {
   // Market Alerts
   getActiveAlerts(): Promise<MarketAlert[]>;
   createAlert(alert: InsertMarketAlert): Promise<MarketAlert>;
+
+  // Composite Index
+  createCompositeIndex(index: InsertCompositeIndex): Promise<CompositeIndex>;
+  getLatestCompositeIndex(): Promise<CompositeIndex | undefined>;
+  getCompositeIndexHistory(days: number): Promise<CompositeIndex[]>;
 
   // Dashboard Data
   getDashboardStats(): Promise<DashboardStats>;
@@ -418,6 +426,24 @@ export class DatabaseStorage implements IStorage {
         "commodity_id" varchar,
         "ai_model_id" varchar,
         "is_active" integer DEFAULT 1 NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
+
+    // Create composite_index table
+    await db.execute(sql`
+      CREATE TABLE "composite_index" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "date" timestamp NOT NULL UNIQUE,
+        "overall_index" numeric(5,2) NOT NULL,
+        "hard_commodities_index" numeric(5,2) NOT NULL,
+        "soft_commodities_index" numeric(5,2) NOT NULL,
+        "directional_component" numeric(5,2) NOT NULL,
+        "confidence_component" numeric(5,2) NOT NULL,
+        "accuracy_component" numeric(5,2) NOT NULL,
+        "momentum_component" numeric(5,2) NOT NULL,
+        "total_predictions" integer NOT NULL,
+        "market_sentiment" text NOT NULL,
         "created_at" timestamp DEFAULT now() NOT NULL
       )
     `);
@@ -817,6 +843,54 @@ export class DatabaseStorage implements IStorage {
       console.log(`Updating prices for ${commodity.name} (${commodity.yahooSymbol})`);
     } catch (error) {
       console.error(`Yahoo Finance update failed for ${commodity.name}:`, error);
+    }
+  }
+
+  // Composite Index methods
+  async createCompositeIndex(index: InsertCompositeIndex): Promise<CompositeIndex> {
+    await this.initializationPromise;
+    
+    try {
+      const [result] = await db.insert(compositeIndex).values(index).returning();
+      return result;
+    } catch (error) {
+      console.error('Error creating composite index:', error);
+      throw error;
+    }
+  }
+
+  async getLatestCompositeIndex(): Promise<CompositeIndex | undefined> {
+    await this.initializationPromise;
+    
+    try {
+      const results = await db
+        .select()
+        .from(compositeIndex)
+        .orderBy(desc(compositeIndex.date))
+        .limit(1);
+      
+      return results[0];
+    } catch (error) {
+      console.error('Error fetching latest composite index:', error);
+      return undefined;
+    }
+  }
+
+  async getCompositeIndexHistory(days: number): Promise<CompositeIndex[]> {
+    await this.initializationPromise;
+    
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - days);
+      
+      return await db
+        .select()
+        .from(compositeIndex)
+        .where(sql`${compositeIndex.date} >= ${cutoffDate}`)
+        .orderBy(desc(compositeIndex.date));
+    } catch (error) {
+      console.error('Error fetching composite index history:', error);
+      return [];
     }
   }
 

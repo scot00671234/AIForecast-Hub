@@ -12,6 +12,7 @@ import {
   insertActualPriceSchema,
   insertMarketAlertSchema
 } from "@shared/schema";
+import { compositeIndexService } from "./services/compositeIndexService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -864,6 +865,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating commodity prices:", error);
       res.status(500).json({ message: "Failed to update commodity prices" });
+    }
+  });
+
+  // Composite Index (AI Commodity Composite Index - ACCI)
+  app.get("/api/composite-index/latest", async (req, res) => {
+    try {
+      const latestIndex = await compositeIndexService.getLatestIndex();
+      if (!latestIndex) {
+        return res.status(404).json({ message: "No composite index data available" });
+      }
+      res.json(latestIndex);
+    } catch (error) {
+      console.error("Error fetching latest composite index:", error);
+      res.status(500).json({ message: "Failed to fetch latest composite index" });
+    }
+  });
+
+  app.get("/api/composite-index/history", async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      const history = await compositeIndexService.getIndexHistory(days);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching composite index history:", error);
+      res.status(500).json({ message: "Failed to fetch composite index history" });
+    }
+  });
+
+  app.post("/api/composite-index/calculate", async (req, res) => {
+    try {
+      await compositeIndexService.calculateAndStoreIndex();
+      res.json({ message: "Composite index calculated and stored successfully" });
+    } catch (error) {
+      console.error("Error calculating composite index:", error);
+      res.status(500).json({ message: "Failed to calculate composite index" });
     }
   });
 

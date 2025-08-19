@@ -67,6 +67,21 @@ export const marketAlerts = pgTable("market_alerts", {
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
+export const compositeIndex = pgTable("composite_index", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: timestamp("date").notNull().unique(),
+  overallIndex: decimal("overall_index", { precision: 5, scale: 2 }).notNull(),
+  hardCommoditiesIndex: decimal("hard_commodities_index", { precision: 5, scale: 2 }).notNull(),
+  softCommoditiesIndex: decimal("soft_commodities_index", { precision: 5, scale: 2 }).notNull(),
+  directionalComponent: decimal("directional_component", { precision: 5, scale: 2 }).notNull(),
+  confidenceComponent: decimal("confidence_component", { precision: 5, scale: 2 }).notNull(),
+  accuracyComponent: decimal("accuracy_component", { precision: 5, scale: 2 }).notNull(),
+  momentumComponent: decimal("momentum_component", { precision: 5, scale: 2 }).notNull(),
+  totalPredictions: integer("total_predictions").notNull(),
+  marketSentiment: text("market_sentiment").notNull(), // 'bullish', 'bearish', 'neutral'
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
 // Insert Schemas
 export const insertAiModelSchema = createInsertSchema(aiModels).omit({
   id: true,
@@ -96,6 +111,11 @@ export const insertMarketAlertSchema = createInsertSchema(marketAlerts).omit({
   createdAt: true,
 });
 
+export const insertCompositeIndexSchema = createInsertSchema(compositeIndex).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type AiModel = typeof aiModels.$inferSelect;
 export type InsertAiModel = z.infer<typeof insertAiModelSchema>;
@@ -114,6 +134,9 @@ export type InsertAccuracyMetric = z.infer<typeof insertAccuracyMetricSchema>;
 
 export type MarketAlert = typeof marketAlerts.$inferSelect;
 export type InsertMarketAlert = z.infer<typeof insertMarketAlertSchema>;
+
+export type CompositeIndex = typeof compositeIndex.$inferSelect;
+export type InsertCompositeIndex = z.infer<typeof insertCompositeIndexSchema>;
 
 // Additional types for API responses
 export type DashboardStats = {

@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Link } from "wouter";
 import OverallModelRankings from "@/components/dashboard/overall-model-rankings";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
+import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
@@ -164,6 +165,19 @@ export default function Dashboard() {
         </section>
 
         <div className="space-y-12 md:space-y-20">
+          {/* AI Commodity Composite Index */}
+          <section>
+            <div className="mb-8">
+              <h3 className="text-xl md:text-2xl font-normal text-foreground mb-2 tracking-wide">
+                Market Sentiment Index
+              </h3>
+              <p className="text-sm md:text-base text-muted-foreground font-light">
+                PMI-style aggregation of all AI model predictions across commodity markets
+              </p>
+            </div>
+            <CompositeIndexGauge className="max-w-md mx-auto" />
+          </section>
+          
           {/* Overall Model Rankings */}
           <OverallModelRankings />
           

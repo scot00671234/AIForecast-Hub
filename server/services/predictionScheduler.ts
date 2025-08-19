@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { aiPredictionService } from './aiPredictionService';
 import { cachedPredictionService } from './cachedPredictionService';
+import { compositeIndexService } from './compositeIndexService';
 
 export class PredictionScheduler {
   private isScheduled = false;
@@ -17,6 +18,11 @@ export class PredictionScheduler {
       try {
         await aiPredictionService.generateMonthlyPredictions();
         console.log('Monthly comprehensive AI prediction update completed successfully');
+        
+        // Calculate composite index after predictions
+        console.log('Calculating AI Commodity Composite Index (ACCI)...');
+        await compositeIndexService.calculateAndStoreIndex();
+        console.log('Composite index calculation completed successfully');
       } catch (error) {
         console.error('Monthly comprehensive AI prediction update failed:', error);
       }
