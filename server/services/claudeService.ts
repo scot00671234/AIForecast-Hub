@@ -9,7 +9,7 @@ When copying code from this code snippet, ensure you also include this informati
 */
 
 // <important_do_not_delete>
-const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
+const DEFAULT_MODEL_STR = "claude-3-5-sonnet-20241022";
 // </important_do_not_delete>
 
 class ClaudeService {
@@ -68,7 +68,7 @@ Respond in JSON format with:
       const message = await this.anthropic.messages.create({
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
-        // "claude-sonnet-4-20250514"
+        // "claude-3-5-sonnet-20241022"
         model: DEFAULT_MODEL_STR,
       });
 
