@@ -117,25 +117,15 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-yellow-600" />
-            AI Commodity Composite Index (ACCI)
-          </CardTitle>
-          <CardDescription>
-            {error || 'No data available'}
-          </CardDescription>
+          <CardTitle>AI Commodity Composite Index (ACCI)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              Composite index will be available once AI predictions are generated.
+            {/* Triangle logo when no data */}
+            <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-foreground mx-auto mb-4 opacity-20"></div>
+            <p className="text-sm text-muted-foreground">
+              Awaiting AI predictions
             </p>
-            <button 
-              onClick={triggerCalculation}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Calculate Index
-            </button>
           </div>
         </CardContent>
       </Card>

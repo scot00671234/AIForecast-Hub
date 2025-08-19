@@ -9,6 +9,8 @@ import { Link } from "wouter";
 import OverallModelRankings from "@/components/dashboard/overall-model-rankings";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
+import PredictionStatsCard from "@/components/PredictionStatsCard";
+import MarketStatusCard from "@/components/MarketStatusCard";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
@@ -158,24 +160,17 @@ export default function Dashboard() {
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal text-foreground mb-4 md:mb-6 tracking-wide">
               AI Prediction Performance
             </h2>
-            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
-              Real-time tracking of AI model accuracy in commodity price forecasting
-            </p>
           </div>
         </section>
 
         <div className="space-y-12 md:space-y-20">
-          {/* AI Commodity Composite Index */}
+          {/* Dashboard Cards Grid */}
           <section>
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-normal text-foreground mb-2 tracking-wide">
-                Market Sentiment Index
-              </h3>
-              <p className="text-sm md:text-base text-muted-foreground font-light">
-                PMI-style aggregation of all AI model predictions across commodity markets
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              <CompositeIndexGauge />
+              <PredictionStatsCard />
+              <MarketStatusCard />
             </div>
-            <CompositeIndexGauge className="max-w-md mx-auto" />
           </section>
           
           {/* Overall Model Rankings */}
