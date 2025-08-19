@@ -28,6 +28,7 @@ export const predictions = pgTable("predictions", {
   targetDate: timestamp("target_date").notNull(),
   predictedPrice: decimal("predicted_price", { precision: 10, scale: 4 }).notNull(),
   confidence: decimal("confidence", { precision: 5, scale: 2 }),
+  timeframe: text("timeframe").notNull().default("7d"), // "3mo", "6mo", "9mo", "12mo", "7d"
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });

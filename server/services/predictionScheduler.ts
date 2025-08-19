@@ -11,14 +11,14 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule weekly comprehensive updates every Monday at 3 AM
-    cron.schedule('0 3 * * 1', async () => {
-      console.log('Running weekly comprehensive AI prediction update...');
+    // Schedule monthly comprehensive updates every 1st of the month at 3 AM
+    cron.schedule('0 3 1 * *', async () => {
+      console.log('Running monthly comprehensive AI prediction update...');
       try {
-        await aiPredictionService.generateWeeklyPredictions();
-        console.log('Weekly comprehensive AI prediction update completed successfully');
+        await aiPredictionService.generateMonthlyPredictions();
+        console.log('Monthly comprehensive AI prediction update completed successfully');
       } catch (error) {
-        console.error('Weekly comprehensive AI prediction update failed:', error);
+        console.error('Monthly comprehensive AI prediction update failed:', error);
       }
     });
 
@@ -35,7 +35,7 @@ export class PredictionScheduler {
 
     this.isScheduled = true;
     console.log('Prediction scheduler started with schedules:');
-    console.log('- Weekly comprehensive: Every Monday at 3 AM');
+    console.log('- Monthly comprehensive: Every 1st of the month at 3 AM (3mo, 6mo, 9mo, 12mo predictions)');
     console.log('- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri');
   }
 
