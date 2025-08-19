@@ -11,17 +11,6 @@ export class PredictionScheduler {
       return;
     }
 
-    // Schedule daily AI prediction updates at 2 AM
-    cron.schedule('0 2 * * *', async () => {
-      console.log('Running daily AI prediction update...');
-      try {
-        await aiPredictionService.generateDailyPredictions();
-        console.log('Daily AI prediction update completed successfully');
-      } catch (error) {
-        console.error('Daily AI prediction update failed:', error);
-      }
-    });
-
     // Schedule weekly comprehensive updates every Monday at 3 AM
     cron.schedule('0 3 * * 1', async () => {
       console.log('Running weekly comprehensive AI prediction update...');
@@ -45,8 +34,7 @@ export class PredictionScheduler {
     });
 
     this.isScheduled = true;
-    console.log('Prediction scheduler started with multiple schedules:');
-    console.log('- Daily predictions: Every day at 2 AM');
+    console.log('Prediction scheduler started with schedules:');
     console.log('- Weekly comprehensive: Every Monday at 3 AM');
     console.log('- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri');
   }
