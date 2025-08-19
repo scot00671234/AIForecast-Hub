@@ -62,6 +62,9 @@ export class StartupManager {
         // Run initial AI predictions on first deployment
         await this.runInitialPredictions();
         
+        // Check for missing Claude predictions and auto-generate
+        await this.checkAndGenerateMissingClaudePredictions();
+        
         console.log('✅ Background initialization complete');
       } catch (error) {
         console.error('❌ Background initialization failed:', error);
@@ -99,6 +102,77 @@ export class StartupManager {
       }
     } catch (error) {
       console.error('❌ Initial prediction generation failed (non-critical):', error);
+      // Don't throw - this is non-critical for app startup
+    }
+  }
+
+  // Check for missing Claude predictions and auto-generate
+  private async checkAndGenerateMissingClaudePredictions(): Promise<void> {
+    try {
+      console.log('🔍 Checking for missing Claude predictions...');
+      
+      // Import required services
+      const { aiPredictionService } = await import('./aiPredictionService');
+      const { claudeService } = await import('./claudeService');
+      
+      // Only proceed if Claude is configured (production has API key)
+      if (!claudeService.isConfigured()) {
+        console.log('⚠️ Claude not configured - skipping missing prediction check');
+        return;
+      }
+      
+      // Get all commodities and Claude model
+      const commodities = await this.storage.getCommodities();
+      const aiModels = await this.storage.getAiModels();
+      const claudeModel = aiModels.find(model => model.name.toLowerCase() === 'claude');
+      
+      if (!claudeModel) {
+        console.log('⚠️ Claude model not found in database - skipping check');
+        return;
+      }
+      
+      // Check each commodity for missing Claude predictions
+      const commoditiesNeedingPredictions: string[] = [];
+      
+      for (const commodity of commodities) {
+        // Get Claude predictions for this commodity from last 7 days
+        const recentPredictions = await this.storage.getPredictions(commodity.id, claudeModel.id);
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 7);
+        
+        const recentClaudePredictions = recentPredictions.filter(pred => 
+          new Date(pred.createdAt!) > cutoffDate
+        );
+        
+        if (recentClaudePredictions.length === 0) {
+          commoditiesNeedingPredictions.push(commodity.id);
+          console.log(`📝 Missing Claude predictions for: ${commodity.name}`);
+        }
+      }
+      
+      // Auto-generate missing predictions
+      if (commoditiesNeedingPredictions.length > 0) {
+        console.log(`🚀 Auto-generating Claude predictions for ${commoditiesNeedingPredictions.length} commodities...`);
+        
+        for (const commodityId of commoditiesNeedingPredictions) {
+          try {
+            await aiPredictionService.generatePredictionsForCommodity(commodityId);
+            console.log(`✅ Generated Claude prediction for commodity ${commodityId}`);
+            
+            // Add delay to respect rate limits
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } catch (error) {
+            console.error(`❌ Failed to generate Claude prediction for commodity ${commodityId}:`, error);
+          }
+        }
+        
+        console.log('✅ Auto-generation of missing Claude predictions completed');
+      } else {
+        console.log('✅ All commodities have recent Claude predictions');
+      }
+      
+    } catch (error) {
+      console.error('❌ Missing Claude prediction check failed (non-critical):', error);
       // Don't throw - this is non-critical for app startup
     }
   }
