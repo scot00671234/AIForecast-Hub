@@ -121,6 +121,7 @@ async function createCompleteSchema(db: any) {
       "target_date" timestamp NOT NULL,
       "predicted_price" numeric(10,4) NOT NULL,
       "confidence" numeric(5,2),
+      "timeframe" text NOT NULL DEFAULT '7d',
       "metadata" jsonb,
       "created_at" timestamp DEFAULT now() NOT NULL
     )
@@ -186,6 +187,33 @@ async function ensureCompleteSchema(db: any, existingTables: string[]) {
     if (!existingTables.includes(table)) {
       console.log(`Creating missing table: ${table}`);
       // Add individual table creation logic here if needed
+    }
+  }
+  
+  // Check if timeframe column exists in predictions table
+  if (existingTables.includes('predictions')) {
+    console.log('🔍 Checking for timeframe column in predictions table...');
+    try {
+      const columnCheck = await db.execute(sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'predictions' 
+        AND column_name = 'timeframe'
+      `);
+      
+      if (columnCheck.rows.length === 0) {
+        console.log('🔧 Adding timeframe column to predictions table...');
+        await db.execute(sql`
+          ALTER TABLE "predictions" 
+          ADD COLUMN "timeframe" text NOT NULL DEFAULT '7d'
+        `);
+        console.log('✅ Added timeframe column successfully');
+      } else {
+        console.log('✅ Timeframe column already exists');
+      }
+    } catch (error) {
+      console.error('⚠️ Error checking/adding timeframe column:', error);
+      // Don't fail the migration for this, just log it
     }
   }
 }

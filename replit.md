@@ -7,6 +7,11 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- **Monthly Multi-Timeframe Predictions**: Complete architecture overhaul from weekly 7-day predictions to monthly 3mo/6mo/9mo/12mo predictions on 1st of each month
+- **Timeframe-Aware Schema**: Added timeframe field to predictions table with production-safe migration for existing deployments
+- **Enhanced AI Services**: Updated OpenAI, Claude, and Deepseek services with timeframe-specific prediction logic and prompts
+- **Production Migration Safety**: Updated production-migrate.ts script to handle schema changes seamlessly for Dokploy VPS deployments
+- **Overlap Management**: Implemented full prediction overlap preservation for rich accuracy analysis and prediction evolution tracking
 - **Claude Model Fix**: Fixed critical Claude prediction failures by updating to current model version (claude-sonnet-4-20250514) and added JSON parsing robustness for markdown code blocks
 - **Production Migration System**: Created comprehensive database migration system with automatic production deployment
 - **Robust Error Handling**: Fixed critical production issue (42P01 - relation 'commodities' does not exist) with multi-layer migration approach
@@ -15,8 +20,6 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Compatibility**: Enhanced responsive design across all components for optimal mobile viewing experience
 - **Real Accuracy System**: Implemented comprehensive accuracy calculation based on actual AI predictions vs real historical prices
 - **Production-Ready**: League table and scoreboards now use authentic prediction data instead of mock data
-- **AI Prediction Automation**: Fully automated AI prediction system with multiple scheduling options and no manual triggers required
-- **Advanced Scheduling**: Daily (2 AM), weekly (3 AM Monday), and hourly (9 AM-5 PM, Mon-Fri) automatic prediction generation
 - **Multi-Service Integration**: Simultaneous prediction generation using OpenAI, Anthropic, and DeepSeek APIs with robust error handling
 - **API Management**: Comprehensive manual trigger endpoints for all prediction operations and service status monitoring
 

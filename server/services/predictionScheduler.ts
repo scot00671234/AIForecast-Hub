@@ -40,12 +40,12 @@ export class PredictionScheduler {
   }
 
   async runNow(): Promise<void> {
-    console.log('Running weekly AI prediction update manually...');
+    console.log('Running monthly AI prediction update manually...');
     try {
-      await aiPredictionService.generateWeeklyPredictions();
-      console.log('Manual weekly AI prediction update completed successfully');
+      await aiPredictionService.generateMonthlyPredictions();
+      console.log('Manual monthly AI prediction update completed successfully');
     } catch (error) {
-      console.error('Manual weekly AI prediction update failed:', error);
+      console.error('Manual monthly AI prediction update failed:', error);
       throw error;
     }
   }
