@@ -7,7 +7,7 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
-- **Claude Model Fix**: Fixed critical Claude prediction failures by updating to current model version (claude-sonnet-4-20250514)
+- **Claude Model Fix**: Fixed critical Claude prediction failures by updating to current model version (claude-sonnet-4-20250514) and added JSON parsing robustness for markdown code blocks
 - **Production Migration System**: Created comprehensive database migration system with automatic production deployment
 - **Robust Error Handling**: Fixed critical production issue (42P01 - relation 'commodities' does not exist) with multi-layer migration approach
 - **Enhanced Deployment**: Added automatic schema creation, conflict resolution, and production-ready scripts (deploy.sh, production-migrate.ts)

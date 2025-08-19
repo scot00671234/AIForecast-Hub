@@ -53,7 +53,7 @@ Analyze the market conditions and provide a price prediction for one week from n
 - Seasonal factors
 - Global supply/demand dynamics
 
-Respond in JSON format with:
+Respond ONLY with valid JSON in this exact format (no markdown, no code blocks, no extra text):
 {
   "predictedPrice": number,
   "confidence": number (0-1),
@@ -74,7 +74,20 @@ Respond in JSON format with:
 
       const response = message.content[0];
       if (response.type === 'text') {
-        const result = JSON.parse(response.text);
+        // Clean the response text to handle markdown code blocks
+        let cleanText = response.text.trim();
+        
+        // Remove markdown code blocks if present
+        if (cleanText.startsWith('```json')) {
+          cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (cleanText.startsWith('```')) {
+          cleanText = cleanText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        // Remove any remaining backticks
+        cleanText = cleanText.replace(/`/g, '');
+        
+        const result = JSON.parse(cleanText);
         return {
           predictedPrice: Number(result.predictedPrice),
           confidence: Number(result.confidence),
