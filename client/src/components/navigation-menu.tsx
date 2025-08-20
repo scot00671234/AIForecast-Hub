@@ -59,17 +59,17 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
           variant="ghost"
           size="sm"
           onClick={() => setIsOpen(!isOpen)}
-          className="relative p-2 hover:bg-muted/80 transition-colors"
+          className="relative h-10 w-10 p-0 hover:bg-muted/80 transition-colors flex items-center justify-center"
           data-testid="menu-toggle"
         >
-          <div className="relative w-6 h-6">
+          <div className="relative w-5 h-5 flex items-center justify-center">
             <MenuIcon 
-              className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
+              className={`absolute h-4 w-4 transition-all duration-300 ${
                 isOpen ? 'rotate-90 opacity-0' : 'rotate-0 opacity-100'
               }`} 
             />
             <XIcon 
-              className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
+              className={`absolute h-4 w-4 transition-all duration-300 ${
                 isOpen ? 'rotate-0 opacity-100' : '-rotate-90 opacity-0'
               }`} 
             />
