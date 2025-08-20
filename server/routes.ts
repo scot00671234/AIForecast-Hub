@@ -13,6 +13,8 @@ import {
   insertMarketAlertSchema
 } from "@shared/schema";
 import { compositeIndexService } from "./services/compositeIndexService";
+import { FearGreedService } from "./services/fearGreedService";
+import { CategoryCompositeService } from "./services/categoryCompositeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -900,6 +902,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error calculating composite index:", error);
       res.status(500).json({ message: "Failed to calculate composite index" });
+    }
+  });
+
+  // Fear & Greed Index
+  app.get("/api/fear-greed-index", async (req, res) => {
+    try {
+      const fearGreedService = new FearGreedService();
+      const index = await fearGreedService.getFearGreedIndex();
+      res.json(index);
+    } catch (error) {
+      console.error("Error fetching Fear & Greed Index:", error);
+      res.status(500).json({ message: "Failed to fetch Fear & Greed Index" });
+    }
+  });
+
+  // Category Composite Indices (Hard vs Soft Commodities)
+  app.get("/api/composite-index/categories", async (req, res) => {
+    try {
+      const categoryService = new CategoryCompositeService(storage);
+      const categoryIndices = await categoryService.getCategoryCompositeIndices();
+      res.json(categoryIndices);
+    } catch (error) {
+      console.error("Error fetching category composite indices:", error);
+      res.status(500).json({ message: "Failed to fetch category composite indices" });
     }
   });
 
