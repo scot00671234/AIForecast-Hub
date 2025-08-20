@@ -10,8 +10,11 @@ cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = [
+  "echo 'CACHE BUST: Emergency migration fix v3.0.0'",
+  "rm -rf dist node_modules/.cache",
   "npm run build",
-  "node fix-build.js"
+  "node fix-build.js",
+  "echo 'Build completed with migration fixes at $(date)'"
 ]
 
 [start]

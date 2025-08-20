@@ -1,4 +1,3 @@
-import { fileURLToPath } from "url";
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __esm = (fn, res) => function __init() {
@@ -271,7 +270,27 @@ var init_storage = __esm({
             "target_date" timestamp NOT NULL,
             "predicted_price" numeric(10,4) NOT NULL,
             "confidence" numeric(5,2),
+            "timeframe" text NOT NULL DEFAULT '3mo',
             "metadata" jsonb,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+          },
+          {
+            name: "composite_index",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "composite_index" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "date" timestamp NOT NULL UNIQUE,
+            "overall_index" numeric(5,2) NOT NULL,
+            "hard_commodities_index" numeric(5,2) NOT NULL,
+            "soft_commodities_index" numeric(5,2) NOT NULL,
+            "directional_component" numeric(5,2) NOT NULL,
+            "confidence_component" numeric(5,2) NOT NULL,
+            "accuracy_component" numeric(5,2) NOT NULL,
+            "momentum_component" numeric(5,2) NOT NULL,
+            "total_predictions" integer NOT NULL,
+            "market_sentiment" text NOT NULL,
             "created_at" timestamp DEFAULT now() NOT NULL
           )
         `
@@ -338,8 +357,78 @@ var init_storage = __esm({
         } catch (error) {
           console.log("Note: Some constraints may already exist");
         }
+        console.log("\u{1F527} Ensuring production data...");
         await this.insertProductionData();
         console.log("\u2705 Production migration completed");
+      }
+      // AUTOMATIC MIGRATION SYSTEM - Runs every deployment
+      async runAutomaticMigrations() {
+        console.log("\u{1F680} Running automatic migrations...");
+        try {
+          await db.execute(sql2`
+        DO $$ 
+        BEGIN 
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'predictions' AND column_name = 'timeframe'
+          ) THEN
+            ALTER TABLE "predictions" ADD COLUMN "timeframe" text NOT NULL DEFAULT '3mo';
+            
+            -- Add check constraint for valid timeframes
+            ALTER TABLE "predictions" ADD CONSTRAINT "predictions_timeframe_check" 
+            CHECK ("timeframe" IN ('3mo', '6mo', '9mo', '12mo'));
+            
+            RAISE NOTICE '✅ Added timeframe column to predictions table';
+          ELSE
+            RAISE NOTICE 'ℹ️ Timeframe column already exists';
+          END IF;
+        END $$;
+      `);
+          console.log("\u2705 Migration 1: Timeframe column - COMPLETED");
+        } catch (error) {
+          console.log("\u26A0\uFE0F Migration 1: Timeframe column - FAILED:", error.message);
+        }
+        try {
+          await db.execute(sql2`
+        CREATE TABLE IF NOT EXISTS "composite_index" (
+          "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+          "date" timestamp NOT NULL UNIQUE,
+          "overall_index" numeric(5,2) NOT NULL,
+          "hard_commodities_index" numeric(5,2) NOT NULL,
+          "soft_commodities_index" numeric(5,2) NOT NULL,
+          "directional_component" numeric(5,2) NOT NULL,
+          "confidence_component" numeric(5,2) NOT NULL,
+          "accuracy_component" numeric(5,2) NOT NULL,
+          "momentum_component" numeric(5,2) NOT NULL,
+          "total_predictions" integer NOT NULL,
+          "market_sentiment" text NOT NULL,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `);
+          console.log("\u2705 Migration 2: Composite index table - COMPLETED");
+        } catch (error) {
+          console.log("\u26A0\uFE0F Migration 2: Composite index table - FAILED:", error.message);
+        }
+        console.log("\u{1F3AF} All automatic migrations completed");
+      }
+      // EMERGENCY TIMEFRAME COLUMN FIXER - Can be called anytime
+      async ensureTimeframeColumn() {
+        try {
+          await db.execute(sql2`
+        DO $$ 
+        BEGIN 
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'predictions' AND column_name = 'timeframe'
+          ) THEN
+            ALTER TABLE "predictions" ADD COLUMN "timeframe" text NOT NULL DEFAULT '3mo';
+            RAISE NOTICE 'EMERGENCY: Added timeframe column';
+          END IF;
+        END $$;
+      `);
+        } catch (error) {
+          console.log("Note: Could not ensure timeframe column");
+        }
       }
       async insertProductionData() {
         console.log("\u{1F527} Inserting production data...");
@@ -594,15 +683,38 @@ var init_storage = __esm({
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
-        const conditions = [];
-        if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
-        if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
-        if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
-        let query = db.select().from(predictions);
-        if (conditions.length > 0) {
-          query = query.where(and(...conditions));
+        try {
+          await this.ensureTimeframeColumn();
+          const conditions = [];
+          if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+          if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+          if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
+          let query = db.select().from(predictions);
+          if (conditions.length > 0) {
+            query = query.where(and(...conditions));
+          }
+          return await query.orderBy(desc(predictions.createdAt));
+        } catch (error) {
+          if (error?.code === "42703") {
+            console.log("\u{1F6A8} EMERGENCY FALLBACK: Timeframe column missing, ignoring timeframe filters");
+            console.log("\u{1F527} Attempting emergency column creation...");
+            try {
+              await db.execute(sql2`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+              console.log("\u2705 Emergency timeframe column added");
+            } catch (addError) {
+              console.log("\u26A0\uFE0F Could not add timeframe column:", addError.message);
+            }
+            const conditions = [];
+            if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+            if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+            let query = db.select().from(predictions);
+            if (conditions.length > 0) {
+              query = query.where(and(...conditions));
+            }
+            return await query.orderBy(desc(predictions.createdAt));
+          }
+          throw error;
         }
-        return await query.orderBy(desc(predictions.createdAt));
       }
       async createPrediction(insertPrediction) {
         const [prediction] = await db.insert(predictions).values(insertPrediction).returning();
@@ -612,16 +724,42 @@ var init_storage = __esm({
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
-        return await db.select().from(predictions).where(eq(predictions.timeframe, timeframe)).orderBy(desc(predictions.createdAt));
+        try {
+          await this.ensureTimeframeColumn();
+          return await db.select().from(predictions).where(eq(predictions.timeframe, timeframe)).orderBy(desc(predictions.createdAt));
+        } catch (error) {
+          if (error?.code === "42703") {
+            console.log("\u{1F6A8} EMERGENCY: Timeframe column missing, returning all predictions");
+            try {
+              await db.execute(sql2`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+            } catch {
+            }
+            return await db.select().from(predictions).orderBy(desc(predictions.createdAt));
+          }
+          throw error;
+        }
       }
       async getPredictionsByTimeframeCommodity(commodityId, timeframe) {
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
-        return await db.select().from(predictions).where(and(
-          eq(predictions.commodityId, commodityId),
-          eq(predictions.timeframe, timeframe)
-        )).orderBy(desc(predictions.createdAt));
+        try {
+          await this.ensureTimeframeColumn();
+          return await db.select().from(predictions).where(and(
+            eq(predictions.commodityId, commodityId),
+            eq(predictions.timeframe, timeframe)
+          )).orderBy(desc(predictions.createdAt));
+        } catch (error) {
+          if (error?.code === "42703") {
+            console.log("\u{1F6A8} EMERGENCY: Timeframe column missing, returning commodity predictions only");
+            try {
+              await db.execute(sql2`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+            } catch {
+            }
+            return await db.select().from(predictions).where(eq(predictions.commodityId, commodityId)).orderBy(desc(predictions.createdAt));
+          }
+          throw error;
+        }
       }
       async getPredictionsByCommodity(commodityId, timeframe) {
         return this.getPredictions(commodityId, void 0, timeframe);
@@ -2100,6 +2238,8 @@ var init_startupManager = __esm({
         console.log("\u{1F527} Initializing critical services...");
         await this.storage.ensureConnection();
         console.log("\u2705 Database connection verified");
+        await this.storage.runAutomaticMigrations();
+        console.log("\u2705 Database migrations completed");
         await this.storage.ensureDefaultData();
         console.log("\u2705 Database schema and default data initialized");
       }
@@ -3641,14 +3781,14 @@ var vite_config_default = defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "client", "src"),
-      "@shared": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "shared"),
-      "@assets": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "attached_assets")
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets")
     }
   },
-  root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "client"),
+  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
   },
   server: {
@@ -3695,7 +3835,7 @@ async function setupVite(app2, server) {
     const url = req.originalUrl;
     try {
       const clientTemplate = path2.resolve(
-        path.dirname(fileURLToPath(import.meta.url)),
+        import.meta.dirname,
         "..",
         "client",
         "index.html"
@@ -3714,7 +3854,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path2.resolve(path.dirname(fileURLToPath(import.meta.url)), "public");
+  const distPath = path2.resolve(import.meta.dirname, "public");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`

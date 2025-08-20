@@ -39,7 +39,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  console.log("🚀 Starting AIForecast Hub (Professional Edition)");
+  console.log("🚀 Starting AIForecast Hub (Professional Edition) - Emergency Migration Fix v3.0.0");
+console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
   
   // Initialize startup manager
   const startupManager = new StartupManager(storage);
