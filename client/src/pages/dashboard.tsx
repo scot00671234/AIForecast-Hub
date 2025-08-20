@@ -10,6 +10,7 @@ import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
 import PredictionStatsCard from "@/components/PredictionStatsCard";
 import MarketStatusCard from "@/components/MarketStatusCard";
+import SidebarAd from "@/components/ads/SidebarAd";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
@@ -138,6 +139,11 @@ export default function Dashboard() {
               <PredictionStatsCard />
               <MarketStatusCard />
             </div>
+          </section>
+          
+          {/* Strategic Ad Placement */}
+          <section className="flex justify-center">
+            <SidebarAd />
           </section>
           
           {/* Overall Model Rankings */}
