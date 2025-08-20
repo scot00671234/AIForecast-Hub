@@ -52,69 +52,59 @@ export default function Dashboard() {
         </svg>
       </div>
 
-      {/* Minimal Header - matching landing page */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-6 md:py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link href="/">
-                <div className="flex items-center space-x-3 cursor-pointer">
-                  {/* Triangle logo - same as landing */}
-                  <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-                  <span className="text-lg font-medium text-foreground">
-                    AIForecast Hub
-                  </span>
-                </div>
-              </Link>
-            </div>
-            
-            {/* Search Bar and Menu */}
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <div className="relative">
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Search commodities..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-40 sm:w-48 md:w-64 bg-background/60 dark:bg-white/10 border-border dark:border-white/20 focus:border-border/80 dark:focus:border-white/30 placeholder:text-muted-foreground min-h-[44px]"
-                  data-testid="input-search-commodities"
-                />
-                {searchQuery && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 dark:bg-black/95 backdrop-blur-md border border-border dark:border-white/20 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
-                    {filteredCommodities.length > 0 ? (
-                      filteredCommodities.map(commodity => (
-                        <div
-                          key={commodity.id}
-                          className="px-4 py-3 hover:bg-muted/50 dark:hover:bg-white/5 cursor-pointer border-b border-border/50 last:border-b-0"
-                          onClick={() => {
-                            setSearchQuery("");
-                            document.getElementById(`commodity-${commodity.id}`)?.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          data-testid={`search-result-${commodity.id}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-foreground">{commodity.name}</p>
-                              <p className="text-sm text-muted-foreground">{commodity.symbol} • {commodity.category}</p>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {commodity.unit}
-                            </div>
+      {/* Header */}
+      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+            <span className="font-bold text-xl text-foreground">AIForecast Hub</span>
+          </Link>
+          
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search commodities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 w-40 sm:w-48 md:w-64 bg-background/60 dark:bg-white/10 border-border dark:border-white/20 focus:border-border/80 dark:focus:border-white/30 placeholder:text-muted-foreground min-h-[44px]"
+                data-testid="input-search-commodities"
+              />
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 dark:bg-black/95 backdrop-blur-md border border-border dark:border-white/20 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                  {filteredCommodities.length > 0 ? (
+                    filteredCommodities.map(commodity => (
+                      <div
+                        key={commodity.id}
+                        className="px-4 py-3 hover:bg-muted/50 dark:hover:bg-white/5 cursor-pointer border-b border-border/50 last:border-b-0"
+                        onClick={() => {
+                          setSearchQuery("");
+                          document.getElementById(`commodity-${commodity.id}`)?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        data-testid={`search-result-${commodity.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-foreground">{commodity.name}</p>
+                            <p className="text-sm text-muted-foreground">{commodity.symbol} • {commodity.category}</p>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {commodity.unit}
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-muted-foreground text-center">
-                        No commodities found
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              <NavigationMenu currentPath={location} />
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-muted-foreground text-center">
+                      No commodities found
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+            
+            <NavigationMenu currentPath={location} />
           </div>
         </div>
       </header>

@@ -1,63 +1,38 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ThemeToggle } from "../components/theme-toggle";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "wouter";
-import { MenuIcon, ArrowLeftIcon, AlertTriangleIcon } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { ArrowLeftIcon, AlertTriangleIcon } from "lucide-react";
+import { NavigationMenu } from "../components/navigation-menu";
 
 export default function Policy() {
+  const [location] = useLocation();
+  
   return (
-    <div className="min-h-screen bg-background relative">
-
-
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="absolute top-0 w-full z-50">
-        <div className="max-w-6xl mx-auto px-8 py-6">
+      <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link href="/">
-                <div className="flex items-center space-x-3 cursor-pointer">
-                  {/* Triangle logo */}
-                  <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-                  <span className="text-lg font-medium text-foreground">
-                    AIForecast Hub
-                  </span>
-                </div>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-3">
-              <ThemeToggle />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <MenuIcon className="h-[1.2rem] w-[1.2rem]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link href="/blog">Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/policy">Policy</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="text-lg font-medium text-foreground">AIForecast Hub</span>
+            </Link>
+            
+            <NavigationMenu currentPath={location} />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="pt-24 pb-16 relative z-10">
-        <div className="max-w-4xl mx-auto px-8">
-          <div className="mb-8">
-            <Link href="/dashboard">
-              <Button variant="ghost" className="flex items-center space-x-2 mb-6">
-                <ArrowLeftIcon className="h-4 w-4" />
-                <span>Back to Home</span>
-              </Button>
-            </Link>
-          </div>
+      <main className="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-20">
+        <div className="mb-8">
+          <Link href="/dashboard">
+            <Button variant="ghost" className="flex items-center space-x-2 mb-6">
+              <ArrowLeftIcon className="h-4 w-4" />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+        </div>
           
           <article className="space-y-8">
             <header className="space-y-4">
