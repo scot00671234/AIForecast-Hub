@@ -276,9 +276,8 @@ export class DatabaseStorage implements IStorage {
       console.log('Note: Some constraints may already exist');
     }
 
-    // AUTOMATIC MIGRATION SYSTEM - Fixes production database issues
-    console.log('🔧 Running automatic database migrations...');
-    await this.runAutomaticMigrations();
+    // Migrations now run earlier in startup process
+    console.log('🔧 Ensuring production data...');
 
     // Insert initial data
     await this.insertProductionData();
@@ -287,7 +286,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // AUTOMATIC MIGRATION SYSTEM - Runs every deployment
-  private async runAutomaticMigrations() {
+  async runAutomaticMigrations() {
     console.log('🚀 Running automatic migrations...');
     
     // Migration 1: Add missing timeframe column

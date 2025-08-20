@@ -15,6 +15,10 @@ export class StartupManager {
     await this.storage.ensureConnection();
     console.log('✅ Database connection verified');
     
+    // CRITICAL: Run migrations FIRST before any other database operations
+    await this.storage.runAutomaticMigrations();
+    console.log('✅ Database migrations completed');
+    
     // Initialize default data (models + commodities)
     await this.storage.ensureDefaultData();
     console.log('✅ Database schema and default data initialized');
