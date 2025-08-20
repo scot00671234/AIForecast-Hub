@@ -1,58 +1,30 @@
-# VPS Deployment Guide for AIForecast Hub
+# AIForecast Hub - Replit Deployment
 
-## Root Cause of Bad Gateway
+## Overview
 
-The "Bad Gateway" error is caused by **nixpacks incorrectly detecting Caddy** instead of Node.js, despite our prevention measures. The deployment logs show:
+The AIForecast Hub is a React + Express application that provides AI-powered commodity price forecasting. It runs seamlessly on Replit with an integrated PostgreSQL database.
 
-```
-║ caddy      │ pkgs: caddy                                   ║
-║            │ cmds: caddy fmt --overwrite /assets/Caddyfile ║
-```
+## Environment Setup
 
-And the startup failure:
-```
-/bin/bash: line 1: ./start.sh: Permission denied
-```
-
-## Solution: Environment Variables Configuration
-
-### Required Environment Variables
-
-Set these in your **Environment Settings** tab in dokploy:
+The application automatically configures itself for Replit with the following environment variables:
 
 ```bash
-# Node.js Detection
-NODE_ENV=production
-PORT=3000
+# Automatically provided by Replit
+DATABASE_URL=<automatically-configured>
+NODE_ENV=development
 
-# Force Node.js (Anti-Caddy)
-NIXPACKS_NO_CADDY=1
-NIXPACKS_NO_STATIC_SITE=1
-NIXPACKS_FORCE_NODE=1
-FORCE_NODE_ONLY=true
-
-# Database Configuration
-DATABASE_URL=postgresql://postgres:<password>@<host>:5432/<dbname>?sslmode=require
-DATABASE_SSL=true
-
-# Session Security
-SESSION_SECRET=your-super-secure-session-secret-here
-
-# API Keys (Optional - only if you have them)
+# Optional API Keys (add in Secrets)
 OPENAI_API_KEY=your-openai-api-key
 ANTHROPIC_API_KEY=your-claude-api-key
+DEEPSEEK_API_KEY=your-deepseek-api-key
 ```
 
-### Manual Deployment Process
+## Development
 
-If the automated deployment keeps failing:
-
-1. **SSH into your VPS**
-2. **Clone the repository manually**:
-   ```bash
-   git clone https://github.com/scot00671234/AIForecast-Hub.git
-   cd AIForecast-Hub
-   ```
+1. **Start the application**: The workflow automatically runs `npm run dev`
+2. **Database**: PostgreSQL database is automatically created and configured
+3. **Frontend**: React app served at `http://localhost:5000`
+4. **API**: Express server handles backend requests
 3. **Install dependencies**:
    ```bash
    npm install
