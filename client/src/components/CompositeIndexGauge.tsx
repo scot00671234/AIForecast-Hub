@@ -38,10 +38,9 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
       if (response.ok) {
         const data = await response.json();
         setLatestIndex(data);
+        setError(null);
       } else if (response.status === 404) {
-        setError('No index data available - generating first calculation...');
-        // Trigger initial calculation
-        await triggerCalculation();
+        setError('No index data available');
       } else {
         throw new Error('Failed to fetch composite index');
       }
@@ -50,18 +49,6 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
       console.error('Error fetching composite index:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const triggerCalculation = async () => {
-    try {
-      await fetch('/api/composite-index/calculate', { method: 'POST' });
-      // Wait a moment then refetch
-      setTimeout(() => {
-        fetchLatestIndex();
-      }, 2000);
-    } catch (err) {
-      console.error('Error calculating composite index:', err);
     }
   };
 
@@ -100,13 +87,12 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   if (loading) {
     return (
       <Card className={className}>
-        <CardHeader>
-          <CardTitle>AI Commodity Composite Index (ACCI)</CardTitle>
-          <CardDescription>Loading market sentiment...</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">AI Commodity Composite Index</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse">
-            <div className="h-32 bg-muted rounded-lg"></div>
+          <div className="h-20 flex items-center justify-center">
+            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto opacity-30"></div>
           </div>
         </CardContent>
       </Card>
@@ -116,15 +102,14 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   if (error || !latestIndex) {
     return (
       <Card className={className}>
-        <CardHeader>
-          <CardTitle>AI Commodity Composite Index (ACCI)</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">AI Commodity Composite Index</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            {/* Triangle logo when no data */}
-            <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-foreground mx-auto mb-4 opacity-20"></div>
-            <p className="text-sm text-muted-foreground">
-              Awaiting AI predictions
+          <div className="h-20 flex flex-col items-center justify-center">
+            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto mb-2 opacity-30"></div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting predictions
             </p>
           </div>
         </CardContent>

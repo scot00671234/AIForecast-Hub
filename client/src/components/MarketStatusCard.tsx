@@ -67,16 +67,12 @@ export default function MarketStatusCard() {
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Market Status</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Market Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse">
-            <div className="space-y-3">
-              <div className="h-4 bg-muted rounded"></div>
-              <div className="h-4 bg-muted rounded w-2/3"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
-            </div>
+          <div className="h-20 flex items-center justify-center">
+            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto opacity-30"></div>
           </div>
         </CardContent>
       </Card>
@@ -103,49 +99,31 @@ export default function MarketStatusCard() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CheckCircle className="h-5 w-5" />
-          Market Status
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Market Status</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Current Status</span>
-          <Badge 
-            variant={status?.isMarketOpen && status?.systemHealth === 'healthy' ? 'default' : 'secondary'}
-            className={`flex items-center gap-1 ${getStatusColor()}`}
-          >
-            {getStatusIcon()}
+          <span className="text-xs text-muted-foreground">Current Status</span>
+          <span className={`text-xs font-medium ${getStatusColor()}`}>
             {getStatusText()}
-          </Badge>
+          </span>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Data Source</span>
-            <span className="text-sm font-medium">Yahoo Finance</span>
+            <span className="text-xs text-muted-foreground">Data Source</span>
+            <span className="text-xs font-medium">Yahoo Finance</span>
           </div>
-          
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Freshness</span>
-            <span className="text-sm font-medium">{status?.dataFreshness}</span>
+            <span className="text-xs text-muted-foreground">Freshness</span>
+            <span className="text-xs font-medium">{status?.dataFreshness}</span>
           </div>
-          
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Schedule</span>
-            <span className="text-xs text-muted-foreground">{status?.nextUpdate}</span>
+            <span className="text-xs text-muted-foreground">Schedule</span>
+            <span className="text-xs font-medium">{status?.nextUpdate}</span>
           </div>
         </div>
-        
-        {(!status?.isMarketOpen || status?.systemHealth !== 'healthy') && (
-          <div className="text-center py-2">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-foreground mx-auto mb-2 opacity-20"></div>
-            <p className="text-xs text-muted-foreground">
-              {status?.systemHealth === 'error' ? 'System maintenance' : 'Off-market hours'}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
