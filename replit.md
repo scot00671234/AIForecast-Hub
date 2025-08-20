@@ -7,6 +7,9 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- **Component Optimization August 2025**: Fixed constant loading issue by removing infinite retry loops in CompositeIndexGauge and related dashboard components
+- **Minimalist Design Update**: Simplified dashboard cards with cleaner spacing, reduced padding, and subtle loading states using triangle icons
+- **Company Information Added**: Added Loremt ApS CVR-nr 41691360 to footer across all pages (landing, dashboard, blog)
 - **Monthly Multi-Timeframe Predictions**: Complete architecture overhaul from weekly 7-day predictions to monthly 3mo/6mo/9mo/12mo predictions on 1st of each month
 - **Timeframe-Aware Schema**: Added timeframe field to predictions table with production-safe migration for existing deployments
 - **Enhanced AI Services**: Updated OpenAI, Claude, and Deepseek services with timeframe-specific prediction logic and prompts

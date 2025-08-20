@@ -266,9 +266,10 @@ export default function Landing() {
                 Policy
               </Link>
             </div>
-            <p className="text-xs text-muted-foreground">
-              © 2025 AIForecast Hub
-            </p>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>© 2025 AIForecast Hub</p>
+              <p>Loremt ApS CVR-nr 41691360</p>
+            </div>
           </div>
         </div>
       </footer>

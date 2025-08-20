@@ -135,9 +135,10 @@ export default function Blog() {
       {/* Footer */}
       <footer className="py-8 border-t border-border/30">
         <div className="max-w-6xl mx-auto px-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            © 2025 AIForecast Hub
-          </p>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>© 2025 AIForecast Hub</p>
+            <p>Loremt ApS CVR-nr 41691360</p>
+          </div>
         </div>
       </footer>
     </div>

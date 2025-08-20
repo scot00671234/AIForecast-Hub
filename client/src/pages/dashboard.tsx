@@ -189,9 +189,10 @@ export default function Dashboard() {
               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
               <span className="font-medium text-foreground">AIForecast Hub</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 AIForecast Hub.
-            </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>© 2025 AIForecast Hub</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+            </div>
           </div>
         </div>
       </footer>
