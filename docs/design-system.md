@@ -2,13 +2,13 @@
 
 ## Design Philosophy
 
-Based on the inspiration images, the design system follows a minimalist, premium aesthetic with emphasis on:
-- **Ultra-clean typography** with generous spacing
-- **Deep dark backgrounds** with subtle gradients
-- **Minimal use of color** with strategic accent placement
-- **Geometric shapes** as primary visual elements
-- **Premium glassmorphism** with subtle transparency
-- **Refined spacing** and micro-interactions
+The AIForecast Hub design system follows a clean, modern aesthetic with emphasis on:
+- **Clean typography** with clear hierarchy and optimal readability
+- **Light-first design** with seamless dark mode support
+- **Strategic color usage** for AI model differentiation and status indicators
+- **Card-based layout** with subtle shadows and rounded corners
+- **Triangle brand identity** as a geometric logo element
+- **Sidebar navigation** with contextual sections and smooth interactions
 
 ## Color System
 
@@ -90,11 +90,11 @@ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 
 ## Component Guidelines
 
 ### Cards
-- **Background**: Extremely subtle transparency with dark backdrop
-- **Border**: 1px solid with very low opacity
-- **Border Radius**: 12px for cards, 8px for smaller elements
-- **Padding**: Generous (24px minimum for cards)
-- **Shadow**: Minimal, focused on depth rather than prominence
+- **Background**: Clean white/light gray with subtle shadows
+- **Border**: Subtle border with rounded corners (12px radius)
+- **Layout**: Grid-based commodity cards with consistent spacing
+- **Content**: Commodity name, current price, percentage change, model accuracy scores
+- **Hover states**: Subtle elevation increase and "Click for detailed analysis" prompts
 
 ### Buttons
 - **Primary**: Dark background with subtle border
@@ -104,16 +104,18 @@ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 
 - **Padding**: 12px 24px for regular buttons
 
 ### Navigation
-- **Minimal design** with clean typography
-- **No visible separators** between nav items
-- **Subtle hover states** with opacity changes
-- **Logo**: Simple geometric triangle shape
+- **Slide-out sidebar** triggered by hamburger menu in top-right
+- **Contextual sections**: Dashboard, Indices, About, FAQ, Blog, Policy
+- **Clean typography** with section descriptions
+- **Smooth slide animations** for sidebar open/close
+- **Header logo**: Triangle geometric shape with "AIForecast Hub" text
 
 ### Data Visualization
-- **Minimal grid lines** with low opacity
-- **Clean axes** with subtle typography
-- **Strategic use of color** - limited palette
-- **Smooth animations** and transitions
+- **Model accuracy display**: Horizontal list with colored indicators
+- **AI model colors**: Claude (green), ChatGPT (blue), Deepseek (purple)
+- **Percentage displays**: Clear accuracy scores with ranking (#1, #2, #3)
+- **Price indicators**: Large price values with percentage change indicators
+- **Status colors**: Green for positive, red for negative, gray for neutral
 
 ### Layout Principles
 - **Generous whitespace** between sections
@@ -121,34 +123,30 @@ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 
 - **Grid system**: 12-column responsive grid
 - **Vertical rhythm**: Consistent 24px baseline
 
-## Glassmorphism Implementation
+## Component Specifications
 
-### Base Glass Effect
+### Commodity Cards
 ```css
-.glass-minimal {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.commodity-card {
+  background: var(--background-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 200ms ease;
 }
 
-.dark .glass-minimal {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.commodity-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 ```
 
-### Enhanced Glass Effect
+### AI Model Indicators
 ```css
-.glass-prominent {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.dark .glass-prominent {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+.model-claude { color: hsl(142, 76%, 36%); }     /* Green */
+.model-chatgpt { color: hsl(210, 100%, 50%); }   /* Blue */
+.model-deepseek { color: hsl(271, 76%, 53%); }   /* Purple */
 ```
 
 ## Animation Guidelines
@@ -175,22 +173,25 @@ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 
 
 ## Implementation Rules
 
-1. **Consistency First**: Every component must follow the design tokens
-2. **Minimal Color Usage**: Use color sparingly and strategically
-3. **Typography Hierarchy**: Clear distinction between heading levels
-4. **Spacing Consistency**: Use only defined spacing values
-5. **Subtle Interactions**: All hover states should be understated
-6. **Performance**: Optimize backdrop-filter usage for performance
-7. **Accessibility**: Maintain WCAG AA contrast ratios in both themes
+1. **Card-First Design**: Primary content organized in clean, hoverable cards
+2. **AI Model Consistency**: Claude (green), ChatGPT (blue), Deepseek (purple) throughout
+3. **Navigation Pattern**: Slide-out sidebar for all major sections
+4. **Typography Hierarchy**: Clear price prominence with supporting accuracy data
+5. **Interactive States**: Subtle hover effects on all clickable elements
+6. **Theme Support**: Seamless light/dark mode switching
+7. **Responsive Grid**: Fluid card layout that adapts to screen size
+8. **Accessibility**: WCAG AA compliance with proper contrast and focus states
 
 ## Quality Checklist
 
 Before shipping any component:
-- [ ] Follows color system exactly
-- [ ] Uses defined spacing values
-- [ ] Implements proper typography hierarchy
+- [ ] Follows card-based layout patterns
+- [ ] Uses correct AI model colors (Claude=green, ChatGPT=blue, Deepseek=purple)
+- [ ] Implements proper commodity data hierarchy (name → price → change → accuracy)
 - [ ] Includes both light and dark theme variants
-- [ ] Has appropriate hover/focus states
-- [ ] Maintains consistent border radius
-- [ ] Uses minimal, purposeful animations
-- [ ] Passes accessibility checks
+- [ ] Has hover states for interactive elements
+- [ ] Maintains 12px border radius for cards
+- [ ] Includes "Click for detailed analysis" interactions
+- [ ] Shows proper navigation sidebar integration
+- [ ] Displays percentage changes with appropriate colors
+- [ ] Passes accessibility checks with proper focus management
