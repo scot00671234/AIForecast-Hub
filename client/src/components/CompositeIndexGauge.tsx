@@ -86,13 +86,15 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">AI Commodity Composite Index</CardTitle>
+      <Card className={`${className} border-0 shadow-sm`}>
+        <CardHeader className="pb-4 space-y-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">AI Commodity Composite Index</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-20 flex items-center justify-center">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto opacity-30"></div>
+        <CardContent className="pt-0">
+          <div className="h-24 flex items-center justify-center">
+            <div className="animate-pulse">
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground/40"></div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -101,14 +103,14 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (error || !latestIndex) {
     return (
-      <Card className={className}>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">AI Commodity Composite Index</CardTitle>
+      <Card className={`${className} border-0 shadow-sm`}>
+        <CardHeader className="pb-4 space-y-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">AI Commodity Composite Index</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-20 flex flex-col items-center justify-center">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto mb-2 opacity-30"></div>
-            <p className="text-xs text-muted-foreground">
+        <CardContent className="pt-0">
+          <div className="h-24 flex flex-col items-center justify-center space-y-2">
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground/40"></div>
+            <p className="text-xs text-muted-foreground/70">
               Awaiting predictions
             </p>
           </div>
@@ -126,23 +128,11 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   const gaugeRotation = (gaugePosition / 100) * 180 - 90; // -90 to 90 degrees
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>AI Commodity Composite Index (ACCI)</span>
-          <Badge 
-            variant={getSentimentBadgeVariant(latestIndex.marketSentiment)}
-            className="flex items-center gap-1"
-          >
-            {getSentimentIcon(latestIndex.marketSentiment)}
-            {latestIndex.marketSentiment.toUpperCase()}
-          </Badge>
-        </CardTitle>
-        <CardDescription>
-          PMI-style aggregation of all AI model predictions
-        </CardDescription>
+    <Card className={`${className} border-0 shadow-sm`}>
+      <CardHeader className="pb-4 space-y-1">
+        <CardTitle className="text-sm font-medium text-muted-foreground">AI Commodity Composite Index</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="pt-0 space-y-6">
         {/* Main Gauge */}
         <div className="relative mx-auto w-48 h-24">
           <svg viewBox="0 0 200 100" className="w-full h-full">

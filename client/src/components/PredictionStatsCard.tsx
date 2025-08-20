@@ -46,13 +46,15 @@ export default function PredictionStatsCard() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Prediction Stats</CardTitle>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-4 space-y-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Prediction Stats</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-20 flex items-center justify-center">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto opacity-30"></div>
+        <CardContent className="pt-0">
+          <div className="h-24 flex items-center justify-center">
+            <div className="animate-pulse">
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground/40"></div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -60,42 +62,42 @@ export default function PredictionStatsCard() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Prediction Stats</CardTitle>
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-4 space-y-1">
+        <CardTitle className="text-sm font-medium text-muted-foreground">Prediction Stats</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center">
-            <div className="text-xl font-semibold text-foreground">
+      <CardContent className="pt-0 space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="text-center space-y-1">
+            <div className="text-2xl font-semibold text-foreground">
               {stats?.totalPredictions || 0}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground/70">
               Total Predictions
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-xl font-semibold text-foreground">
+          <div className="text-center space-y-1">
+            <div className="text-2xl font-semibold text-foreground">
               {stats?.activeModels || 3}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground/70">
               AI Models
             </div>
           </div>
         </div>
         
-        <div className="space-y-1">
-          <div className="flex justify-between items-center">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground">Coverage</span>
-            <span className="text-xs font-medium">14 Commodities</span>
+            <span className="text-xs font-medium text-foreground">14 Commodities</span>
           </div>
           
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground">Recent Activity</span>
             {stats?.totalPredictions === 0 ? (
-              <span className="text-xs text-muted-foreground">Pending</span>
+              <span className="text-xs text-muted-foreground/70">Pending</span>
             ) : (
-              <span className="text-xs text-green-600 dark:text-green-400">Active</span>
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Active</span>
             )}
           </div>
         </div>

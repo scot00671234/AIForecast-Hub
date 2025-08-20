@@ -66,13 +66,15 @@ export default function MarketStatusCard() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Market Status</CardTitle>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-4 space-y-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Market Status</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-20 flex items-center justify-center">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-muted-foreground mx-auto opacity-30"></div>
+        <CardContent className="pt-0">
+          <div className="h-24 flex items-center justify-center">
+            <div className="animate-pulse">
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground/40"></div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -98,30 +100,34 @@ export default function MarketStatusCard() {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Market Status</CardTitle>
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-4 space-y-1">
+        <CardTitle className="text-sm font-medium text-muted-foreground">Market Status</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center justify-between">
+      <CardContent className="pt-0 space-y-6">
+        <div className="flex items-center justify-between py-2">
           <span className="text-xs text-muted-foreground">Current Status</span>
-          <span className={`text-xs font-medium ${getStatusColor()}`}>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor()} ${
+            status?.isMarketOpen && status?.systemHealth === 'healthy' 
+              ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300' 
+              : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300'
+          }`}>
             {getStatusText()}
           </span>
         </div>
         
-        <div className="space-y-1">
-          <div className="flex justify-between items-center">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground">Data Source</span>
-            <span className="text-xs font-medium">Yahoo Finance</span>
+            <span className="text-xs font-medium text-foreground">Yahoo Finance</span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground">Freshness</span>
-            <span className="text-xs font-medium">{status?.dataFreshness}</span>
+            <span className="text-xs font-medium text-foreground">{status?.dataFreshness}</span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground">Schedule</span>
-            <span className="text-xs font-medium">{status?.nextUpdate}</span>
+            <span className="text-xs font-medium text-foreground">{status?.nextUpdate}</span>
           </div>
         </div>
       </CardContent>
