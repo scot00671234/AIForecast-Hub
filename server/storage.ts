@@ -190,6 +190,25 @@ export class DatabaseStorage implements IStorage {
         `
       },
       {
+        name: 'composite_index',
+        query: sql`
+          CREATE TABLE IF NOT EXISTS "composite_index" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "date" timestamp NOT NULL UNIQUE,
+            "overall_index" numeric(5,2) NOT NULL,
+            "hard_commodities_index" numeric(5,2) NOT NULL,
+            "soft_commodities_index" numeric(5,2) NOT NULL,
+            "directional_component" numeric(5,2) NOT NULL,
+            "confidence_component" numeric(5,2) NOT NULL,
+            "accuracy_component" numeric(5,2) NOT NULL,
+            "momentum_component" numeric(5,2) NOT NULL,
+            "total_predictions" integer NOT NULL,
+            "market_sentiment" text NOT NULL,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+      },
+      {
         name: 'actual_prices',
         query: sql`
           CREATE TABLE IF NOT EXISTS "actual_prices" (
@@ -257,9 +276,22 @@ export class DatabaseStorage implements IStorage {
       console.log('Note: Some constraints may already exist');
     }
 
-    // Handle missing timeframe column in existing predictions table
+    // AUTOMATIC MIGRATION SYSTEM - Fixes production database issues
+    console.log('🔧 Running automatic database migrations...');
+    await this.runAutomaticMigrations();
+
+    // Insert initial data
+    await this.insertProductionData();
+    
+    console.log('✅ Production migration completed');
+  }
+
+  // AUTOMATIC MIGRATION SYSTEM - Runs every deployment
+  private async runAutomaticMigrations() {
+    console.log('🚀 Running automatic migrations...');
+    
+    // Migration 1: Add missing timeframe column
     try {
-      console.log('🔧 Adding missing timeframe column if needed...');
       await db.execute(sql`
         DO $$ 
         BEGIN 
@@ -272,18 +304,42 @@ export class DatabaseStorage implements IStorage {
             -- Add check constraint for valid timeframes
             ALTER TABLE "predictions" ADD CONSTRAINT "predictions_timeframe_check" 
             CHECK ("timeframe" IN ('3mo', '6mo', '9mo', '12mo'));
+            
+            RAISE NOTICE '✅ Added timeframe column to predictions table';
+          ELSE
+            RAISE NOTICE 'ℹ️ Timeframe column already exists';
           END IF;
         END $$;
       `);
-      console.log('✅ Timeframe column migration completed');
+      console.log('✅ Migration 1: Timeframe column - COMPLETED');
     } catch (error) {
-      console.log('Note: Timeframe column migration failed (might already exist):', (error as Error).message);
+      console.log('⚠️ Migration 1: Timeframe column - FAILED:', (error as Error).message);
     }
-
-    // Insert initial data
-    await this.insertProductionData();
     
-    console.log('✅ Production migration completed');
+    // Migration 2: Ensure composite_index table exists (for future features)
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "composite_index" (
+          "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+          "date" timestamp NOT NULL UNIQUE,
+          "overall_index" numeric(5,2) NOT NULL,
+          "hard_commodities_index" numeric(5,2) NOT NULL,
+          "soft_commodities_index" numeric(5,2) NOT NULL,
+          "directional_component" numeric(5,2) NOT NULL,
+          "confidence_component" numeric(5,2) NOT NULL,
+          "accuracy_component" numeric(5,2) NOT NULL,
+          "momentum_component" numeric(5,2) NOT NULL,
+          "total_predictions" integer NOT NULL,
+          "market_sentiment" text NOT NULL,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `);
+      console.log('✅ Migration 2: Composite index table - COMPLETED');
+    } catch (error) {
+      console.log('⚠️ Migration 2: Composite index table - FAILED:', (error as Error).message);
+    }
+    
+    console.log('🎯 All automatic migrations completed');
   }
 
   private async insertProductionData() {
