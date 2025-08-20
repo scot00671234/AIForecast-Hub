@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NavigationMenu } from "../components/navigation-menu";
 import { useLocation } from "wouter";
-import { TrendingUpIcon, TrendingDownIcon, ActivityIcon } from "lucide-react";
+import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon } from "lucide-react";
 import BottomBanner from "@/components/ads/BottomBanner";
+import { useState } from "react";
 
 interface CompositeIndex {
   value: number;
@@ -28,11 +30,12 @@ interface CategoryCompositeIndex {
   soft: CompositeIndex;
 }
 
-function IndexGauge({ value, title, subtitle, classification }: {
+function IndexGauge({ value, title, subtitle, classification, onClick }: {
   value: number;
   title: string;
   subtitle: string;
   classification?: string;
+  onClick?: () => void;
 }) {
   const getColor = (val: number) => {
     if (val >= 75) return "text-green-600 dark:text-green-400";
@@ -56,17 +59,23 @@ function IndexGauge({ value, title, subtitle, classification }: {
   };
 
   return (
-    <Card className={`${getBgColor(value)} border-2`}>
-      <CardHeader className="pb-4">
+    <Card 
+      className={`${getBgColor(value)} border-2 cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 aspect-square flex flex-col`}
+      onClick={onClick}
+    >
+      <CardHeader className="pb-4 flex-1">
         <CardTitle className="text-lg font-semibold flex items-center justify-between">
           {title}
-          <div className={`${getColor(value)} flex items-center`}>
-            {getIcon(value)}
+          <div className="flex items-center space-x-2">
+            <div className={`${getColor(value)} flex items-center`}>
+              {getIcon(value)}
+            </div>
+            <InfoIcon className="h-4 w-4 text-muted-foreground opacity-60" />
           </div>
         </CardTitle>
         <CardDescription className="text-sm">{subtitle}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col justify-center">
         <div className="flex items-center justify-between">
           <div className={`text-4xl font-bold ${getColor(value)}`}>
             {value.toFixed(1)}
@@ -100,6 +109,7 @@ function IndexGauge({ value, title, subtitle, classification }: {
 
 export default function Indices() {
   const [location] = useLocation();
+  const [selectedIndex, setSelectedIndex] = useState<string | null>(null);
 
   const { data: overallComposite, isLoading: loadingOverall } = useQuery<CompositeIndex>({
     queryKey: ["/api/composite-index/latest"],
@@ -159,179 +169,148 @@ export default function Indices() {
             </p>
           </div>
 
-          {/* Overall AI Commodity Composite Index */}
-          <section className="space-y-6">
+          {/* Market Indices Grid */}
+          <section className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                AI Commodity Composite Index
+              <h2 className="text-3xl font-bold text-foreground mb-4">
+                Market Intelligence Dashboard
               </h2>
-              <p className="text-muted-foreground">
-                Combined intelligence from Claude, ChatGPT, and DeepSeek across all commodities
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Click on any index card to learn more about its methodology and calculation
               </p>
             </div>
 
-            {loadingOverall ? (
-              <Card className="bg-muted/10">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin">
-                      <ActivityIcon className="h-8 w-8 text-muted-foreground" />
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+              {/* Overall AI Commodity Composite Index */}
+              {loadingOverall ? (
+                <Card className="bg-muted/10 aspect-square flex items-center justify-center">
+                  <div className="animate-spin">
+                    <ActivityIcon className="h-8 w-8 text-muted-foreground" />
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <IndexGauge
-                value={overallComposite?.value || 50}
-                title="Overall Market Sentiment"
-                subtitle="AI-powered composite across all commodities"
-                classification={
-                  (overallComposite?.value || 50) >= 75 ? "Extremely Bullish" :
-                  (overallComposite?.value || 50) >= 60 ? "Bullish" :
-                  (overallComposite?.value || 50) >= 40 ? "Neutral" :
-                  (overallComposite?.value || 50) >= 25 ? "Bearish" : "Extremely Bearish"
-                }
-              />
-            )}
-          </section>
+                </Card>
+              ) : (
+                <IndexGauge
+                  value={overallComposite?.value || 50}
+                  title="AI Composite"
+                  subtitle="All Commodities"
+                  classification={
+                    (overallComposite?.value || 50) >= 75 ? "Extremely Bullish" :
+                    (overallComposite?.value || 50) >= 60 ? "Bullish" :
+                    (overallComposite?.value || 50) >= 40 ? "Neutral" :
+                    (overallComposite?.value || 50) >= 25 ? "Bearish" : "Extremely Bearish"
+                  }
+                  onClick={() => setSelectedIndex("composite")}
+                />
+              )}
 
-          {/* Fear & Greed Index */}
-          <section className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Fear & Greed Index
-              </h2>
-              <p className="text-muted-foreground">
-                Market sentiment based on volatility, momentum, and investor behavior
-              </p>
-            </div>
-
-            {loadingFearGreed ? (
-              <Card className="bg-muted/10">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin">
-                      <ActivityIcon className="h-8 w-8 text-muted-foreground" />
-                    </div>
+              {/* Fear & Greed Index */}
+              {loadingFearGreed ? (
+                <Card className="bg-muted/10 aspect-square flex items-center justify-center">
+                  <div className="animate-spin">
+                    <ActivityIcon className="h-8 w-8 text-muted-foreground" />
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <IndexGauge
-                value={fearGreedIndex?.value || 50}
-                title="Market Fear & Greed"
-                subtitle="Based on market volatility and investor sentiment"
-                classification={fearGreedIndex?.classification || "Neutral"}
-              />
-            )}
-          </section>
+                </Card>
+              ) : (
+                <IndexGauge
+                  value={fearGreedIndex?.value || 50}
+                  title="Fear & Greed"
+                  subtitle="Market Sentiment"
+                  classification={fearGreedIndex?.classification || "Neutral"}
+                  onClick={() => setSelectedIndex("feargreed")}
+                />
+              )}
 
-          {/* Hard vs Soft Commodities */}
-          <section className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Commodity Categories
-              </h2>
-              <p className="text-muted-foreground">
-                Separate AI indices for hard commodities (metals, energy) and soft commodities (agriculture)
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
               {/* Hard Commodities */}
               {loadingCategories ? (
-                <Card className="bg-muted/10">
-                  <CardContent className="p-8">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin">
-                        <ActivityIcon className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </CardContent>
+                <Card className="bg-muted/10 aspect-square flex items-center justify-center">
+                  <div className="animate-spin">
+                    <ActivityIcon className="h-8 w-8 text-muted-foreground" />
+                  </div>
                 </Card>
               ) : (
                 <IndexGauge
                   value={categoryComposite?.hard?.value || 50}
                   title="Hard Commodities"
-                  subtitle="Metals, Energy & Industrial Materials"
+                  subtitle="Metals & Energy"
                   classification={
                     (categoryComposite?.hard?.value || 50) >= 75 ? "Very Bullish" :
                     (categoryComposite?.hard?.value || 50) >= 60 ? "Bullish" :
                     (categoryComposite?.hard?.value || 50) >= 40 ? "Neutral" :
                     (categoryComposite?.hard?.value || 50) >= 25 ? "Bearish" : "Very Bearish"
                   }
+                  onClick={() => setSelectedIndex("hard")}
                 />
               )}
 
               {/* Soft Commodities */}
               {loadingCategories ? (
-                <Card className="bg-muted/10">
-                  <CardContent className="p-8">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin">
-                        <ActivityIcon className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </CardContent>
+                <Card className="bg-muted/10 aspect-square flex items-center justify-center">
+                  <div className="animate-spin">
+                    <ActivityIcon className="h-8 w-8 text-muted-foreground" />
+                  </div>
                 </Card>
               ) : (
                 <IndexGauge
                   value={categoryComposite?.soft?.value || 50}
                   title="Soft Commodities"
-                  subtitle="Agricultural Products & Food"
+                  subtitle="Agriculture & Food"
                   classification={
                     (categoryComposite?.soft?.value || 50) >= 75 ? "Very Bullish" :
                     (categoryComposite?.soft?.value || 50) >= 60 ? "Bullish" :
                     (categoryComposite?.soft?.value || 50) >= 40 ? "Neutral" :
                     (categoryComposite?.soft?.value || 50) >= 25 ? "Bearish" : "Very Bearish"
                   }
+                  onClick={() => setSelectedIndex("soft")}
                 />
               )}
             </div>
           </section>
 
-          {/* Index Methodology */}
+          {/* Quick Stats Overview */}
           <section className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Index Methodology
+                Index Performance Summary
               </h2>
+              <p className="text-muted-foreground">
+                Real-time market intelligence updated continuously
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-muted/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">AI Composite Index</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <div>• <strong>Directional Sentiment</strong>: 40%</div>
-                  <div>• <strong>Confidence Score</strong>: 25%</div>
-                  <div>• <strong>Accuracy Weight</strong>: 20%</div>
-                  <div>• <strong>Momentum Component</strong>: 15%</div>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-foreground">
+                    {(overallComposite?.value || 50).toFixed(0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Overall Index</div>
                 </CardContent>
               </Card>
 
               <Card className="bg-muted/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">Fear & Greed Index</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <div>• Market volatility analysis</div>
-                  <div>• Price momentum indicators</div>
-                  <div>• Volume analysis</div>
-                  <div>• Put/call ratios</div>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-foreground">
+                    {(fearGreedIndex?.value || 50).toFixed(0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Fear & Greed</div>
                 </CardContent>
               </Card>
 
               <Card className="bg-muted/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">Category Indices</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <div>• <strong>Hard</strong>: Energy, Metals</div>
-                  <div>• <strong>Soft</strong>: Agricultural</div>
-                  <div>• Same AI methodology</div>
-                  <div>• Category-specific insights</div>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-foreground">
+                    {(categoryComposite?.hard?.value || 50).toFixed(0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Hard Commodities</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-muted/5">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-foreground">
+                    {(categoryComposite?.soft?.value || 50).toFixed(0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Soft Commodities</div>
                 </CardContent>
               </Card>
             </div>
@@ -339,6 +318,176 @@ export default function Indices() {
 
         </div>
       </main>
+
+      {/* Methodology Modal */}
+      <Dialog open={selectedIndex !== null} onOpenChange={() => setSelectedIndex(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {selectedIndex === "composite" && "AI Commodity Composite Index Methodology"}
+              {selectedIndex === "feargreed" && "Fear & Greed Index Methodology"}
+              {selectedIndex === "hard" && "Hard Commodities Index Methodology"}
+              {selectedIndex === "soft" && "Soft Commodities Index Methodology"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedIndex === "composite" && "Understanding how we combine multiple AI model predictions into a single market intelligence score"}
+              {selectedIndex === "feargreed" && "How we measure market sentiment using volatility and behavioral indicators"}
+              {selectedIndex === "hard" && "AI-powered analysis focused on metals, energy, and industrial commodities"}
+              {selectedIndex === "soft" && "AI-powered analysis focused on agricultural and food commodities"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {selectedIndex === "composite" && (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Calculation Methodology</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Directional Sentiment</span>
+                      <span className="text-sm text-muted-foreground">40% weight</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Confidence Score</span>
+                      <span className="text-sm text-muted-foreground">25% weight</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Accuracy Weight</span>
+                      <span className="text-sm text-muted-foreground">20% weight</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Momentum Component</span>
+                      <span className="text-sm text-muted-foreground">15% weight</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Data Sources</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Claude AI predictions across all commodity categories</li>
+                    <li>• ChatGPT (GPT-4) price forecasts and market analysis</li>
+                    <li>• DeepSeek AI predictions with confidence intervals</li>
+                    <li>• Historical accuracy weighting based on past performance</li>
+                    <li>• Real-time price data from Yahoo Finance API</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Index Interpretation</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span>75-100:</span> <span className="text-green-600">Extremely Bullish</span></div>
+                    <div className="flex justify-between"><span>60-74:</span> <span className="text-green-500">Bullish</span></div>
+                    <div className="flex justify-between"><span>40-59:</span> <span className="text-yellow-500">Neutral</span></div>
+                    <div className="flex justify-between"><span>25-39:</span> <span className="text-orange-500">Bearish</span></div>
+                    <div className="flex justify-between"><span>0-24:</span> <span className="text-red-500">Extremely Bearish</span></div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {selectedIndex === "feargreed" && (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Calculation Methodology</h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">VIX Volatility Analysis</span>
+                      <p className="text-sm text-muted-foreground mt-1">Uses the CBOE Volatility Index to gauge market fear levels</p>
+                    </div>
+                    <div className="p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Price Momentum Indicators</span>
+                      <p className="text-sm text-muted-foreground mt-1">Analyzes recent price movements and trends</p>
+                    </div>
+                    <div className="p-3 bg-muted/20 rounded-lg">
+                      <span className="font-medium">Market Behavior Patterns</span>
+                      <p className="text-sm text-muted-foreground mt-1">Incorporates historical volatility patterns</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">VIX Interpretation Scale</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span>VIX 0-12:</span> <span className="text-green-600">Extreme Greed</span></div>
+                    <div className="flex justify-between"><span>VIX 12-17:</span> <span className="text-green-500">Greed</span></div>
+                    <div className="flex justify-between"><span>VIX 17-25:</span> <span className="text-yellow-500">Neutral</span></div>
+                    <div className="flex justify-between"><span>VIX 25-35:</span> <span className="text-orange-500">Fear</span></div>
+                    <div className="flex justify-between"><span>VIX 35+:</span> <span className="text-red-500">Extreme Fear</span></div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Data Sources</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• CBOE VIX (Volatility Index) real-time data</li>
+                    <li>• Market volatility patterns and historical analysis</li>
+                    <li>• Yahoo Finance API for current market conditions</li>
+                    <li>• Sentiment adjustments based on recent price movements</li>
+                  </ul>
+                </div>
+              </>
+            )}
+
+            {(selectedIndex === "hard" || selectedIndex === "soft") && (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Category-Specific Analysis</h3>
+                  <div className="p-3 bg-muted/20 rounded-lg mb-4">
+                    <span className="font-medium">
+                      {selectedIndex === "hard" ? "Hard Commodities Include:" : "Soft Commodities Include:"}
+                    </span>
+                    <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                      {selectedIndex === "hard" ? (
+                        <>
+                          <li>• Crude Oil, Natural Gas (Energy)</li>
+                          <li>• Gold, Silver, Copper (Precious & Base Metals)</li>
+                          <li>• Aluminum, Platinum, Palladium (Industrial Metals)</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>• Corn, Soybeans, Wheat (Grains)</li>
+                          <li>• Coffee, Sugar, Cotton (Soft Commodities)</li>
+                          <li>• Agricultural products and food commodities</li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Calculation Methodology</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Uses the same AI composite methodology as the overall index</p>
+                    <p>• Applies category-specific weighting for relevant commodities</p>
+                    <p>• Combines predictions from Claude, ChatGPT, and DeepSeek</p>
+                    <p>• Weighted by directional sentiment (40%), confidence (25%), accuracy (20%), momentum (15%)</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Unique Insights</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    {selectedIndex === "hard" ? (
+                      <>
+                        <p>• Energy commodities often drive overall market sentiment</p>
+                        <p>• Metals respond strongly to industrial demand and inflation</p>
+                        <p>• Geopolitical factors heavily influence hard commodity prices</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>• Weather patterns significantly impact agricultural commodities</p>
+                        <p>• Seasonal factors create predictable price cycles</p>
+                        <p>• Food security and trade policies affect soft commodity markets</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Bottom Banner Ad */}
       <BottomBanner />
