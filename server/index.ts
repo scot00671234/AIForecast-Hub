@@ -70,6 +70,7 @@ console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
     await setupVite(app, server);
   } else {
     serveStatic(app);
+    console.log("✅ Static file serving configured for production");
   }
 
   // Start server
