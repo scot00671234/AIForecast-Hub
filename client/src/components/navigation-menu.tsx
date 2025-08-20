@@ -154,12 +154,10 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
 
         {/* Menu Footer */}
         <div className="flex-shrink-0 p-4 border-t border-border/30">
-          <div className="text-center space-y-1">
-            <p className="text-xs text-muted-foreground">
-              © 2025 AIForecast Hub
-            </p>
-            <p className="text-xs text-muted-foreground/70">
-              Loremt ApS CVR-nr 41691360
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[6px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
+            <p className="text-xs text-muted-foreground font-medium">
+              AIForecast Hub
             </p>
           </div>
         </div>
