@@ -37,40 +37,39 @@ try {
     process.exit(1);
   }
   
-  // Fix import.meta.dirname issue in bundled code
+  // Fix import.meta.dirname issue in bundled code - COMPREHENSIVE FIX
   console.log('🔧 Fixing import.meta.dirname in bundled code...');
   let indexContent = readFileSync(indexPath, 'utf-8');
   
-  // Check if import.meta.dirname is used
-  if (indexContent.includes('import.meta.dirname')) {
-    console.log('🔍 Found import.meta.dirname references, applying fixes...');
+  // Count all import.meta.dirname references
+  const dirNameCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
+  console.log(`🔍 Found ${dirNameCount} import.meta.dirname references`);
+  
+  if (dirNameCount > 0) {
+    console.log('🚨 CRITICAL: Applying comprehensive import.meta.dirname fixes...');
     
-    // Add imports at the top if not present
-    if (!indexContent.includes('fileURLToPath')) {
-      const importLine = 'import { fileURLToPath } from "url";';
-      indexContent = importLine + '\n' + indexContent;
-      console.log('✅ Added fileURLToPath import');
+    // Add imports at the very beginning
+    const requiredImports = `import { fileURLToPath } from "url";
+import path from "path";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+`;
+    
+    // Check if imports are already present
+    if (!indexContent.includes('fileURLToPath') || !indexContent.includes('const __dirname')) {
+      indexContent = requiredImports + indexContent;
+      console.log('✅ Added comprehensive dirname setup');
     }
     
-    if (!indexContent.includes('import path from "path"') && !indexContent.includes('path.dirname')) {
-      const pathImportLine = 'import path from "path";';
-      // Insert after existing imports or at the top
-      if (indexContent.includes('import ')) {
-        indexContent = indexContent.replace(/^(import[^;]+;)/m, '$1\n' + pathImportLine);
-      } else {
-        indexContent = pathImportLine + '\n' + indexContent;
-      }
-      console.log('✅ Added path import');
-    }
+    // Replace ALL import.meta.dirname with __dirname
+    const beforeCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
+    indexContent = indexContent.replace(/import\.meta\.dirname/g, '__dirname');
+    const afterCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
     
-    // Replace import.meta.dirname with proper ES module equivalent
-    indexContent = indexContent.replace(
-      /import\.meta\.dirname/g,
-      'path.dirname(fileURLToPath(import.meta.url))'
-    );
+    console.log(`✅ Replaced ${beforeCount - afterCount} import.meta.dirname references`);
+    console.log(`⚠️ Remaining references: ${afterCount}`);
     
     writeFileSync(indexPath, indexContent, 'utf-8');
-    console.log('✅ Fixed import.meta.dirname references in bundled code');
+    console.log('✅ COMPREHENSIVE dirname fix applied successfully');
   } else {
     console.log('ℹ️ No import.meta.dirname references found');
   }
