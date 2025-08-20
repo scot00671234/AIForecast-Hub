@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AIForecast Hub is a React + Express application that provides AI-powered commodity price forecasting. It runs seamlessly on Replit with an integrated PostgreSQL database.
+The AIForecast Hub is a React + Express application that provides AI-powered quarterly commodity price forecasting. The system generates monthly predictions for 3mo, 6mo, 9mo, and 12mo timeframes using Claude, ChatGPT, and DeepSeek models. It runs seamlessly on Replit with an integrated PostgreSQL database.
 
 ## Environment Setup
 
@@ -24,49 +24,38 @@ DEEPSEEK_API_KEY=your-deepseek-api-key
 1. **Start the application**: The workflow automatically runs `npm run dev`
 2. **Database**: PostgreSQL database is automatically created and configured
 3. **Frontend**: React app served at `http://localhost:5000`
-4. **API**: Express server handles backend requests
-3. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-4. **Build the application**:
-   ```bash
-   npm run build
-   node fix-build.js
-   ```
-5. **Set environment variables**:
-   ```bash
-   export NODE_ENV=production
-   export PORT=3000
-   export DATABASE_URL="your-database-url"
-   export SESSION_SECRET="your-session-secret"
-   ```
-6. **Start the application**:
-   ```bash
-   node dist/index.js
-   ```
+4. **API**: Express server handles backend requests at the same port
+5. **Prediction Scheduler**: Automatically generates quarterly predictions monthly on the 1st at 3 AM
+6. **AI Services**: Supports OpenAI, Anthropic, and DeepSeek APIs for prediction generation
 
 ## Troubleshooting
 
-### Issue: Permission Denied on start.sh
-**Solution**: The app now uses direct Node.js startup (`node dist/index.js`) instead of shell scripts.
+### Issue: Predictions Not Generating
+**Solution**: Ensure AI API keys are properly configured in Replit Secrets.
 
-### Issue: Caddy Still Being Detected
-**Solution**: Set all the anti-Caddy environment variables listed above.
+### Issue: Database Schema Errors
+**Solution**: The app automatically initializes the database schema on startup.
 
 ### Issue: Database Connection Failed
 **Solution**: Verify your DATABASE_URL is correct and the database is accessible from your VPS.
 
+## Key Features
+
+- **Quarterly Forecasting**: Generates 3mo, 6mo, 9mo, and 12mo predictions
+- **Monthly Scheduling**: Automatic prediction generation on the 1st of each month
+- **Multi-AI Integration**: Uses Claude, ChatGPT, and DeepSeek models
+- **Timeframe Filtering**: Frontend supports filtering by prediction timeframe
+- **Real-time Data**: Yahoo Finance integration for current commodity prices
+- **Accuracy Tracking**: Comprehensive model performance analytics
+
 ## Files Created for Deployment
 
-The following files have been created/updated to force Node.js detection:
+The following files have been created/updated for Replit deployment:
 
-- `.buildpacks` - Forces Heroku Node.js buildpack
-- `.nixpacks` - Forces nodejs provider
-- `Procfile` - Defines web process as Node.js
-- `runtime.txt` - Specifies Node.js 18.x
-- `.dockerignore` - Blocks all Caddy-related files
-- Updated `nixpacks.toml` - Direct Node.js startup
+- `nixpacks.toml` - Configures Node.js startup
+- `package.json` - Dependencies and scripts
+- `tsconfig.json` - TypeScript configuration
+- `vite.config.ts` - Frontend build configuration
 
 ## Success Indicators
 
@@ -75,10 +64,16 @@ When deployment works correctly, you should see:
 ```
 🚀 Starting AIForecast Hub (Professional Edition)
 🔧 Initializing critical services...
-✅ Database connection verified
+✅ Database connection established
+✅ Database schema and default data initialized
+✅ Critical initialization complete
 ⚡ Starting heavy initialization (background)...
-✅ Server running on port 3000
+✅ Server running on port 5000
 🎯 Application ready - all systems operational
+Prediction scheduler started with schedules:
+- Monthly comprehensive: Every 1st of the month at 3 AM (3mo, 6mo, 9mo, 12mo predictions)
+- Weekly predictions have been disabled
+✅ Background initialization complete
 ```
 
-No Caddy-related logs should appear in the build process.
+The application should start successfully with all services initialized and the prediction scheduler configured for quarterly forecasting.
