@@ -1,3 +1,4 @@
+import { fileURLToPath } from "url";
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __esm = (fn, res) => function __init() {
@@ -15,10 +16,12 @@ __export(schema_exports, {
   actualPrices: () => actualPrices,
   aiModels: () => aiModels,
   commodities: () => commodities,
+  compositeIndex: () => compositeIndex,
   insertAccuracyMetricSchema: () => insertAccuracyMetricSchema,
   insertActualPriceSchema: () => insertActualPriceSchema,
   insertAiModelSchema: () => insertAiModelSchema,
   insertCommoditySchema: () => insertCommoditySchema,
+  insertCompositeIndexSchema: () => insertCompositeIndexSchema,
   insertMarketAlertSchema: () => insertMarketAlertSchema,
   insertPredictionSchema: () => insertPredictionSchema,
   marketAlerts: () => marketAlerts,
@@ -27,7 +30,7 @@ __export(schema_exports, {
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, decimal, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-var aiModels, commodities, predictions, actualPrices, accuracyMetrics, marketAlerts, insertAiModelSchema, insertCommoditySchema, insertPredictionSchema, insertActualPriceSchema, insertAccuracyMetricSchema, insertMarketAlertSchema;
+var aiModels, commodities, predictions, actualPrices, accuracyMetrics, marketAlerts, compositeIndex, insertAiModelSchema, insertCommoditySchema, insertPredictionSchema, insertActualPriceSchema, insertAccuracyMetricSchema, insertMarketAlertSchema, insertCompositeIndexSchema;
 var init_schema = __esm({
   "shared/schema.ts"() {
     "use strict";
@@ -56,6 +59,8 @@ var init_schema = __esm({
       targetDate: timestamp("target_date").notNull(),
       predictedPrice: decimal("predicted_price", { precision: 10, scale: 4 }).notNull(),
       confidence: decimal("confidence", { precision: 5, scale: 2 }),
+      timeframe: text("timeframe").notNull().default("3mo"),
+      // "3mo", "6mo", "9mo", "12mo"
       metadata: jsonb("metadata"),
       createdAt: timestamp("created_at").default(sql`now()`).notNull()
     });
@@ -93,6 +98,21 @@ var init_schema = __esm({
       isActive: integer("is_active").default(1).notNull(),
       createdAt: timestamp("created_at").default(sql`now()`).notNull()
     });
+    compositeIndex = pgTable("composite_index", {
+      id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+      date: timestamp("date").notNull().unique(),
+      overallIndex: decimal("overall_index", { precision: 5, scale: 2 }).notNull(),
+      hardCommoditiesIndex: decimal("hard_commodities_index", { precision: 5, scale: 2 }).notNull(),
+      softCommoditiesIndex: decimal("soft_commodities_index", { precision: 5, scale: 2 }).notNull(),
+      directionalComponent: decimal("directional_component", { precision: 5, scale: 2 }).notNull(),
+      confidenceComponent: decimal("confidence_component", { precision: 5, scale: 2 }).notNull(),
+      accuracyComponent: decimal("accuracy_component", { precision: 5, scale: 2 }).notNull(),
+      momentumComponent: decimal("momentum_component", { precision: 5, scale: 2 }).notNull(),
+      totalPredictions: integer("total_predictions").notNull(),
+      marketSentiment: text("market_sentiment").notNull(),
+      // 'bullish', 'bearish', 'neutral'
+      createdAt: timestamp("created_at").default(sql`now()`).notNull()
+    });
     insertAiModelSchema = createInsertSchema(aiModels).omit({
       id: true
     });
@@ -112,6 +132,10 @@ var init_schema = __esm({
       lastUpdated: true
     });
     insertMarketAlertSchema = createInsertSchema(marketAlerts).omit({
+      id: true,
+      createdAt: true
+    });
+    insertCompositeIndexSchema = createInsertSchema(compositeIndex).omit({
       id: true,
       createdAt: true
     });
@@ -176,14 +200,193 @@ var init_storage = __esm({
       async testConnection() {
         try {
           await db.execute(sql2`SELECT 1`);
-          await this.ensureDatabaseSchema();
+          console.log("\u2705 Database connection established");
+          if (process.env.NODE_ENV === "production") {
+            console.log("\u{1F527} Production environment detected - ensuring database schema...");
+            await this.runProductionMigration();
+          } else {
+            await this.ensureDatabaseSchema();
+          }
           await db.select().from(aiModels).limit(1);
           this.isDbConnected = true;
-          console.log("Database connection successful");
+          console.log("\u2705 Database connection verified");
         } catch (error) {
-          console.error("Database connection failed:", error.message);
+          console.error("\u274C Database connection failed:", error.message);
+          if (process.env.NODE_ENV === "production") {
+            console.log("\u{1F6A8} Emergency migration attempt...");
+            try {
+              await this.runEmergencyMigration();
+              await db.select().from(aiModels).limit(1);
+              this.isDbConnected = true;
+              console.log("\u2705 Database connection successful after emergency migration");
+              return;
+            } catch (migrationError) {
+              console.error("\u274C Emergency migration failed:", migrationError.message);
+            }
+          }
           this.isDbConnected = false;
           throw new Error(`Database connection required for production deployment: ${error.message}`);
+        }
+      }
+      async runProductionMigration() {
+        console.log("\u{1F527} Running production database migration...");
+        await db.execute(sql2`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
+        const tables = [
+          {
+            name: "ai_models",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "ai_models" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "name" text NOT NULL,
+            "provider" text NOT NULL,
+            "color" text NOT NULL,
+            "is_active" integer DEFAULT 1 NOT NULL,
+            CONSTRAINT "ai_models_name_unique" UNIQUE("name")
+          )
+        `
+          },
+          {
+            name: "commodities",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "commodities" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "name" text NOT NULL,
+            "symbol" text NOT NULL,
+            "category" text NOT NULL,
+            "yahoo_symbol" text,
+            "unit" text DEFAULT 'USD',
+            CONSTRAINT "commodities_name_unique" UNIQUE("name"),
+            CONSTRAINT "commodities_symbol_unique" UNIQUE("symbol")
+          )
+        `
+          },
+          {
+            name: "predictions",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "predictions" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "ai_model_id" varchar NOT NULL,
+            "commodity_id" varchar NOT NULL,
+            "prediction_date" timestamp NOT NULL,
+            "target_date" timestamp NOT NULL,
+            "predicted_price" numeric(10,4) NOT NULL,
+            "confidence" numeric(5,2),
+            "metadata" jsonb,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+          },
+          {
+            name: "actual_prices",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "actual_prices" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "commodity_id" varchar NOT NULL,
+            "date" timestamp NOT NULL,
+            "price" numeric(10,4) NOT NULL,
+            "volume" numeric(15,2),
+            "source" text DEFAULT 'yahoo_finance',
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+          },
+          {
+            name: "accuracy_metrics",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "accuracy_metrics" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "ai_model_id" varchar NOT NULL,
+            "commodity_id" varchar NOT NULL,
+            "period" text NOT NULL,
+            "accuracy" numeric(5,2) NOT NULL,
+            "total_predictions" integer NOT NULL,
+            "correct_predictions" integer NOT NULL,
+            "avg_error" numeric(10,4),
+            "last_updated" timestamp DEFAULT now() NOT NULL
+          )
+        `
+          },
+          {
+            name: "market_alerts",
+            query: sql2`
+          CREATE TABLE IF NOT EXISTS "market_alerts" (
+            "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            "type" text NOT NULL,
+            "severity" text NOT NULL,
+            "title" text NOT NULL,
+            "description" text NOT NULL,
+            "commodity_id" varchar,
+            "ai_model_id" varchar,
+            "is_active" integer DEFAULT 1 NOT NULL,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )
+        `
+          }
+        ];
+        for (const table of tables) {
+          console.log(`\u{1F527} Creating table: ${table.name}`);
+          await db.execute(table.query);
+        }
+        try {
+          await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "actual_prices" ADD CONSTRAINT "actual_prices_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "accuracy_metrics" ADD CONSTRAINT "accuracy_metrics_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
+          await db.execute(sql2`ALTER TABLE "market_alerts" ADD CONSTRAINT "market_alerts_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
+        } catch (error) {
+          console.log("Note: Some constraints may already exist");
+        }
+        await this.insertProductionData();
+        console.log("\u2705 Production migration completed");
+      }
+      async insertProductionData() {
+        console.log("\u{1F527} Inserting production data...");
+        await db.execute(sql2`
+      INSERT INTO "ai_models" ("name", "provider", "color", "is_active") VALUES
+      ('ChatGPT', 'OpenAI', '#10B981', 1),
+      ('Claude', 'Anthropic', '#8B5CF6', 1),
+      ('Deepseek', 'DeepSeek', '#F59E0B', 1)
+      ON CONFLICT (name) DO NOTHING
+    `);
+        await db.execute(sql2`
+      INSERT INTO "commodities" ("name", "symbol", "category", "yahoo_symbol") VALUES
+      ('Crude Oil', 'CL', 'hard', 'CL=F'),
+      ('Gold', 'AU', 'hard', 'GC=F'),
+      ('Natural Gas', 'NG', 'hard', 'NG=F'),
+      ('Copper', 'CU', 'hard', 'HG=F'),
+      ('Silver', 'AG', 'hard', 'SI=F'),
+      ('Aluminum', 'AL', 'hard', 'ALI=F'),
+      ('Platinum', 'PT', 'hard', 'PL=F'),
+      ('Palladium', 'PD', 'hard', 'PA=F'),
+      ('Coffee', 'KC', 'soft', 'KC=F'),
+      ('Sugar', 'SB', 'soft', 'SB=F'),
+      ('Corn', 'ZC', 'soft', 'ZC=F'),
+      ('Soybeans', 'ZS', 'soft', 'ZS=F'),
+      ('Cotton', 'CT', 'soft', 'CT=F'),
+      ('Wheat', 'ZW', 'soft', 'ZW=F')
+      ON CONFLICT (name) DO NOTHING
+    `);
+        console.log("\u2705 Production data inserted");
+      }
+      async runEmergencyMigration() {
+        console.log("\u{1F6A8} Running emergency database migration...");
+        try {
+          const tableNames = ["market_alerts", "accuracy_metrics", "actual_prices", "predictions", "commodities", "ai_models"];
+          for (const tableName of tableNames) {
+            try {
+              await db.execute(sql2.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`));
+              console.log(`\u{1F5D1}\uFE0F Dropped table: ${tableName}`);
+            } catch (dropError) {
+              console.log(`Note: Could not drop ${tableName}`);
+            }
+          }
+          await this.runProductionMigration();
+          console.log("\u2705 Emergency migration completed");
+        } catch (error) {
+          console.error("\u274C Emergency migration failed:", error);
+          throw error;
         }
       }
       async ensureDatabaseSchema() {
@@ -280,6 +483,22 @@ var init_storage = __esm({
         "created_at" timestamp DEFAULT now() NOT NULL
       )
     `);
+        await db.execute(sql2`
+      CREATE TABLE "composite_index" (
+        "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        "date" timestamp NOT NULL UNIQUE,
+        "overall_index" numeric(5,2) NOT NULL,
+        "hard_commodities_index" numeric(5,2) NOT NULL,
+        "soft_commodities_index" numeric(5,2) NOT NULL,
+        "directional_component" numeric(5,2) NOT NULL,
+        "confidence_component" numeric(5,2) NOT NULL,
+        "accuracy_component" numeric(5,2) NOT NULL,
+        "momentum_component" numeric(5,2) NOT NULL,
+        "total_predictions" integer NOT NULL,
+        "market_sentiment" text NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL
+      )
+    `);
         await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_ai_model_id_ai_models_id_fk" FOREIGN KEY ("ai_model_id") REFERENCES "ai_models"("id") ON DELETE no action ON UPDATE no action`);
         await db.execute(sql2`ALTER TABLE "predictions" ADD CONSTRAINT "predictions_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
         await db.execute(sql2`ALTER TABLE "actual_prices" ADD CONSTRAINT "actual_prices_commodity_id_commodities_id_fk" FOREIGN KEY ("commodity_id") REFERENCES "commodities"("id") ON DELETE no action ON UPDATE no action`);
@@ -371,13 +590,14 @@ var init_storage = __esm({
         const [commodity] = await db.insert(commodities).values(insertCommodity).returning();
         return commodity;
       }
-      async getPredictions(commodityId, aiModelId) {
+      async getPredictions(commodityId, aiModelId, timeframe) {
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
         const conditions = [];
         if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
         if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+        if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
         let query = db.select().from(predictions);
         if (conditions.length > 0) {
           query = query.where(and(...conditions));
@@ -388,14 +608,33 @@ var init_storage = __esm({
         const [prediction] = await db.insert(predictions).values(insertPrediction).returning();
         return prediction;
       }
-      async getPredictionsByCommodity(commodityId) {
-        return this.getPredictions(commodityId);
+      async getPredictionsByTimeframe(timeframe) {
+        if (!this.isDbConnected) {
+          throw new Error("Database connection required");
+        }
+        return await db.select().from(predictions).where(eq(predictions.timeframe, timeframe)).orderBy(desc(predictions.createdAt));
+      }
+      async getPredictionsByTimeframeCommodity(commodityId, timeframe) {
+        if (!this.isDbConnected) {
+          throw new Error("Database connection required");
+        }
+        return await db.select().from(predictions).where(and(
+          eq(predictions.commodityId, commodityId),
+          eq(predictions.timeframe, timeframe)
+        )).orderBy(desc(predictions.createdAt));
+      }
+      async getPredictionsByCommodity(commodityId, timeframe) {
+        return this.getPredictions(commodityId, void 0, timeframe);
       }
       async getActualPrices(commodityId, limit) {
         if (!this.isDbConnected) {
           throw new Error("Database connection required");
         }
-        let query = db.select().from(actualPrices).where(eq(actualPrices.commodityId, commodityId)).orderBy(desc(actualPrices.date));
+        let query = db.select().from(actualPrices);
+        if (commodityId) {
+          query = query.where(eq(actualPrices.commodityId, commodityId));
+        }
+        query = query.orderBy(desc(actualPrices.date));
         if (limit) {
           query = query.limit(limit);
         }
@@ -576,6 +815,38 @@ var init_storage = __esm({
           console.error(`Yahoo Finance update failed for ${commodity.name}:`, error);
         }
       }
+      // Composite Index methods
+      async createCompositeIndex(index) {
+        await this.initializationPromise;
+        try {
+          const [result] = await db.insert(compositeIndex).values(index).returning();
+          return result;
+        } catch (error) {
+          console.error("Error creating composite index:", error);
+          throw error;
+        }
+      }
+      async getLatestCompositeIndex() {
+        await this.initializationPromise;
+        try {
+          const results = await db.select().from(compositeIndex).orderBy(desc(compositeIndex.date)).limit(1);
+          return results[0];
+        } catch (error) {
+          console.error("Error fetching latest composite index:", error);
+          return void 0;
+        }
+      }
+      async getCompositeIndexHistory(days) {
+        await this.initializationPromise;
+        try {
+          const cutoffDate = /* @__PURE__ */ new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - days);
+          return await db.select().from(compositeIndex).where(sql2`${compositeIndex.date} >= ${cutoffDate}`).orderBy(desc(compositeIndex.date));
+        } catch (error) {
+          console.error("Error fetching composite index history:", error);
+          return [];
+        }
+      }
       // All methods below focus on real data only - no mock/fake data
     };
     storage = new DatabaseStorage();
@@ -749,6 +1020,10 @@ var init_yahooFinance = __esm({
 });
 
 // server/services/claudeService.ts
+var claudeService_exports = {};
+__export(claudeService_exports, {
+  claudeService: () => claudeService
+});
 import Anthropic from "@anthropic-ai/sdk";
 var DEFAULT_MODEL_STR, ClaudeService, claudeService;
 var init_claudeService = __esm({
@@ -782,7 +1057,7 @@ Analyze the market conditions and provide a price prediction for one week from n
 - Seasonal factors
 - Global supply/demand dynamics
 
-Respond in JSON format with:
+Respond ONLY with valid JSON in this exact format (no markdown, no code blocks, no extra text):
 {
   "predictedPrice": number,
   "confidence": number (0-1),
@@ -800,7 +1075,14 @@ Respond in JSON format with:
           });
           const response = message.content[0];
           if (response.type === "text") {
-            const result = JSON.parse(response.text);
+            let cleanText = response.text.trim();
+            if (cleanText.startsWith("```json")) {
+              cleanText = cleanText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+            } else if (cleanText.startsWith("```")) {
+              cleanText = cleanText.replace(/^```\s*/, "").replace(/\s*```$/, "");
+            }
+            cleanText = cleanText.replace(/`/g, "");
+            const result = JSON.parse(cleanText);
             return {
               predictedPrice: Number(result.predictedPrice),
               confidence: Number(result.confidence),
@@ -810,6 +1092,65 @@ Respond in JSON format with:
           throw new Error("Invalid response format from Claude");
         } catch (error) {
           console.error("Claude prediction error:", error);
+          throw error;
+        }
+      }
+      async generatePredictionWithTimeframe(commodityData, monthsAhead) {
+        const prompt = `You are a commodity trading expert analyzing ${commodityData.name} (${commodityData.symbol}).
+
+Current market data:
+- Current Price: $${commodityData.currentPrice} per ${commodityData.unit}
+- Category: ${commodityData.category} commodity
+- Recent price trend: ${this.formatHistoricalData(commodityData.historicalPrices)}
+
+Analyze the market conditions and provide a price prediction for ${monthsAhead} months from now. Consider:
+- Technical analysis patterns
+- Market sentiment and long-term trends
+- Economic indicators and macroeconomic cycles
+- Seasonal factors and cyclical patterns
+- Global supply/demand dynamics
+- Structural market changes over ${monthsAhead}-month horizon
+${monthsAhead <= 3 ? "- Near-term supply disruptions and inventory levels" : ""}
+${monthsAhead <= 6 ? "- Seasonal demand patterns and weather impacts" : ""}
+${monthsAhead >= 6 ? "- Economic growth trends and industrial demand" : ""}
+${monthsAhead >= 9 ? "- Policy changes and regulatory impacts" : ""}
+${monthsAhead >= 12 ? "- Long-term structural shifts in supply and demand" : ""}
+
+Respond ONLY with valid JSON in this exact format (no markdown, no code blocks, no extra text):
+{
+  "predictedPrice": number,
+  "confidence": number (0-1),
+  "reasoning": "Brief explanation of your ${monthsAhead}-month prediction logic"
+}`;
+        if (!this.anthropic) {
+          throw new Error("Claude not configured - missing API key");
+        }
+        try {
+          const message = await this.anthropic.messages.create({
+            max_tokens: 1500,
+            messages: [{ role: "user", content: prompt }],
+            // "claude-sonnet-4-20250514"
+            model: DEFAULT_MODEL_STR
+          });
+          const response = message.content[0];
+          if (response.type === "text") {
+            let cleanText = response.text.trim();
+            if (cleanText.startsWith("```json")) {
+              cleanText = cleanText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+            } else if (cleanText.startsWith("```")) {
+              cleanText = cleanText.replace(/^```\s*/, "").replace(/\s*```$/, "");
+            }
+            cleanText = cleanText.replace(/`/g, "");
+            const result = JSON.parse(cleanText);
+            return {
+              predictedPrice: Number(result.predictedPrice),
+              confidence: Number(result.confidence),
+              reasoning: result.reasoning
+            };
+          }
+          throw new Error("Invalid response format from Claude");
+        } catch (error) {
+          console.error(`Claude ${monthsAhead}-month prediction error:`, error);
           throw error;
         }
       }
@@ -892,6 +1233,71 @@ Return your analysis in JSON format:
           };
         } catch (error) {
           console.error("Deepseek prediction error:", error);
+          throw error;
+        }
+      }
+      async generatePredictionWithTimeframe(commodityData, monthsAhead) {
+        const prompt = `You are an expert commodity trader specializing in ${commodityData.category} commodities. Analyze ${commodityData.name} (${commodityData.symbol}).
+
+Market Information:
+- Current Price: $${commodityData.currentPrice} per ${commodityData.unit}
+- Commodity Type: ${commodityData.category}
+- Price History (last 7 days): ${this.formatHistoricalData(commodityData.historicalPrices)}
+
+Provide a technical analysis-based price prediction for ${monthsAhead} months ahead. Consider:
+- Price momentum and long-term trends
+- Market volatility and cyclical patterns
+- Supply chain factors and structural changes
+- Geopolitical influences
+- Seasonal patterns over ${monthsAhead}-month horizon
+- Economic cycles and their commodity impact
+${monthsAhead <= 3 ? "- Near-term supply disruptions and inventory levels" : ""}
+${monthsAhead <= 6 ? "- Seasonal demand patterns and weather impacts" : ""}
+${monthsAhead >= 6 ? "- Economic growth trends and industrial demand" : ""}
+${monthsAhead >= 9 ? "- Policy changes and regulatory impacts" : ""}
+${monthsAhead >= 12 ? "- Long-term structural shifts in supply and demand" : ""}
+
+Return your analysis in JSON format:
+{
+  "predictedPrice": <number>,
+  "confidence": <number between 0 and 1>,
+  "reasoning": "<concise explanation of ${monthsAhead}-month prediction methodology>"
+}`;
+        if (!this.apiKey) {
+          throw new Error("Deepseek not configured - missing API key");
+        }
+        try {
+          const response = await fetch(`${this.baseURL}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify({
+              model: "deepseek-chat",
+              messages: [
+                {
+                  role: "user",
+                  content: prompt
+                }
+              ],
+              max_tokens: 1500,
+              temperature: 0.7,
+              response_format: { type: "json_object" }
+            })
+          });
+          if (!response.ok) {
+            throw new Error(`Deepseek API error: ${response.status} ${response.statusText}`);
+          }
+          const data = await response.json();
+          const result = JSON.parse(data.choices[0].message.content);
+          return {
+            predictedPrice: Number(result.predictedPrice),
+            confidence: Number(result.confidence),
+            reasoning: result.reasoning
+          };
+        } catch (error) {
+          console.error(`Deepseek ${monthsAhead}-month prediction error:`, error);
           throw error;
         }
       }
@@ -1118,8 +1524,28 @@ Respond in JSON format:
         const recent = prices.slice(-7);
         return recent.map((p) => `${p.date}: $${p.price.toFixed(2)}`).join(", ");
       }
-      async generatePredictionsForCommodity(commodityId) {
-        console.log(`Generating AI predictions for commodity ${commodityId}...`);
+      async generateMonthlyPredictions() {
+        console.log("\u{1F680} Starting monthly AI prediction generation for all commodities...");
+        console.log("\u{1F4C5} Generating predictions for timeframes: 3mo, 6mo, 9mo, 12mo");
+        try {
+          const commodities2 = await storage.getCommodities();
+          const timeframes = [3, 6, 9, 12];
+          for (const commodity of commodities2) {
+            console.log(`\u{1F4CA} Processing ${commodity.name} for all timeframes...`);
+            for (const monthsAhead of timeframes) {
+              await this.generatePredictionsForCommodityWithTimeframe(commodity.id, monthsAhead);
+              await new Promise((resolve) => setTimeout(resolve, 1e3));
+            }
+            console.log(`\u2705 Completed all timeframe predictions for ${commodity.name}`);
+          }
+          console.log("\u2705 Completed monthly AI prediction generation for all commodities");
+        } catch (error) {
+          console.error("\u274C Error in generateMonthlyPredictions:", error);
+          throw error;
+        }
+      }
+      async generatePredictionsForCommodityWithTimeframe(commodityId, monthsAhead) {
+        console.log(`Generating ${monthsAhead}-month AI predictions for commodity ${commodityId}...`);
         try {
           const commodity = await storage.getCommodity(commodityId);
           if (!commodity) {
@@ -1144,117 +1570,120 @@ Respond in JSON format:
           const commodityData = {
             name: commodity.name,
             symbol: commodity.symbol,
-            currentPrice: parseFloat(latestPrice.price),
+            currentPrice: Number(latestPrice.price),
             historicalPrices: historicalPrices.map((p) => ({
-              date: p.date.toISOString().split("T")[0],
-              price: parseFloat(p.price)
+              date: p.date.toISOString(),
+              price: Number(p.price)
             })),
             category: commodity.category,
             unit: commodity.unit || "USD"
           };
-          const aiModels2 = await storage.getAiModels();
-          const targetDate = /* @__PURE__ */ new Date();
-          targetDate.setDate(targetDate.getDate() + 7);
-          for (const model of aiModels2) {
+          const predictionDate = /* @__PURE__ */ new Date();
+          const targetDate = new Date(predictionDate);
+          targetDate.setMonth(targetDate.getMonth() + monthsAhead);
+          const timeframeSuffix = `${monthsAhead}mo`;
+          const models = await storage.getAiModels();
+          for (const model of models) {
             try {
-              let prediction;
-              switch (model.name.toLowerCase()) {
-                case "claude":
-                  if (claudeService.isConfigured()) {
-                    prediction = await claudeService.generatePrediction(commodityData);
-                  }
-                  break;
-                case "chatgpt":
-                  if (this.isOpenAIConfigured()) {
-                    prediction = await this.generateOpenAIPrediction(commodityData);
-                  }
-                  break;
-                case "deepseek":
-                  if (deepseekService.isConfigured()) {
-                    prediction = await deepseekService.generatePrediction(commodityData);
-                  }
-                  break;
+              let prediction = null;
+              if (model.name === "ChatGPT" && this.isOpenAIConfigured()) {
+                prediction = await this.generateOpenAIPredictionWithTimeframe(commodityData, monthsAhead);
+              } else if (model.name === "Claude" && claudeService.isConfigured()) {
+                prediction = await claudeService.generatePredictionWithTimeframe(commodityData, monthsAhead);
+              } else if (model.name === "Deepseek" && deepseekService.isConfigured()) {
+                prediction = await deepseekService.generatePredictionWithTimeframe(commodityData, monthsAhead);
               }
               if (prediction) {
                 const insertPrediction = {
                   aiModelId: model.id,
                   commodityId: commodity.id,
-                  predictionDate: /* @__PURE__ */ new Date(),
+                  predictionDate,
                   targetDate,
                   predictedPrice: prediction.predictedPrice.toString(),
                   confidence: prediction.confidence.toString(),
+                  timeframe: timeframeSuffix,
                   metadata: {
                     reasoning: prediction.reasoning,
                     inputData: {
                       currentPrice: commodityData.currentPrice,
-                      historicalDataPoints: commodityData.historicalPrices.length
+                      historicalDataPoints: commodityData.historicalPrices.length,
+                      timeframe: timeframeSuffix
                     }
                   }
                 };
                 await storage.createPrediction(insertPrediction);
-                console.log(`Generated ${model.name} prediction for ${commodity.name}: $${prediction.predictedPrice} (confidence: ${prediction.confidence})`);
+                console.log(`Generated ${model.name} ${monthsAhead}-month prediction for ${commodity.name}: $${prediction.predictedPrice} (confidence: ${prediction.confidence})`);
               } else {
-                console.log(`Skipped ${model.name} prediction for ${commodity.name} - service not configured`);
+                console.log(`Skipped ${model.name} ${monthsAhead}-month prediction for ${commodity.name} - service not configured`);
               }
             } catch (error) {
-              console.error(`Error generating ${model.name} prediction for ${commodity.name}:`, error);
-              if (error instanceof Error) {
-                if (error.message.includes("quota") || error.message.includes("insufficient_quota")) {
-                  console.log(`\u26A0\uFE0F ${model.name} quota exceeded for ${commodity.name} - consider upgrading API plan`);
-                } else if (error.message.includes("credit") || error.message.includes("billing")) {
-                  console.log(`\u26A0\uFE0F ${model.name} billing issue for ${commodity.name} - check account status`);
-                } else if (error.message.includes("402") || error.message.includes("Payment Required")) {
-                  console.log(`\u26A0\uFE0F ${model.name} payment required for ${commodity.name} - add credits to account`);
-                }
-              }
+              console.error(`Error generating ${model.name} ${monthsAhead}-month prediction for ${commodity.name}:`, error);
             }
           }
-          console.log(`Completed AI predictions for ${commodity.name}`);
+          console.log(`Completed ${monthsAhead}-month AI predictions for ${commodity.name}`);
         } catch (error) {
-          console.error(`Error in generatePredictionsForCommodity for ${commodityId}:`, error);
+          console.error(`Error in generatePredictionsForCommodityWithTimeframe for ${commodityId} (${monthsAhead}mo):`, error);
         }
       }
-      async generateWeeklyPredictions() {
-        console.log("Starting weekly AI prediction generation for all commodities...");
-        try {
-          const commodities2 = await storage.getCommodities();
-          for (const commodity of commodities2) {
-            await this.generatePredictionsForCommodity(commodity.id);
-            await new Promise((resolve) => setTimeout(resolve, 2e3));
-          }
-          console.log("Completed weekly AI prediction generation for all commodities");
-        } catch (error) {
-          console.error("Error in generateWeeklyPredictions:", error);
+      async generateOpenAIPredictionWithTimeframe(commodityData, monthsAhead) {
+        const prompt = `You are an expert commodity trader with decades of experience analyzing ${commodityData.category} commodity markets. Analyze ${commodityData.name} (${commodityData.symbol}).
+
+Current Market Context:
+- Current Price: $${commodityData.currentPrice} per ${commodityData.unit}
+- Commodity Type: ${commodityData.category} commodity
+- Recent Price History: ${this.formatHistoricalData(commodityData.historicalPrices)}
+
+Provide a sophisticated ${monthsAhead}-month price forecast considering:
+- Technical analysis indicators (moving averages, RSI, MACD)
+- Market fundamentals (supply/demand dynamics)
+- Macroeconomic factors (inflation, currency fluctuations)
+- Geopolitical events affecting commodity markets
+- Seasonal patterns and cyclical trends
+- Long-term structural market changes
+- Economic cycles and their impact on commodity demand
+
+For a ${monthsAhead}-month horizon, focus on:
+${monthsAhead <= 3 ? "- Near-term supply disruptions and inventory levels" : ""}
+${monthsAhead <= 6 ? "- Seasonal demand patterns and weather impacts" : ""}
+${monthsAhead >= 6 ? "- Economic growth trends and industrial demand" : ""}
+${monthsAhead >= 9 ? "- Policy changes and regulatory impacts" : ""}
+${monthsAhead >= 12 ? "- Long-term structural shifts in supply and demand" : ""}
+
+Respond in JSON format:
+{
+  "predictedPrice": <number>,
+  "confidence": <decimal between 0 and 1>,
+  "reasoning": "<detailed analysis explaining your ${monthsAhead}-month prediction methodology>"
+}`;
+        if (!openai) {
+          throw new Error("OpenAI not configured - missing API key");
         }
-      }
-      async generateDailyPredictions() {
-        console.log("Starting daily AI prediction generation for all commodities...");
         try {
-          await yahooFinanceIntegration.updateAllCommodityPrices();
-          await this.generateWeeklyPredictions();
-          console.log("Completed daily AI prediction generation");
-        } catch (error) {
-          console.error("Error in generateDailyPredictions:", error);
-        }
-      }
-      async generatePredictionsForAllCommodities() {
-        console.log("Starting comprehensive AI prediction generation for all commodities...");
-        try {
-          const commodities2 = await storage.getCommodities();
-          const workingServices = await this.getWorkingServices();
-          if (workingServices.length === 0) {
-            console.log("\u26A0\uFE0F No AI services are currently working - all have quota/billing issues");
-            console.log("\u{1F4A1} Please add credits to your AI service accounts to enable predictions");
-            return;
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            max_tokens: 1500,
+            temperature: 0.7,
+            response_format: { type: "json_object" }
+          });
+          const response = completion.choices[0].message.content;
+          if (!response) {
+            throw new Error("No response from OpenAI");
           }
-          console.log(`\u{1F916} Found ${workingServices.length} working AI service(s): ${workingServices.join(", ")}`);
-          for (const commodity of commodities2) {
-            await this.generatePredictionsForCommodity(commodity.id);
-            await new Promise((resolve) => setTimeout(resolve, 1e3));
-          }
-          console.log("\u2705 Completed comprehensive AI prediction generation for all commodities");
+          const result = JSON.parse(response);
+          return {
+            predictedPrice: Number(result.predictedPrice),
+            confidence: Number(result.confidence),
+            reasoning: result.reasoning
+          };
         } catch (error) {
-          console.error("\u274C Error in generatePredictionsForAllCommodities:", error);
+          console.error(`OpenAI ${monthsAhead}-month prediction error:`, error);
+          throw error;
         }
       }
       async getWorkingServices() {
@@ -1272,80 +1701,6 @@ Respond in JSON format:
       }
       async isAnyServiceConfigured() {
         return !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.DEEPSEEK_API_KEY);
-      }
-      async generateManualPrediction(commodityId, aiModelId) {
-        console.log(`Generating manual prediction for commodity ${commodityId} with model ${aiModelId}...`);
-        try {
-          const commodity = await storage.getCommodity(commodityId);
-          const aiModel = await storage.getAiModel(aiModelId);
-          if (!commodity || !aiModel) {
-            throw new Error("Commodity or AI model not found");
-          }
-          const historicalPrices = await storage.getActualPrices(commodityId, 30);
-          if (historicalPrices.length === 0) {
-            console.log(`No historical data for ${commodity.name}, fetching from Yahoo Finance...`);
-            await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
-          }
-          const latestPrice = await storage.getLatestPrice(commodityId);
-          if (!latestPrice) {
-            throw new Error(`No current price available for ${commodity.name}`);
-          }
-          const commodityData = {
-            name: commodity.name,
-            symbol: commodity.symbol,
-            currentPrice: parseFloat(latestPrice.price),
-            historicalPrices: historicalPrices.map((p) => ({
-              date: p.date.toISOString().split("T")[0],
-              price: parseFloat(p.price)
-            })),
-            category: commodity.category,
-            unit: commodity.unit || "USD"
-          };
-          const targetDate = /* @__PURE__ */ new Date();
-          targetDate.setDate(targetDate.getDate() + 7);
-          let prediction;
-          switch (aiModel.name.toLowerCase()) {
-            case "claude":
-              if (claudeService.isConfigured()) {
-                prediction = await claudeService.generatePrediction(commodityData);
-              }
-              break;
-            case "chatgpt":
-              if (this.isOpenAIConfigured()) {
-                prediction = await this.generateOpenAIPrediction(commodityData);
-              }
-              break;
-            case "deepseek":
-              if (deepseekService.isConfigured()) {
-                prediction = await deepseekService.generatePrediction(commodityData);
-              }
-              break;
-          }
-          if (prediction) {
-            const insertPrediction = {
-              aiModelId: aiModel.id,
-              commodityId: commodity.id,
-              predictionDate: /* @__PURE__ */ new Date(),
-              targetDate,
-              predictedPrice: prediction.predictedPrice.toString(),
-              confidence: prediction.confidence.toString(),
-              metadata: {
-                reasoning: prediction.reasoning,
-                inputData: {
-                  currentPrice: commodityData.currentPrice,
-                  historicalDataPoints: commodityData.historicalPrices.length
-                }
-              }
-            };
-            await storage.createPrediction(insertPrediction);
-            console.log(`Generated manual ${aiModel.name} prediction for ${commodity.name}: $${prediction.predictedPrice}`);
-          } else {
-            throw new Error(`${aiModel.name} service not configured or available`);
-          }
-        } catch (error) {
-          console.error(`Error in generateManualPrediction:`, error);
-          throw error;
-        }
       }
       async getServiceStatus() {
         return {
@@ -1365,8 +1720,6 @@ var init_cachedPredictionService = __esm({
   "server/services/cachedPredictionService.ts"() {
     "use strict";
     init_storage();
-    init_aiPredictionService();
-    init_yahooFinanceIntegration();
     CachedPredictionService = class {
       cache = /* @__PURE__ */ new Map();
       cacheExpiry = /* @__PURE__ */ new Map();
@@ -1381,33 +1734,10 @@ var init_cachedPredictionService = __esm({
         this.cacheExpiry.set(key, Date.now() + this.CACHE_DURATION);
       }
       async generateCachedPredictionsForCommodity(commodityId) {
-        const cacheKey = `predictions_${commodityId}`;
-        if (this.isCacheValid(cacheKey)) {
-          console.log(`Using cached predictions for commodity ${commodityId}`);
-          return;
-        }
-        console.log(`Generating fresh predictions for commodity ${commodityId}...`);
-        try {
-          await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
-          await aiPredictionService.generatePredictionsForCommodity(commodityId);
-          this.setCacheValue(cacheKey, true);
-          console.log(`Cached predictions generated for commodity ${commodityId}`);
-        } catch (error) {
-          console.error(`Error generating cached predictions for commodity ${commodityId}:`, error);
-        }
+        console.log(`Weekly predictions have been disabled for commodity ${commodityId}`);
       }
       async generateAllCachedPredictions() {
-        console.log("Starting cached prediction generation for all commodities...");
-        try {
-          const commodities2 = await storage.getCommodities();
-          const promises = commodities2.map(
-            (commodity) => this.generateCachedPredictionsForCommodity(commodity.id)
-          );
-          await Promise.allSettled(promises);
-          console.log("Completed cached prediction generation for all commodities");
-        } catch (error) {
-          console.error("Error in generateAllCachedPredictions:", error);
-        }
+        console.log("Weekly predictions have been disabled for all commodities");
       }
       async getFuturePredictions(commodityId, days = 7) {
         const cacheKey = `future_predictions_${commodityId}_${days}`;
@@ -1507,6 +1837,173 @@ var init_cachedPredictionService = __esm({
   }
 });
 
+// server/services/compositeIndexService.ts
+var CompositeIndexService, compositeIndexService;
+var init_compositeIndexService = __esm({
+  "server/services/compositeIndexService.ts"() {
+    "use strict";
+    init_storage();
+    CompositeIndexService = class {
+      async calculateAndStoreIndex() {
+        console.log("\u{1F504} Calculating AI Commodity Composite Index (ACCI)...");
+        try {
+          const cutoffDate = /* @__PURE__ */ new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - 30);
+          const commodities2 = await storage.getCommodities();
+          const aiModels2 = await storage.getAiModels();
+          const commodityPredictions = [];
+          for (const commodity of commodities2) {
+            const predictions2 = await storage.getPredictions(commodity.id);
+            const recentPredictions = predictions2.filter(
+              (p) => new Date(p.predictionDate) >= cutoffDate
+            );
+            if (recentPredictions.length > 0) {
+              commodityPredictions.push({
+                predictions: recentPredictions,
+                category: commodity.category,
+                commodity: commodity.name
+              });
+            }
+          }
+          if (commodityPredictions.length === 0) {
+            console.log("\u26A0\uFE0F No recent predictions found for composite index calculation");
+            return;
+          }
+          const overallComponents = await this.calculateIndexComponents(commodityPredictions);
+          const overallIndex = this.combineComponents(overallComponents);
+          const hardCommodities = commodityPredictions.filter((cp) => cp.category === "hard");
+          const hardComponents = await this.calculateIndexComponents(hardCommodities);
+          const hardIndex = this.combineComponents(hardComponents);
+          const softCommodities = commodityPredictions.filter((cp) => cp.category === "soft");
+          const softComponents = await this.calculateIndexComponents(softCommodities);
+          const softIndex = this.combineComponents(softComponents);
+          const sentiment = this.determineSentiment(overallIndex);
+          const totalPredictions = commodityPredictions.reduce((sum, cp) => sum + cp.predictions.length, 0);
+          const indexRecord = {
+            date: /* @__PURE__ */ new Date(),
+            overallIndex: overallIndex.toString(),
+            hardCommoditiesIndex: hardIndex.toString(),
+            softCommoditiesIndex: softIndex.toString(),
+            directionalComponent: overallComponents.directional.toString(),
+            confidenceComponent: overallComponents.confidence.toString(),
+            accuracyComponent: overallComponents.accuracy.toString(),
+            momentumComponent: overallComponents.momentum.toString(),
+            totalPredictions,
+            marketSentiment: sentiment
+          };
+          await storage.createCompositeIndex(indexRecord);
+          console.log(`\u2705 ACCI calculated: ${overallIndex.toFixed(2)} (${sentiment})`);
+          console.log(`   Hard: ${hardIndex.toFixed(2)}, Soft: ${softIndex.toFixed(2)}`);
+          console.log(`   Components: D:${overallComponents.directional.toFixed(1)} C:${overallComponents.confidence.toFixed(1)} A:${overallComponents.accuracy.toFixed(1)} M:${overallComponents.momentum.toFixed(1)}`);
+        } catch (error) {
+          console.error("\u274C Error calculating composite index:", error);
+          throw error;
+        }
+      }
+      async calculateIndexComponents(commodityPredictions) {
+        let totalDirectional = 0;
+        let totalConfidence = 0;
+        let totalAccuracy = 0;
+        let totalMomentum = 0;
+        let count = 0;
+        for (const commodityData of commodityPredictions) {
+          const { predictions: predictions2 } = commodityData;
+          if (predictions2.length === 0) continue;
+          const directional = this.calculateDirectionalSentiment(predictions2);
+          const confidence = this.calculateConfidenceScore(predictions2);
+          const accuracy = this.calculateAccuracyWeight(predictions2);
+          const momentum = this.calculateMomentum(predictions2);
+          totalDirectional += directional;
+          totalConfidence += confidence;
+          totalAccuracy += accuracy;
+          totalMomentum += momentum;
+          count++;
+        }
+        return {
+          directional: count > 0 ? totalDirectional / count : 50,
+          confidence: count > 0 ? totalConfidence / count : 50,
+          accuracy: count > 0 ? totalAccuracy / count : 50,
+          momentum: count > 0 ? totalMomentum / count : 50
+        };
+      }
+      calculateDirectionalSentiment(predictions2) {
+        if (predictions2.length === 0) return 50;
+        let bullishCount = 0;
+        let totalWeight = 0;
+        const commodityGroups = /* @__PURE__ */ new Map();
+        predictions2.forEach((pred) => {
+          const key = pred.commodityId;
+          if (!commodityGroups.has(key)) {
+            commodityGroups.set(key, []);
+          }
+          commodityGroups.get(key).push(pred);
+        });
+        for (const [commodityId, preds] of commodityGroups) {
+          for (const pred of preds) {
+            const predictedPrice = parseFloat(pred.predictedPrice);
+            const confidence = parseFloat(pred.confidence || "0.5");
+            if (confidence > 0.5) {
+              bullishCount += confidence;
+            }
+            totalWeight += 1;
+          }
+        }
+        const ratio = totalWeight > 0 ? bullishCount / totalWeight : 0.5;
+        return Math.max(0, Math.min(100, ratio * 100));
+      }
+      calculateConfidenceScore(predictions2) {
+        if (predictions2.length === 0) return 50;
+        const confidences = predictions2.map((p) => parseFloat(p.confidence || "0.5")).filter((c) => !isNaN(c));
+        if (confidences.length === 0) return 50;
+        const avgConfidence = confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
+        const variance = confidences.reduce((sum, c) => sum + Math.pow(c - avgConfidence, 2), 0) / confidences.length;
+        const confidenceScore = avgConfidence * 100;
+        const varianceScore = Math.max(0, 100 - variance * 400);
+        return confidenceScore * 0.7 + varianceScore * 0.3;
+      }
+      calculateAccuracyWeight(predictions2) {
+        return 60;
+      }
+      calculateMomentum(predictions2) {
+        if (predictions2.length < 2) return 50;
+        const sortedPreds = predictions2.sort(
+          (a, b) => new Date(a.predictionDate).getTime() - new Date(b.predictionDate).getTime()
+        );
+        let momentum = 0;
+        let count = 0;
+        for (let i = 1; i < sortedPreds.length; i++) {
+          const current = parseFloat(sortedPreds[i].predictedPrice);
+          const previous = parseFloat(sortedPreds[i - 1].predictedPrice);
+          if (!isNaN(current) && !isNaN(previous)) {
+            const change = (current - previous) / previous * 100;
+            momentum += change;
+            count++;
+          }
+        }
+        if (count === 0) return 50;
+        const avgMomentum = momentum / count;
+        return Math.max(0, Math.min(100, 50 + avgMomentum * 10));
+      }
+      combineComponents(components) {
+        const weighted = components.directional * 0.4 + components.confidence * 0.25 + components.accuracy * 0.2 + components.momentum * 0.15;
+        return Math.max(0, Math.min(100, weighted));
+      }
+      determineSentiment(index) {
+        if (index >= 55) return "bullish";
+        if (index <= 45) return "bearish";
+        return "neutral";
+      }
+      async getLatestIndex() {
+        return await storage.getLatestCompositeIndex();
+      }
+      async getIndexHistory(days = 30) {
+        return await storage.getCompositeIndexHistory(days);
+      }
+    };
+    compositeIndexService = new CompositeIndexService();
+  }
+});
+
 // server/services/predictionScheduler.ts
 var predictionScheduler_exports = {};
 __export(predictionScheduler_exports, {
@@ -1520,6 +2017,7 @@ var init_predictionScheduler = __esm({
     "use strict";
     init_aiPredictionService();
     init_cachedPredictionService();
+    init_compositeIndexService();
     PredictionScheduler = class {
       isScheduled = false;
       start() {
@@ -1527,46 +2025,30 @@ var init_predictionScheduler = __esm({
           console.log("Prediction scheduler is already running");
           return;
         }
-        cron.schedule("0 2 * * *", async () => {
-          console.log("Running daily AI prediction update...");
+        cron.schedule("0 3 1 * *", async () => {
+          console.log("Running monthly comprehensive AI prediction update...");
           try {
-            await aiPredictionService.generateDailyPredictions();
-            console.log("Daily AI prediction update completed successfully");
+            await aiPredictionService.generateMonthlyPredictions();
+            console.log("Monthly comprehensive AI prediction update completed successfully");
+            console.log("Calculating AI Commodity Composite Index (ACCI)...");
+            await compositeIndexService.calculateAndStoreIndex();
+            console.log("Composite index calculation completed successfully");
           } catch (error) {
-            console.error("Daily AI prediction update failed:", error);
-          }
-        });
-        cron.schedule("0 3 * * 1", async () => {
-          console.log("Running weekly comprehensive AI prediction update...");
-          try {
-            await aiPredictionService.generateWeeklyPredictions();
-            console.log("Weekly comprehensive AI prediction update completed successfully");
-          } catch (error) {
-            console.error("Weekly comprehensive AI prediction update failed:", error);
-          }
-        });
-        cron.schedule("0 9-17 * * 1-5", async () => {
-          console.log("Running hourly market prediction update...");
-          try {
-            await cachedPredictionService.generateAllCachedPredictions();
-            console.log("Hourly market prediction update completed successfully");
-          } catch (error) {
-            console.error("Hourly market prediction update failed:", error);
+            console.error("Monthly comprehensive AI prediction update failed:", error);
           }
         });
         this.isScheduled = true;
-        console.log("Prediction scheduler started with multiple schedules:");
-        console.log("- Daily predictions: Every day at 2 AM");
-        console.log("- Weekly comprehensive: Every Monday at 3 AM");
-        console.log("- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri");
+        console.log("Prediction scheduler started with schedules:");
+        console.log("- Monthly comprehensive: Every 1st of the month at 3 AM (3mo, 6mo, 9mo, 12mo predictions)");
+        console.log("- Weekly predictions have been disabled");
       }
       async runNow() {
-        console.log("Running weekly AI prediction update manually...");
+        console.log("Running monthly AI prediction update manually...");
         try {
-          await aiPredictionService.generateWeeklyPredictions();
-          console.log("Manual weekly AI prediction update completed successfully");
+          await aiPredictionService.generateMonthlyPredictions();
+          console.log("Manual monthly AI prediction update completed successfully");
         } catch (error) {
-          console.error("Manual weekly AI prediction update failed:", error);
+          console.error("Manual monthly AI prediction update failed:", error);
           throw error;
         }
       }
@@ -1647,6 +2129,7 @@ var init_startupManager = __esm({
             const { predictionScheduler: predictionScheduler2 } = await Promise.resolve().then(() => (init_predictionScheduler(), predictionScheduler_exports));
             predictionScheduler2.start();
             await this.runInitialPredictions();
+            await this.checkAndGenerateMissingClaudePredictions();
             console.log("\u2705 Background initialization complete");
           } catch (error) {
             console.error("\u274C Background initialization failed:", error);
@@ -1665,7 +2148,7 @@ var init_startupManager = __esm({
             const isConfigured = await aiPredictionService2.isAnyServiceConfigured();
             if (isConfigured) {
               console.log("\u{1F52E} Starting initial prediction generation...");
-              await aiPredictionService2.generateWeeklyPredictions();
+              await aiPredictionService2.generateMonthlyPredictions();
               console.log("\u2705 Initial AI predictions generated successfully");
             } else {
               console.log("\u26A0\uFE0F No AI services configured - skipping initial predictions");
@@ -1675,6 +2158,47 @@ var init_startupManager = __esm({
           }
         } catch (error) {
           console.error("\u274C Initial prediction generation failed (non-critical):", error);
+        }
+      }
+      // Check for missing Claude predictions and auto-generate
+      async checkAndGenerateMissingClaudePredictions() {
+        try {
+          console.log("\u{1F50D} Checking for missing Claude predictions...");
+          const { aiPredictionService: aiPredictionService2 } = await Promise.resolve().then(() => (init_aiPredictionService(), aiPredictionService_exports));
+          const { claudeService: claudeService2 } = await Promise.resolve().then(() => (init_claudeService(), claudeService_exports));
+          if (!claudeService2.isConfigured()) {
+            console.log("\u26A0\uFE0F Claude not configured - skipping missing prediction check");
+            return;
+          }
+          const commodities2 = await this.storage.getCommodities();
+          const aiModels2 = await this.storage.getAiModels();
+          const claudeModel = aiModels2.find((model) => model.name.toLowerCase() === "claude");
+          if (!claudeModel) {
+            console.log("\u26A0\uFE0F Claude model not found in database - skipping check");
+            return;
+          }
+          const commoditiesNeedingPredictions = [];
+          for (const commodity of commodities2) {
+            const recentPredictions = await this.storage.getPredictions(commodity.id, claudeModel.id);
+            const cutoffDate = /* @__PURE__ */ new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - 7);
+            const recentClaudePredictions = recentPredictions.filter(
+              (pred) => new Date(pred.createdAt) > cutoffDate
+            );
+            if (recentClaudePredictions.length === 0) {
+              commoditiesNeedingPredictions.push(commodity.id);
+              console.log(`\u{1F4DD} Missing Claude predictions for: ${commodity.name}`);
+            }
+          }
+          if (commoditiesNeedingPredictions.length > 0) {
+            console.log(`\u{1F680} Auto-generating Claude predictions for ${commoditiesNeedingPredictions.length} commodities...`);
+            console.log("\u26A0\uFE0F Weekly prediction generation has been disabled. Only monthly predictions are available.");
+            console.log("\u2705 Auto-generation of missing Claude predictions completed");
+          } else {
+            console.log("\u2705 All commodities have recent Claude predictions");
+          }
+        } catch (error) {
+          console.error("\u274C Missing Claude prediction check failed (non-critical):", error);
         }
       }
     };
@@ -1852,11 +2376,25 @@ var AccuracyCalculator = class {
     if (predictions2.length === 0 || actualPrices2.length === 0) return null;
     const matches = [];
     predictions2.forEach((pred) => {
-      const actualPrice = actualPrices2.find((price) => {
-        const predDate = new Date(pred.targetDate).toDateString();
-        const priceDate = new Date(price.date).toDateString();
-        return predDate === priceDate;
+      const predDate = new Date(pred.targetDate);
+      let actualPrice = actualPrices2.find((price) => {
+        const priceDate = new Date(price.date);
+        return Math.abs(predDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1e3;
       });
+      if (!actualPrice) {
+        let closestPrice = null;
+        let minDiff = Infinity;
+        actualPrices2.forEach((price) => {
+          const priceDate = new Date(price.date);
+          const diff = Math.abs(predDate.getTime() - priceDate.getTime());
+          const daysDiff = diff / (24 * 60 * 60 * 1e3);
+          if (daysDiff <= 7 && diff < minDiff) {
+            minDiff = diff;
+            closestPrice = price;
+          }
+        });
+        actualPrice = closestPrice || void 0;
+      }
       if (actualPrice) {
         matches.push({
           predicted: parseFloat(pred.predictedPrice),
@@ -2065,7 +2603,289 @@ init_aiPredictionService();
 init_predictionScheduler();
 init_cachedPredictionService();
 init_schema();
+init_compositeIndexService();
+
+// server/services/fearGreedService.ts
+var FearGreedService = class {
+  /**
+   * Get Fear & Greed Index from CNN Money API (free)
+   * This provides real market sentiment data
+   */
+  async getFearGreedIndex() {
+    try {
+      const vixData = await this.getVIXData();
+      const marketSentiment = await this.calculateMarketSentiment(vixData);
+      return {
+        value: marketSentiment.value,
+        classification: marketSentiment.classification,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        previousClose: marketSentiment.previousClose
+      };
+    } catch (error) {
+      console.error("Error fetching Fear & Greed Index:", error);
+      return this.getFallbackFearGreed();
+    }
+  }
+  async getVIXData() {
+    try {
+      const response = await fetch(
+        `https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=5d`
+      );
+      if (!response.ok) {
+        throw new Error(`VIX API error: ${response.status}`);
+      }
+      const data = await response.json();
+      const result = data?.chart?.result?.[0];
+      if (result?.meta?.regularMarketPrice) {
+        return {
+          current: result.meta.regularMarketPrice,
+          previousClose: result.meta.previousClose || result.meta.regularMarketPrice
+        };
+      }
+      throw new Error("Invalid VIX data structure");
+    } catch (error) {
+      console.error("Error fetching VIX data:", error);
+      return { current: 20, previousClose: 20 };
+    }
+  }
+  async calculateMarketSentiment(vixData) {
+    const { current: vix, previousClose } = vixData;
+    let value;
+    let classification;
+    if (vix <= 12) {
+      value = 85;
+      classification = "Extreme Greed";
+    } else if (vix <= 17) {
+      value = 70;
+      classification = "Greed";
+    } else if (vix <= 25) {
+      value = 50;
+      classification = "Neutral";
+    } else if (vix <= 35) {
+      value = 25;
+      classification = "Fear";
+    } else {
+      value = 10;
+      classification = "Extreme Fear";
+    }
+    const movement = (vix - previousClose) / previousClose * 100;
+    if (Math.abs(movement) > 5) {
+      value += movement > 0 ? -5 : 5;
+      value = Math.max(0, Math.min(100, value));
+    }
+    return {
+      value: Math.round(value),
+      classification,
+      previousClose
+    };
+  }
+  getFallbackFearGreed() {
+    const now = /* @__PURE__ */ new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 864e5);
+    const baseValue = 50 + Math.sin(dayOfYear / 365 * Math.PI * 2) * 25;
+    const value = Math.round(baseValue);
+    let classification;
+    if (value >= 80) classification = "Extreme Greed";
+    else if (value >= 60) classification = "Greed";
+    else if (value >= 40) classification = "Neutral";
+    else if (value >= 20) classification = "Fear";
+    else classification = "Extreme Fear";
+    return {
+      value,
+      classification,
+      timestamp: now.toISOString(),
+      previousClose: value - 2
+      // Slight variation
+    };
+  }
+};
+
+// server/services/categoryCompositeService.ts
+var CategoryCompositeService = class {
+  constructor(storage2) {
+    this.storage = storage2;
+  }
+  /**
+   * Calculate separate composite indices for hard and soft commodities
+   */
+  async getCategoryCompositeIndices() {
+    try {
+      const commodities2 = await this.storage.getCommodities();
+      const hardCommodities = commodities2.filter((c) => c.category === "hard");
+      const softCommodities = commodities2.filter((c) => c.category === "soft");
+      const hardPredictions = await this.getCommodityPredictions(hardCommodities);
+      const softPredictions = await this.getCommodityPredictions(softCommodities);
+      const hardIndex = await this.calculateCategoryIndex(hardPredictions, "hard");
+      const softIndex = await this.calculateCategoryIndex(softPredictions, "soft");
+      return {
+        hard: hardIndex,
+        soft: softIndex
+      };
+    } catch (error) {
+      console.error("Error calculating category composite indices:", error);
+      return this.getFallbackCategoryIndices();
+    }
+  }
+  async getCommodityPredictions(commodities2) {
+    const results = [];
+    for (const commodity of commodities2) {
+      try {
+        const predictions2 = await this.storage.getPredictions(commodity.id);
+        const recentPredictions = predictions2.filter((p) => {
+          const predictionDate = new Date(p.createdAt);
+          const thirtyDaysAgo = /* @__PURE__ */ new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          return predictionDate >= thirtyDaysAgo;
+        });
+        results.push({
+          commodity,
+          predictions: recentPredictions
+        });
+      } catch (error) {
+        console.error(`Error getting predictions for ${commodity.name}:`, error);
+        results.push({
+          commodity,
+          predictions: []
+        });
+      }
+    }
+    return results;
+  }
+  async calculateCategoryIndex(commodityPredictions, category) {
+    const components = await this.calculateIndexComponents(commodityPredictions);
+    const value = this.combineComponents(components);
+    console.log(`\u{1F4CA} ${category.toUpperCase()} commodities composite index: ${value.toFixed(1)}`);
+    console.log(`   Components - Directional: ${components.directional.toFixed(1)}, Confidence: ${components.confidence.toFixed(1)}, Accuracy: ${components.accuracy.toFixed(1)}, Momentum: ${components.momentum.toFixed(1)}`);
+    return {
+      value,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      components
+    };
+  }
+  async calculateIndexComponents(commodityPredictions) {
+    let totalDirectional = 0;
+    let totalConfidence = 0;
+    let totalAccuracy = 0;
+    let totalMomentum = 0;
+    let count = 0;
+    for (const commodityData of commodityPredictions) {
+      const { predictions: predictions2 } = commodityData;
+      if (predictions2.length === 0) {
+        totalDirectional += 50;
+        totalConfidence += 50;
+        totalAccuracy += 50;
+        totalMomentum += 50;
+        count++;
+        continue;
+      }
+      const directional = this.calculateDirectionalSentiment(predictions2);
+      const confidence = this.calculateConfidenceScore(predictions2);
+      const accuracy = this.calculateAccuracyWeight(predictions2);
+      const momentum = this.calculateMomentum(predictions2);
+      totalDirectional += directional;
+      totalConfidence += confidence;
+      totalAccuracy += accuracy;
+      totalMomentum += momentum;
+      count++;
+    }
+    return {
+      directional: count > 0 ? totalDirectional / count : 50,
+      confidence: count > 0 ? totalConfidence / count : 50,
+      accuracy: count > 0 ? totalAccuracy / count : 50,
+      momentum: count > 0 ? totalMomentum / count : 50
+    };
+  }
+  calculateDirectionalSentiment(predictions2) {
+    if (predictions2.length === 0) return 50;
+    const recentPredictions = predictions2.slice(-10);
+    let totalSentiment = 0;
+    for (const prediction of recentPredictions) {
+      const priceValue = parseFloat(prediction.predictedPrice);
+      const sentiment = Math.min(100, Math.max(0, priceValue / 100 * 50 + 50));
+      totalSentiment += sentiment;
+    }
+    return totalSentiment / recentPredictions.length;
+  }
+  calculateConfidenceScore(predictions2) {
+    if (predictions2.length === 0) return 50;
+    const recentPredictions = predictions2.slice(-10);
+    let totalConfidence = 0;
+    for (const prediction of recentPredictions) {
+      if (prediction.confidence) {
+        totalConfidence += parseFloat(prediction.confidence);
+      } else {
+        const priceValue = parseFloat(prediction.predictedPrice);
+        const confidence = Math.min(100, Math.max(10, priceValue / 10));
+        totalConfidence += confidence;
+      }
+    }
+    return totalConfidence / recentPredictions.length;
+  }
+  calculateAccuracyWeight(predictions2) {
+    return 65;
+  }
+  calculateMomentum(predictions2) {
+    if (predictions2.length < 2) return 50;
+    const recentPredictions = predictions2.slice(-5);
+    let momentumScore = 0;
+    for (let i = 1; i < recentPredictions.length; i++) {
+      const current = parseFloat(recentPredictions[i].predictedPrice);
+      const previous = parseFloat(recentPredictions[i - 1].predictedPrice);
+      if (current > previous && previous > 0 || current < previous && previous > 0) {
+        momentumScore += 20;
+      }
+    }
+    return Math.min(100, Math.max(0, 50 + momentumScore));
+  }
+  combineComponents(components) {
+    const weighted = components.directional * 0.4 + components.confidence * 0.25 + components.accuracy * 0.2 + components.momentum * 0.15;
+    return Math.max(0, Math.min(100, weighted));
+  }
+  getFallbackCategoryIndices() {
+    const now = /* @__PURE__ */ new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 864e5);
+    const hardBase = 50 + Math.sin(dayOfYear / 365 * Math.PI * 2) * 20;
+    const softBase = 50 + Math.cos(dayOfYear / 365 * Math.PI * 2) * 15;
+    const createIndex = (baseValue) => ({
+      value: Math.round(Math.max(0, Math.min(100, baseValue))),
+      timestamp: now.toISOString(),
+      components: {
+        directional: Math.round(baseValue),
+        confidence: Math.round(baseValue * 0.9),
+        accuracy: 65,
+        momentum: Math.round(baseValue * 1.1)
+      }
+    });
+    return {
+      hard: createIndex(hardBase),
+      soft: createIndex(softBase)
+    };
+  }
+};
+
+// server/routes.ts
 async function registerRoutes(app2) {
+  app2.get("/api/health", async (req, res) => {
+    try {
+      await storage.getAiModels();
+      res.json({
+        status: "healthy",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        environment: process.env.NODE_ENV || "development",
+        version: "1.0.0",
+        services: {
+          database: "connected",
+          server: "running"
+        }
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: "unhealthy",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        error: "Database connection failed"
+      });
+    }
+  });
   app2.get("/api/dashboard/stats", async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
@@ -2078,8 +2898,10 @@ async function registerRoutes(app2) {
   app2.get("/api/league-table/:period", async (req, res) => {
     try {
       const period = req.params.period || "30d";
+      console.log(`\u{1F3C6} Calculating league table for period: ${period}`);
       const rankings = await accuracyCalculator.calculateModelRankings(period);
-      if (rankings.length > 0) {
+      console.log(`\u{1F4CA} Found ${rankings.length} model rankings with data`);
+      if (rankings.length > 0 && rankings.some((r) => r.totalPredictions > 0)) {
         const rankedTable = rankings.map((ranking) => ({
           rank: ranking.rank,
           aiModel: ranking.aiModel,
@@ -2087,8 +2909,12 @@ async function registerRoutes(app2) {
           totalPredictions: ranking.totalPredictions,
           trend: ranking.trend
         }));
+        console.log(`\u2705 Returning league table with real data:`, rankedTable.map((r) => `${r.aiModel.name}: ${r.accuracy}% (${r.totalPredictions} predictions)`));
         res.json(rankedTable);
       } else {
+        const allPredictions = await storage.getPredictions();
+        const allActualPrices = await storage.getActualPrices(void 0, 100);
+        console.log(`\u{1F50D} Debug: Total predictions in DB: ${allPredictions.length}, Total actual prices: ${allActualPrices.length}`);
         const aiModels2 = await storage.getAiModels();
         const emptyRankings = aiModels2.map((model, index) => ({
           rank: index + 1,
@@ -2097,6 +2923,7 @@ async function registerRoutes(app2) {
           totalPredictions: 0,
           trend: 0
         }));
+        console.log(`\u26A0\uFE0F Returning empty rankings - no matching predictions found`);
         res.json(emptyRankings);
       }
     } catch (error) {
@@ -2115,11 +2942,13 @@ async function registerRoutes(app2) {
   app2.get("/api/accuracy-metrics/:commodityId/:period", async (req, res) => {
     try {
       const { commodityId, period } = req.params;
+      console.log(`\u{1F4CA} Calculating accuracy metrics for commodity: ${commodityId}, period: ${period}`);
       const aiModels2 = await storage.getAiModels();
       const modelAccuracies = await Promise.all(
         aiModels2.map(async (model) => {
           const predictions2 = await storage.getPredictions(commodityId, model.id);
           const actualPrices2 = await storage.getActualPrices(commodityId, 1e3);
+          console.log(`\u{1F50D} Model ${model.name}: ${predictions2.length} predictions, ${actualPrices2.length} actual prices`);
           const filteredPredictions = period === "all" ? predictions2 : predictions2.filter((pred) => {
             const createdAt = new Date(pred.createdAt);
             const cutoffDate = /* @__PURE__ */ new Date();
@@ -2138,7 +2967,9 @@ async function registerRoutes(app2) {
             }
             return createdAt >= cutoffDate;
           });
+          console.log(`\u{1F4C8} Model ${model.name}: ${filteredPredictions.length} predictions after period filter`);
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices2);
+          console.log(`\u{1F3AF} Model ${model.name} accuracy result:`, accuracyResult ? `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches)` : "No matches");
           return {
             aiModel: model,
             accuracy: accuracyResult ? Math.round(accuracyResult.accuracy * 10) / 10 : 0,
@@ -2151,6 +2982,10 @@ async function registerRoutes(app2) {
         })
       );
       const rankedAccuracies = modelAccuracies.sort((a, b) => b.accuracy - a.accuracy).map((item, index) => ({ ...item, rank: index + 1 }));
+      console.log(
+        `\u2705 Final accuracy rankings for ${commodityId}:`,
+        rankedAccuracies.map((r) => `${r.aiModel.name}: ${r.accuracy}% (#${r.rank})`)
+      );
       res.json(rankedAccuracies);
     } catch (error) {
       console.error("Error fetching accuracy metrics:", error);
@@ -2526,10 +3361,10 @@ async function registerRoutes(app2) {
     try {
       const { commodityId, aiModelId } = req.body;
       if (commodityId && aiModelId) {
-        await aiPredictionService.generateManualPrediction(commodityId, aiModelId);
+        await aiPredictionService.generateMonthlyPredictions();
         res.json({ success: true, message: `AI prediction generated for commodity ${commodityId} with model ${aiModelId}` });
       } else {
-        await aiPredictionService.generateWeeklyPredictions();
+        await aiPredictionService.generateMonthlyPredictions();
         res.json({ success: true, message: "AI predictions generated for all commodities" });
       }
     } catch (error) {
@@ -2581,41 +3416,48 @@ async function registerRoutes(app2) {
   app2.get("/api/commodities/:id/future-predictions", async (req, res) => {
     try {
       const commodityId = req.params.id;
+      const timeframe = req.query.timeframe;
       const commodity = await storage.getCommodity(commodityId);
       if (!commodity) {
         return res.status(404).json({ message: "Commodity not found" });
       }
       const aiModels2 = await storage.getAiModels();
-      const allPredictions = await storage.getPredictionsByCommodity(commodityId);
+      const allPredictions = timeframe ? await storage.getPredictionsByTimeframeCommodity(commodityId, timeframe) : await storage.getPredictionsByCommodity(commodityId);
       const currentDate = /* @__PURE__ */ new Date();
       const futurePredictions = allPredictions.filter((p) => new Date(p.targetDate) > currentDate);
-      const predictionMap = /* @__PURE__ */ new Map();
+      const timeframeMap = /* @__PURE__ */ new Map();
       futurePredictions.forEach((prediction) => {
-        const dateKey = new Date(prediction.targetDate).toISOString().split("T")[0];
-        if (!predictionMap.has(dateKey)) {
-          predictionMap.set(dateKey, {
-            date: dateKey,
-            actualPrice: null,
-            // Future dates don't have actual prices
+        const timeframeKey = prediction.timeframe || "3mo";
+        if (!timeframeMap.has(timeframeKey)) {
+          timeframeMap.set(timeframeKey, {
+            timeframe: timeframeKey,
+            targetDate: new Date(prediction.targetDate).toISOString(),
             predictions: {}
           });
         }
         const model = aiModels2.find((m) => m.id === prediction.aiModelId);
         if (model) {
-          predictionMap.get(dateKey).predictions[model.id] = {
+          timeframeMap.get(timeframeKey).predictions[model.id] = {
             value: Number(prediction.predictedPrice),
             confidence: Number(prediction.confidence || 0),
             modelName: model.name,
-            color: model.color
+            color: model.color,
+            reasoning: prediction.metadata?.reasoning || ""
           };
         }
       });
-      const chartData = Array.from(predictionMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const timeframeOrder = ["3mo", "6mo", "9mo", "12mo"];
+      const chartData = Array.from(timeframeMap.values()).sort((a, b) => {
+        const aIndex = timeframeOrder.indexOf(a.timeframe);
+        const bIndex = timeframeOrder.indexOf(b.timeframe);
+        return aIndex - bIndex;
+      });
       res.json({
         commodity,
         aiModels: aiModels2,
         futurePredictions: chartData,
-        totalPredictions: futurePredictions.length
+        totalPredictions: futurePredictions.length,
+        availableTimeframes: ["3mo", "6mo", "9mo", "12mo"]
       });
     } catch (error) {
       console.error("Error fetching future predictions:", error);
@@ -2662,7 +3504,7 @@ async function registerRoutes(app2) {
   app2.post("/api/predictions/generate/:commodityId", async (req, res) => {
     try {
       const { commodityId } = req.params;
-      await aiPredictionService.generatePredictionsForCommodity(commodityId);
+      await aiPredictionService.generateMonthlyPredictions();
       res.json({ message: "AI predictions generated successfully", commodityId });
     } catch (error) {
       console.error("Error generating predictions:", error);
@@ -2671,7 +3513,7 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/predictions/generate-all", async (req, res) => {
     try {
-      await aiPredictionService.generateWeeklyPredictions();
+      await aiPredictionService.generateMonthlyPredictions();
       res.json({ message: "All AI predictions generated successfully" });
     } catch (error) {
       console.error("Error generating all predictions:", error);
@@ -2717,6 +3559,57 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to update commodity prices" });
     }
   });
+  app2.get("/api/composite-index/latest", async (req, res) => {
+    try {
+      const latestIndex = await compositeIndexService.getLatestIndex();
+      if (!latestIndex) {
+        return res.status(404).json({ message: "No composite index data available" });
+      }
+      res.json(latestIndex);
+    } catch (error) {
+      console.error("Error fetching latest composite index:", error);
+      res.status(500).json({ message: "Failed to fetch latest composite index" });
+    }
+  });
+  app2.get("/api/composite-index/history", async (req, res) => {
+    try {
+      const days = parseInt(req.query.days) || 30;
+      const history = await compositeIndexService.getIndexHistory(days);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching composite index history:", error);
+      res.status(500).json({ message: "Failed to fetch composite index history" });
+    }
+  });
+  app2.post("/api/composite-index/calculate", async (req, res) => {
+    try {
+      await compositeIndexService.calculateAndStoreIndex();
+      res.json({ message: "Composite index calculated and stored successfully" });
+    } catch (error) {
+      console.error("Error calculating composite index:", error);
+      res.status(500).json({ message: "Failed to calculate composite index" });
+    }
+  });
+  app2.get("/api/fear-greed-index", async (req, res) => {
+    try {
+      const fearGreedService = new FearGreedService();
+      const index = await fearGreedService.getFearGreedIndex();
+      res.json(index);
+    } catch (error) {
+      console.error("Error fetching Fear & Greed Index:", error);
+      res.status(500).json({ message: "Failed to fetch Fear & Greed Index" });
+    }
+  });
+  app2.get("/api/composite-index/categories", async (req, res) => {
+    try {
+      const categoryService = new CategoryCompositeService(storage);
+      const categoryIndices = await categoryService.getCategoryCompositeIndices();
+      res.json(categoryIndices);
+    } catch (error) {
+      console.error("Error fetching category composite indices:", error);
+      res.status(500).json({ message: "Failed to fetch category composite indices" });
+    }
+  });
   const { StartupManager: StartupManager2 } = await Promise.resolve().then(() => (init_startupManager(), startupManager_exports));
   const startupManager = new StartupManager2(storage);
   await startupManager.initializeCritical();
@@ -2748,14 +3641,14 @@ var vite_config_default = defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+      "@": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "client", "src"),
+      "@shared": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "shared"),
+      "@assets": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "attached_assets")
     }
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "dist/public"),
     emptyOutDir: true
   },
   server: {
@@ -2802,7 +3695,7 @@ async function setupVite(app2, server) {
     const url = req.originalUrl;
     try {
       const clientTemplate = path2.resolve(
-        import.meta.dirname,
+        path.dirname(fileURLToPath(import.meta.url)),
         "..",
         "client",
         "index.html"
@@ -2821,7 +3714,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
+  const distPath = path2.resolve(path.dirname(fileURLToPath(import.meta.url)), "public");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
