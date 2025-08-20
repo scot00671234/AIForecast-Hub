@@ -1,5 +1,4 @@
 import { fileURLToPath } from "url";
-import path from "path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;

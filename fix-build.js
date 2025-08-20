@@ -48,16 +48,25 @@ try {
   if (dirNameCount > 0) {
     console.log('🚨 CRITICAL: Applying comprehensive import.meta.dirname fixes...');
     
-    // Add imports at the very beginning
-    const requiredImports = `import { fileURLToPath } from "url";
-import path from "path";
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-`;
+    // Add only the imports we need (check what's already there)
+    let importsToAdd = '';
     
-    // Check if imports are already present
-    if (!indexContent.includes('fileURLToPath') || !indexContent.includes('const __dirname')) {
-      indexContent = requiredImports + indexContent;
-      console.log('✅ Added comprehensive dirname setup');
+    if (!indexContent.includes('fileURLToPath')) {
+      importsToAdd += 'import { fileURLToPath } from "url";\n';
+    }
+    
+    // Check if path is already imported (don't duplicate)
+    if (!indexContent.includes('import path from "path"') && !indexContent.includes('import path2 from "path"')) {
+      importsToAdd += 'import path from "path";\n';
+    }
+    
+    if (!indexContent.includes('const __dirname')) {
+      importsToAdd += 'const __dirname = path.dirname(fileURLToPath(import.meta.url));\n';
+    }
+    
+    if (importsToAdd) {
+      indexContent = importsToAdd + indexContent;
+      console.log('✅ Added required dirname setup (no duplicates)');
     }
     
     // Replace ALL import.meta.dirname with __dirname
