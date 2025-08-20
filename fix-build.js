@@ -37,6 +37,26 @@ try {
     process.exit(1);
   }
   
+  // Fix static file serving - copy public files to server/public
+  console.log('🔧 Fixing static file serving for production...');
+  const serverPublicPath = join(__dirname, 'server', 'public');
+  
+  try {
+    // Remove existing server/public if it exists
+    if (existsSync(serverPublicPath)) {
+      const { rmSync } = await import('fs');
+      rmSync(serverPublicPath, { recursive: true, force: true });
+    }
+    
+    // Copy dist/public to server/public  
+    const { cpSync } = await import('fs');
+    cpSync(publicPath, serverPublicPath, { recursive: true });
+    console.log('✅ Static files copied to server/public for production serving');
+  } catch (error) {
+    console.warn('⚠️ Could not copy static files:', error.message);
+    console.warn('   Frontend serving may not work correctly');
+  }
+  
   // Fix import.meta.dirname issue in bundled code - COMPREHENSIVE FIX
   console.log('🔧 Fixing import.meta.dirname in bundled code...');
   let indexContent = readFileSync(indexPath, 'utf-8');
