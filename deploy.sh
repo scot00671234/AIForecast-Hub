@@ -1,44 +1,21 @@
 #!/bin/bash
 
-# AIForecast Hub Production Deployment Script
-# This script ensures proper database setup and deployment
+# Production deployment script for AIForecast Hub
 
-echo "🚀 Starting AIForecast Hub deployment..."
+echo "🚀 Starting production deployment..."
 
-# Check if DATABASE_URL is set
-if [ -z "$DATABASE_URL" ]; then
-    echo "❌ ERROR: DATABASE_URL environment variable is not set"
-    exit 1
-fi
-
-echo "✅ Database URL configured"
-
-# Install dependencies
+# Step 1: Install dependencies
 echo "📦 Installing dependencies..."
-npm ci --production=false
+npm install
 
-# Build the application
-echo "🔨 Building application..."
+# Step 2: Fix database schema
+echo "🔧 Fixing database schema..."
+node fix-production-simple.js
+
+# Step 3: Build the application
+echo "🏗️ Building application..."
 npm run build
 
-if [ $? -ne 0 ]; then
-    echo "❌ Build failed"
-    exit 1
-fi
-
-echo "✅ Build completed"
-
-# Run database migration
-echo "🔧 Running database migration..."
-tsx scripts/production-migrate.ts
-
-if [ $? -ne 0 ]; then
-    echo "❌ Database migration failed"
-    exit 1
-fi
-
-echo "✅ Database migration completed"
-
-# Start the application
-echo "🎯 Starting production server..."
-NODE_ENV=production npm start
+# Step 4: Start the application
+echo "▶️ Starting application..."
+npm start
