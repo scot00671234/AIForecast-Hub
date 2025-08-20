@@ -1,9 +1,9 @@
-# Force Node.js provider only
+# Production configuration for Dokploy VPS deployment
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
+PORT = "5000"
 
 [phases.install]
 cmds = ["npm ci --production=false"]

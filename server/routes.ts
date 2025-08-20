@@ -18,6 +18,31 @@ import { CategoryCompositeService } from "./services/categoryCompositeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Health Check Endpoint for Production Monitoring
+  app.get("/api/health", async (req, res) => {
+    try {
+      // Test database connection
+      await storage.getAiModels();
+      
+      res.json({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || "development",
+        version: "1.0.0",
+        services: {
+          database: "connected",
+          server: "running"
+        }
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: "Database connection failed"
+      });
+    }
+  });
+  
   // Dashboard Stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
