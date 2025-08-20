@@ -34,7 +34,7 @@ export default function Blog() {
           </Link>
         </div>
           
-          <article className="space-y-8">
+        <article className="space-y-8">
             <header className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-normal text-foreground leading-tight">
                 The Future of AI-Powered Commodity Forecasting
@@ -103,8 +103,7 @@ export default function Blog() {
                 </p>
               </CardContent>
             </Card>
-          </article>
-        </div>
+        </article>
       </main>
 
       {/* Footer */}

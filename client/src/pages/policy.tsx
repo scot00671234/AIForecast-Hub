@@ -182,7 +182,6 @@ export default function Policy() {
               </Card>
             </div>
           </article>
-        </div>
       </main>
 
       {/* Footer */}
