@@ -132,7 +132,12 @@ export class DatabaseStorage implements IStorage {
       }
       
       this.isDbConnected = false;
-      throw new Error(`Database connection required for production deployment: ${(error as Error).message}`);
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(`Database connection required for production deployment: ${(error as Error).message}`);
+      } else {
+        console.warn(`⚠️ Database connection failed in development mode: ${(error as Error).message}`);
+        console.warn("⚠️ Application will continue without database functionality");
+      }
     }
   }
 
