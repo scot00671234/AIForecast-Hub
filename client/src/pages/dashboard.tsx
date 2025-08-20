@@ -1,11 +1,10 @@
-import { MoonIcon, SunIcon, SearchIcon, MenuIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTheme } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "wouter";
+import { NavigationMenu } from "../components/navigation-menu";
 import OverallModelRankings from "@/components/dashboard/overall-model-rankings";
 import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
@@ -14,16 +13,12 @@ import MarketStatusCard from "@/components/MarketStatusCard";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
-  const { theme, setTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
+  const [location] = useLocation();
 
   const { data: commodities = [] } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
   });
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   // Filter commodities based on search query
   const filteredCommodities = commodities.filter(commodity =>
@@ -117,35 +112,7 @@ export default function Dashboard() {
                 )}
               </div>
               
-              <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 p-0 hover:bg-background/60 dark:hover:bg-white/10 transition-colors"
-                data-testid="button-theme-toggle"
-              >
-                {theme === "dark" ? (
-                  <SunIcon className="w-4 h-4" />
-                ) : (
-                  <MoonIcon className="w-4 h-4" />
-                )}
-              </Button>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <MenuIcon className="h-[1.2rem] w-[1.2rem]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link href="/blog">Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/policy">Policy</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <NavigationMenu currentPath={location} />
             </div>
           </div>
         </div>

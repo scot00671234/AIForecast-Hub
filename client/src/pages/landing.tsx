@@ -259,11 +259,17 @@ export default function Landing() {
               <span className="text-sm text-muted-foreground">AIForecast Hub</span>
             </div>
             <div className="flex items-center space-x-6">
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                About
+              </Link>
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                FAQ
+              </Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Blog
-              </Link>
-              <Link href="/policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Policy
               </Link>
             </div>
             <div className="text-xs text-muted-foreground space-y-1">

@@ -7,6 +7,9 @@ This platform is a full-stack web application for tracking and analyzing AI mode
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- **Platform Enhancement Package August 2025**: Complete platform improvement with educational content and user experience enhancements
+- **New Educational Pages**: Added comprehensive About and FAQ pages to improve user understanding and engagement
+- **Enhanced Navigation**: Updated site navigation across all pages with consistent menu structure (Landing, Dashboard, About, FAQ, Blog, Policy)
 - **Component Optimization August 2025**: Fixed constant loading issue by removing infinite retry loops in CompositeIndexGauge and related dashboard components
 - **Minimalist Design Update**: Simplified dashboard cards with cleaner spacing, reduced padding, and subtle loading states using triangle icons
 - **Company Information Added**: Added Loremt ApS CVR-nr 41691360 to footer across all pages (landing, dashboard, blog)
@@ -36,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 - **Charts**: Recharts for interactive data visualization
 - **Forms**: React Hook Form with Zod validation
 - **Visual Design**: Triangle logo, subtle geometric background patterns, minimal button styles with glass effects.
-- **Pages**: Landing page, dashboard, blog, and policy pages with consistent header and navigation.
+- **Pages**: 6 comprehensive pages - Landing page, dashboard, about, FAQ, blog, and policy pages with consistent header and navigation.
 
 ### Backend
 - **Runtime**: Node.js with Express.js
