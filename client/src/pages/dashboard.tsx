@@ -55,9 +55,9 @@ export default function Dashboard() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <Link href="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-            <span className="font-bold text-xl text-foreground">AIForecast Hub</span>
+            <span className="font-medium text-lg text-foreground">AIForecast Hub</span>
           </Link>
           
           <div className="flex items-center space-x-4">
