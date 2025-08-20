@@ -1,7 +1,7 @@
 # AI Commodity Price Prediction Platform
 
 ## Overview
-This platform is a full-stack web application for tracking and analyzing AI model predictions of commodity prices. It features a minimalist landing page and a comprehensive dashboard where users can compare the accuracy of various AI models (Claude, ChatGPT, Deepseek) in predicting both hard and soft commodity prices. Key capabilities include real-time price tracking from Yahoo Finance, interactive charts, model performance analytics, and league tables. The project aims to provide a robust, data-driven tool for assessing AI prediction capabilities in financial markets.
+This platform is a full-stack web application for tracking and analyzing AI model predictions of commodity prices. It features a minimalist landing page and a comprehensive dashboard where users can compare the accuracy of various AI models (Claude, ChatGPT, Deepseek) in predicting both hard and soft commodity prices across quarterly timeframes (3mo, 6mo, 9mo, 12mo). Key capabilities include real-time price tracking from Yahoo Finance, interactive charts with timeframe filtering, model performance analytics, and league tables. The project generates comprehensive monthly predictions on the 1st of each month and provides a robust, data-driven tool for assessing AI prediction capabilities in financial markets.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -13,9 +13,10 @@ Preferred communication style: Simple, everyday language.
 - **Component Optimization August 2025**: Fixed constant loading issue by removing infinite retry loops in CompositeIndexGauge and related dashboard components
 - **Minimalist Design Update**: Simplified dashboard cards with cleaner spacing, reduced padding, and subtle loading states using triangle icons
 - **Company Information Added**: Added Loremt ApS CVR-nr 41691360 to footer across all pages (landing, dashboard, blog)
-- **Monthly Multi-Timeframe Predictions**: Complete architecture overhaul from weekly 7-day predictions to monthly 3mo/6mo/9mo/12mo predictions on 1st of each month
-- **Timeframe-Aware Schema**: Added timeframe field to predictions table with production-safe migration for existing deployments
-- **Enhanced AI Services**: Updated OpenAI, Claude, and Deepseek services with timeframe-specific prediction logic and prompts
+- **Quarterly Prediction System**: Complete architecture transformation implementing quarterly forecasting (3mo, 6mo, 9mo, 12mo) with monthly generation on 1st of each month at 3 AM
+- **Timeframe-Aware Architecture**: Added timeframe field to predictions table with production-safe migration, frontend filtering, and API endpoint support
+- **Enhanced AI Services**: Updated OpenAI, Claude, and Deepseek services with quarterly timeframe-specific prediction logic and specialized prompts for long-term forecasting
+- **Frontend Timeframe Support**: Implemented tabbed interface and filtering for quarterly predictions with bar chart visualization optimized for timeframe comparison
 - **Production Migration Safety**: Updated production-migrate.ts script to handle schema changes seamlessly for Dokploy VPS deployments
 - **Overlap Management**: Implemented full prediction overlap preservation for rich accuracy analysis and prediction evolution tracking
 - **Claude Model Fix**: Fixed critical Claude prediction failures by updating to current model version (claude-sonnet-4-20250514) and added JSON parsing robustness for markdown code blocks
@@ -67,7 +68,7 @@ Preferred communication style: Simple, everyday language.
 - **Consistent Branding**: Unified design language across the application.
 - **Deployment Architecture**: Three-phase startup system (initialization, server startup, background processing) with a StartupManager service for robust deployment.
 - **Real-time Accuracy**: Comprehensive accuracy calculation using MAPE, directional accuracy, and threshold-based methods.
-- **Production Predictions**: Automatic weekly prediction generation with rate limiting and error handling.
+- **Production Predictions**: Automatic monthly prediction generation (quarterly forecasts: 3mo, 6mo, 9mo, 12mo) on the 1st of each month with rate limiting and error handling.
 
 ## External Dependencies
 - **Yahoo Finance API**: Real-time commodity price data.
