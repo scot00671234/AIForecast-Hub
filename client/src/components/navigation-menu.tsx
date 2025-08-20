@@ -87,58 +87,62 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
 
       {/* Menu Panel */}
       <div
-        className={`fixed top-16 right-4 z-50 w-80 bg-background border border-border/50 rounded-xl shadow-2xl transition-all duration-300 ease-out ${
+        className={`fixed top-16 right-4 z-50 w-72 max-h-[calc(100vh-5rem)] bg-background border border-border/50 rounded-xl shadow-2xl transition-all duration-300 ease-out flex flex-col ${
           isOpen
             ? 'opacity-100 translate-y-0 scale-100'
             : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
         }`}
+        style={{ 
+          minHeight: '280px',
+          maxHeight: 'min(520px, calc(100vh - 5rem))'
+        }}
       >
         {/* Menu Header */}
-        <div className="p-6 border-b border-border/30">
+        <div className="flex-shrink-0 p-4 border-b border-border/30">
           <div className="flex items-center space-x-3">
-            <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-foreground"></div>
-            <span className="font-medium text-foreground">AIForecast Hub</span>
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+            <span className="font-medium text-foreground text-sm">AIForecast Hub</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-1">
             Navigate to different sections
           </p>
         </div>
 
-        {/* Menu Items */}
-        <div className="p-2">
+        {/* Scrollable Menu Items */}
+        <div className="flex-1 overflow-y-auto p-2 nav-scrollbar">
           {menuItems.map((item, index) => (
             <Link key={item.path} href={item.path}>
               <div
-                className={`group relative p-4 rounded-lg transition-all duration-200 hover:bg-muted/60 cursor-pointer ${
+                className={`group relative p-3 rounded-lg transition-all duration-200 hover:bg-muted/60 cursor-pointer mb-1 ${
                   isActive(item.path) 
                     ? 'bg-muted/80 border border-border/30' 
                     : 'hover:translate-x-1'
                 }`}
                 style={{
-                  animationDelay: isOpen ? `${index * 50}ms` : '0ms'
+                  animationDelay: isOpen ? `${index * 40}ms` : '0ms'
                 }}
                 data-testid={`menu-item-${item.path.replace('/', '')}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className={`font-medium transition-colors ${
+                  <div className="space-y-1 flex-1">
+                    <div className={`font-medium text-sm transition-colors ${
                       isActive(item.path) 
                         ? 'text-foreground' 
                         : 'text-foreground group-hover:text-foreground'
                     }`}>
                       {item.label}
                     </div>
-                    <div className="text-xs text-muted-foreground group-hover:text-muted-foreground/80">
+                    <div className="text-xs text-muted-foreground group-hover:text-muted-foreground/80 leading-tight">
                       {item.description}
                     </div>
                   </div>
                   {isActive(item.path) && (
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse flex-shrink-0 ml-2"></div>
                   )}
                 </div>
 
                 {/* Hover indicator */}
-                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full transition-all duration-200 ${
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full transition-all duration-200 ${
                   isActive(item.path) 
                     ? 'opacity-100' 
                     : 'opacity-0 group-hover:opacity-60'
@@ -149,8 +153,8 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
         </div>
 
         {/* Menu Footer */}
-        <div className="p-6 border-t border-border/30">
-          <div className="text-center space-y-2">
+        <div className="flex-shrink-0 p-4 border-t border-border/30">
+          <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">
               © 2025 AIForecast Hub
             </p>

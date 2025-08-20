@@ -3,6 +3,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar styles for navigation menu */
+.nav-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.nav-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nav-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.nav-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--border) / 0.8);
+}
+
 :root {
   /* Light Theme - Inspired by minimalist aesthetic */
   --background: hsl(0, 0%, 99%);
