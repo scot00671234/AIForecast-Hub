@@ -78,18 +78,36 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 md:py-24 px-6 md:px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Hero Section with Video Background */}
+      <section className="relative py-16 md:py-24 px-6 md:px-6 overflow-hidden">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-20 dark:opacity-10"
+            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect width='1920' height='1080' fill='%23f8f9fa'/%3E%3C/svg%3E"
+          >
+            <source src="/attached_assets/1826896-hd_1920_1080_24fps_1755654056238.mp4" type="video/mp4" />
+          </video>
+          
+          {/* Video Overlay */}
+          <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px]"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-light text-foreground leading-tight">
+              <h1 className="text-4xl md:text-6xl font-light text-foreground leading-tight drop-shadow-sm">
                 AI Commodity Price
                 <span className="text-muted-foreground block font-normal">
                   Prediction Analysis
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light drop-shadow-sm">
                 Compare the accuracy of leading AI models in predicting commodity prices with real market data and comprehensive analytics.
               </p>
             </div>
@@ -98,7 +116,7 @@ export default function Landing() {
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-8 py-4 text-base font-medium min-h-[48px]"
+                className="px-8 py-4 text-base font-medium min-h-[48px] shadow-lg hover:shadow-xl transition-shadow"
                 data-testid="get-started-button"
               >
                 Get Started <ArrowRightIcon className="ml-2 h-4 w-4" />
