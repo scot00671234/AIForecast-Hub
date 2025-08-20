@@ -342,6 +342,27 @@ export class DatabaseStorage implements IStorage {
     console.log('🎯 All automatic migrations completed');
   }
 
+  // EMERGENCY TIMEFRAME COLUMN FIXER - Can be called anytime
+  private async ensureTimeframeColumn() {
+    try {
+      await db.execute(sql`
+        DO $$ 
+        BEGIN 
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'predictions' AND column_name = 'timeframe'
+          ) THEN
+            ALTER TABLE "predictions" ADD COLUMN "timeframe" text NOT NULL DEFAULT '3mo';
+            RAISE NOTICE 'EMERGENCY: Added timeframe column';
+          END IF;
+        END $$;
+      `);
+    } catch (error) {
+      // Silent fail - this is just a safety check
+      console.log('Note: Could not ensure timeframe column');
+    }
+  }
+
   private async insertProductionData() {
     console.log('🔧 Inserting production data...');
     
@@ -655,6 +676,9 @@ export class DatabaseStorage implements IStorage {
     }
     
     try {
+      // EMERGENCY TIMEFRAME FIX - Try migration first
+      await this.ensureTimeframeColumn();
+      
       const conditions = [];
       if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
       if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
@@ -668,9 +692,20 @@ export class DatabaseStorage implements IStorage {
       
       return await query.orderBy(desc(predictions.createdAt));
     } catch (error) {
-      // If timeframe column doesn't exist, retry without timeframe filter
-      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
-        console.log('⚠️ Timeframe column not found, falling back to query without timeframe filter');
+      // NUCLEAR FALLBACK - If timeframe column doesn't exist, ignore timeframe completely
+      if ((error as any)?.code === '42703') {
+        console.log('🚨 EMERGENCY FALLBACK: Timeframe column missing, ignoring timeframe filters');
+        console.log('🔧 Attempting emergency column creation...');
+        
+        try {
+          // Try to add column immediately
+          await db.execute(sql`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+          console.log('✅ Emergency timeframe column added');
+        } catch (addError) {
+          console.log('⚠️ Could not add timeframe column:', (addError as Error).message);
+        }
+        
+        // Return basic query without timeframe
         const conditions = [];
         if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
         if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
@@ -699,13 +734,18 @@ export class DatabaseStorage implements IStorage {
     }
     
     try {
+      // EMERGENCY FIX
+      await this.ensureTimeframeColumn();
       return await db.select().from(predictions)
         .where(eq(predictions.timeframe, timeframe))
         .orderBy(desc(predictions.createdAt));
     } catch (error) {
-      // If timeframe column doesn't exist, return all predictions
-      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
-        console.log('⚠️ Timeframe column not found, returning all predictions');
+      // NUCLEAR FALLBACK
+      if ((error as any)?.code === '42703') {
+        console.log('🚨 EMERGENCY: Timeframe column missing, returning all predictions');
+        try {
+          await db.execute(sql`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+        } catch {}
         return await db.select().from(predictions)
           .orderBy(desc(predictions.createdAt));
       }
@@ -719,6 +759,8 @@ export class DatabaseStorage implements IStorage {
     }
     
     try {
+      // EMERGENCY FIX
+      await this.ensureTimeframeColumn();
       return await db.select().from(predictions)
         .where(and(
           eq(predictions.commodityId, commodityId),
@@ -726,9 +768,12 @@ export class DatabaseStorage implements IStorage {
         ))
         .orderBy(desc(predictions.createdAt));
     } catch (error) {
-      // If timeframe column doesn't exist, return predictions for commodity only
-      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
-        console.log('⚠️ Timeframe column not found, returning all predictions for commodity');
+      // NUCLEAR FALLBACK
+      if ((error as any)?.code === '42703') {
+        console.log('🚨 EMERGENCY: Timeframe column missing, returning commodity predictions only');
+        try {
+          await db.execute(sql`ALTER TABLE "predictions" ADD COLUMN IF NOT EXISTS "timeframe" text NOT NULL DEFAULT '3mo'`);
+        } catch {}
         return await db.select().from(predictions)
           .where(eq(predictions.commodityId, commodityId))
           .orderBy(desc(predictions.createdAt));
