@@ -20,34 +20,68 @@ export class CompositeIndexService {
     console.log("🔄 Calculating AI Commodity Composite Index (ACCI)...");
     
     try {
-      // Get all recent predictions (last 30 days)
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - 30);
-      
       const commodities = await storage.getCommodities();
       const aiModels = await storage.getAiModels();
       
-      // Group predictions by commodity
+      // Group predictions by commodity - use all available predictions
       const commodityPredictions: CommodityPredictions[] = [];
+      let totalAvailablePredictions = 0;
       
       for (const commodity of commodities) {
         const predictions = await storage.getPredictions(commodity.id);
-        const recentPredictions = predictions.filter(p => 
-          new Date(p.predictionDate) >= cutoffDate
-        );
+        totalAvailablePredictions += predictions.length;
         
-        if (recentPredictions.length > 0) {
-          commodityPredictions.push({
-            predictions: recentPredictions,
-            category: commodity.category as 'hard' | 'soft',
-            commodity: commodity.name
-          });
+        if (predictions.length > 0) {
+          // Use the most recent predictions for each commodity (last 90 days or all if less)
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - 90);
+          
+          const recentPredictions = predictions.filter(p => 
+            new Date(p.predictionDate) >= cutoffDate
+          );
+          
+          // If no recent predictions, use the latest available ones (up to 20 per commodity)
+          const finalPredictions = recentPredictions.length > 0 
+            ? recentPredictions 
+            : predictions.slice(-20);
+          
+          if (finalPredictions.length > 0) {
+            commodityPredictions.push({
+              predictions: finalPredictions,
+              category: commodity.category as 'hard' | 'soft',
+              commodity: commodity.name
+            });
+          }
         }
       }
       
+      console.log(`📊 Found ${totalAvailablePredictions} total predictions across ${commodities.length} commodities`);
+      console.log(`📊 Using ${commodityPredictions.length} commodities with prediction data`);
+      
       if (commodityPredictions.length === 0) {
-        console.log("⚠️ No recent predictions found for composite index calculation");
-        return;
+        console.log("⚠️ No predictions found for composite index calculation - creating fallback index");
+        // Create a fallback index using default neutral values when no predictions exist
+        const fallbackIndexRecord: InsertCompositeIndex = {
+          date: new Date(),
+          overallIndex: "50.0",
+          hardCommoditiesIndex: "50.0", 
+          softCommoditiesIndex: "50.0",
+          directionalComponent: "50.0",
+          confidenceComponent: "50.0",
+          accuracyComponent: "50.0",
+          momentumComponent: "50.0",
+          totalPredictions: 0,
+          marketSentiment: 'neutral'
+        };
+        
+        try {
+          const createdIndex = await storage.createCompositeIndex(fallbackIndexRecord);
+          console.log("✅ Created fallback composite index with neutral values:", createdIndex.id);
+          return;
+        } catch (error) {
+          console.error("❌ Failed to create fallback composite index:", error);
+          throw error;
+        }
       }
       
       // Calculate overall index components
@@ -152,7 +186,7 @@ export class CompositeIndexService {
       commodityGroups.get(key)!.push(pred);
     });
     
-    for (const [commodityId, preds] of commodityGroups) {
+    commodityGroups.forEach((preds, commodityId) => {
       for (const pred of preds) {
         // Get historical price at prediction date for comparison
         const predictedPrice = parseFloat(pred.predictedPrice);
@@ -166,7 +200,7 @@ export class CompositeIndexService {
         }
         totalWeight += 1;
       }
-    }
+    });
     
     const ratio = totalWeight > 0 ? bullishCount / totalWeight : 0.5;
     return Math.max(0, Math.min(100, ratio * 100));
