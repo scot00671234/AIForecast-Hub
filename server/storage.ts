@@ -183,6 +183,7 @@ export class DatabaseStorage implements IStorage {
             "target_date" timestamp NOT NULL,
             "predicted_price" numeric(10,4) NOT NULL,
             "confidence" numeric(5,2),
+            "timeframe" text NOT NULL DEFAULT '3mo',
             "metadata" jsonb,
             "created_at" timestamp DEFAULT now() NOT NULL
           )
@@ -254,6 +255,29 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       // Constraints might already exist, continue
       console.log('Note: Some constraints may already exist');
+    }
+
+    // Handle missing timeframe column in existing predictions table
+    try {
+      console.log('🔧 Adding missing timeframe column if needed...');
+      await db.execute(sql`
+        DO $$ 
+        BEGIN 
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'predictions' AND column_name = 'timeframe'
+          ) THEN
+            ALTER TABLE "predictions" ADD COLUMN "timeframe" text NOT NULL DEFAULT '3mo';
+            
+            -- Add check constraint for valid timeframes
+            ALTER TABLE "predictions" ADD CONSTRAINT "predictions_timeframe_check" 
+            CHECK ("timeframe" IN ('3mo', '6mo', '9mo', '12mo'));
+          END IF;
+        END $$;
+      `);
+      console.log('✅ Timeframe column migration completed');
+    } catch (error) {
+      console.log('Note: Timeframe column migration failed (might already exist):', (error as Error).message);
     }
 
     // Insert initial data
@@ -573,18 +597,38 @@ export class DatabaseStorage implements IStorage {
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
-    const conditions = [];
-    if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
-    if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
-    if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
     
-    let query = db.select().from(predictions);
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
+    try {
+      const conditions = [];
+      if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+      if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+      if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
+      
+      let query = db.select().from(predictions);
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions)) as any;
+      }
+      
+      return await query.orderBy(desc(predictions.createdAt));
+    } catch (error) {
+      // If timeframe column doesn't exist, retry without timeframe filter
+      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
+        console.log('⚠️ Timeframe column not found, falling back to query without timeframe filter');
+        const conditions = [];
+        if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
+        if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+        
+        let query = db.select().from(predictions);
+        
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions)) as any;
+        }
+        
+        return await query.orderBy(desc(predictions.createdAt));
+      }
+      throw error;
     }
-    
-    return await query.orderBy(desc(predictions.createdAt));
   }
 
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
@@ -597,21 +641,44 @@ export class DatabaseStorage implements IStorage {
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
-    return await db.select().from(predictions)
-      .where(eq(predictions.timeframe, timeframe))
-      .orderBy(desc(predictions.createdAt));
+    
+    try {
+      return await db.select().from(predictions)
+        .where(eq(predictions.timeframe, timeframe))
+        .orderBy(desc(predictions.createdAt));
+    } catch (error) {
+      // If timeframe column doesn't exist, return all predictions
+      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
+        console.log('⚠️ Timeframe column not found, returning all predictions');
+        return await db.select().from(predictions)
+          .orderBy(desc(predictions.createdAt));
+      }
+      throw error;
+    }
   }
 
   async getPredictionsByTimeframeCommodity(commodityId: string, timeframe: string): Promise<Prediction[]> {
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
-    return await db.select().from(predictions)
-      .where(and(
-        eq(predictions.commodityId, commodityId),
-        eq(predictions.timeframe, timeframe)
-      ))
-      .orderBy(desc(predictions.createdAt));
+    
+    try {
+      return await db.select().from(predictions)
+        .where(and(
+          eq(predictions.commodityId, commodityId),
+          eq(predictions.timeframe, timeframe)
+        ))
+        .orderBy(desc(predictions.createdAt));
+    } catch (error) {
+      // If timeframe column doesn't exist, return predictions for commodity only
+      if ((error as any)?.code === '42703' && (error as Error).message.includes('timeframe')) {
+        console.log('⚠️ Timeframe column not found, returning all predictions for commodity');
+        return await db.select().from(predictions)
+          .where(eq(predictions.commodityId, commodityId))
+          .orderBy(desc(predictions.createdAt));
+      }
+      throw error;
+    }
   }
 
 
