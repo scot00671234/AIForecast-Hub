@@ -92,7 +92,7 @@ export class StartupManager {
         
         if (isConfigured) {
           console.log('🔮 Starting initial prediction generation...');
-          await aiPredictionService.generateWeeklyPredictions();
+          await aiPredictionService.generateMonthlyPredictions();
           console.log('✅ Initial AI predictions generated successfully');
         } else {
           console.log('⚠️ No AI services configured - skipping initial predictions');
@@ -154,17 +154,8 @@ export class StartupManager {
       if (commoditiesNeedingPredictions.length > 0) {
         console.log(`🚀 Auto-generating Claude predictions for ${commoditiesNeedingPredictions.length} commodities...`);
         
-        for (const commodityId of commoditiesNeedingPredictions) {
-          try {
-            await aiPredictionService.generatePredictionsForCommodity(commodityId);
-            console.log(`✅ Generated Claude prediction for commodity ${commodityId}`);
-            
-            // Add delay to respect rate limits
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          } catch (error) {
-            console.error(`❌ Failed to generate Claude prediction for commodity ${commodityId}:`, error);
-          }
-        }
+        console.log('⚠️ Weekly prediction generation has been disabled. Only monthly predictions are available.');
+        // Weekly predictions have been removed from the system
         
         console.log('✅ Auto-generation of missing Claude predictions completed');
       } else {

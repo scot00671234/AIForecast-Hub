@@ -19,47 +19,13 @@ export class CachedPredictionService {
   }
 
   async generateCachedPredictionsForCommodity(commodityId: string): Promise<void> {
-    const cacheKey = `predictions_${commodityId}`;
-    
-    if (this.isCacheValid(cacheKey)) {
-      console.log(`Using cached predictions for commodity ${commodityId}`);
-      return;
-    }
-
-    console.log(`Generating fresh predictions for commodity ${commodityId}...`);
-    
-    try {
-      // Update prices first
-      await yahooFinanceIntegration.updateSingleCommodityPrices(commodityId);
-      
-      // Generate AI predictions
-      await aiPredictionService.generatePredictionsForCommodity(commodityId);
-      
-      // Cache the result
-      this.setCacheValue(cacheKey, true);
-      
-      console.log(`Cached predictions generated for commodity ${commodityId}`);
-    } catch (error) {
-      console.error(`Error generating cached predictions for commodity ${commodityId}:`, error);
-    }
+    console.log(`Weekly predictions have been disabled for commodity ${commodityId}`);
+    // Weekly predictions have been removed from the system
   }
 
   async generateAllCachedPredictions(): Promise<void> {
-    console.log("Starting cached prediction generation for all commodities...");
-    
-    try {
-      const commodities = await storage.getCommodities();
-      
-      const promises = commodities.map(commodity => 
-        this.generateCachedPredictionsForCommodity(commodity.id)
-      );
-      
-      await Promise.allSettled(promises);
-      
-      console.log("Completed cached prediction generation for all commodities");
-    } catch (error) {
-      console.error("Error in generateAllCachedPredictions:", error);
-    }
+    console.log("Weekly predictions have been disabled for all commodities");
+    // Weekly predictions have been removed from the system
   }
 
   async getFuturePredictions(commodityId: string, days: number = 7): Promise<any[]> {

@@ -28,21 +28,12 @@ export class PredictionScheduler {
       }
     });
 
-    // Schedule hourly prediction updates during market hours (9 AM - 5 PM EST, Mon-Fri)
-    cron.schedule('0 9-17 * * 1-5', async () => {
-      console.log('Running hourly market prediction update...');
-      try {
-        await cachedPredictionService.generateAllCachedPredictions();
-        console.log('Hourly market prediction update completed successfully');
-      } catch (error) {
-        console.error('Hourly market prediction update failed:', error);
-      }
-    });
+    // Hourly predictions have been disabled - only monthly predictions are generated
 
     this.isScheduled = true;
     console.log('Prediction scheduler started with schedules:');
     console.log('- Monthly comprehensive: Every 1st of the month at 3 AM (3mo, 6mo, 9mo, 12mo predictions)');
-    console.log('- Hourly market updates: Every hour 9 AM-5 PM, Mon-Fri');
+    console.log('- Weekly predictions have been disabled');
   }
 
   async runNow(): Promise<void> {
