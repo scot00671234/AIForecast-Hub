@@ -10,7 +10,7 @@ import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
 import PredictionStatsCard from "@/components/PredictionStatsCard";
 import MarketStatusCard from "@/components/MarketStatusCard";
-import SidebarAd from "@/components/ads/SidebarAd";
+import BottomBanner from "@/components/ads/BottomBanner";
 import type { Commodity } from "@shared/schema";
 
 export default function Dashboard() {
@@ -141,11 +141,6 @@ export default function Dashboard() {
             </div>
           </section>
           
-          {/* Strategic Ad Placement */}
-          <section className="flex justify-center">
-            <SidebarAd />
-          </section>
-          
           {/* Overall Model Rankings */}
           <OverallModelRankings />
           
@@ -153,6 +148,9 @@ export default function Dashboard() {
           <AllCommoditiesView filteredCommodities={searchQuery ? filteredCommodities : undefined} />
         </div>
       </main>
+
+      {/* Bottom Banner Ad */}
+      <BottomBanner />
 
       {/* Minimal Footer - matching landing page */}
       <footer className="relative z-10 border-t border-border/50 mt-16 md:mt-32">
