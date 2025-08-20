@@ -41,10 +41,12 @@ export interface IStorage {
   createCommodity(commodity: InsertCommodity): Promise<Commodity>;
 
   // Predictions
-  getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]>;
-  getPredictionsByCommodity(commodityId: string): Promise<Prediction[]>;
+  getPredictions(commodityId?: string, aiModelId?: string, timeframe?: string): Promise<Prediction[]>;
+  getPredictionsByCommodity(commodityId: string, timeframe?: string): Promise<Prediction[]>;
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
   insertPrediction(prediction: InsertPrediction): Promise<Prediction>;
+  getPredictionsByTimeframe(timeframe: string): Promise<Prediction[]>;
+  getPredictionsByTimeframeCommodity(commodityId: string, timeframe: string): Promise<Prediction[]>;
 
   // Actual Prices
   getActualPrices(commodityId: string, limit?: number): Promise<ActualPrice[]>;
@@ -69,6 +71,10 @@ export interface IStorage {
   getDashboardStats(): Promise<DashboardStats>;
   getLeagueTable(period: string): Promise<LeagueTableEntry[]>;
   getChartData(commodityId: string, days: number): Promise<ChartDataPoint[]>;
+  
+  // Timeframe-specific predictions
+  getPredictionsByTimeframe(timeframe: string): Promise<Prediction[]>;
+  getPredictionsByTimeframeCommodity(commodityId: string, timeframe: string): Promise<Prediction[]>;
   
   // Raw SQL queries for complex calculations
   rawQuery(query: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -563,13 +569,14 @@ export class DatabaseStorage implements IStorage {
     return commodity;
   }
 
-  async getPredictions(commodityId?: string, aiModelId?: string): Promise<Prediction[]> {
+  async getPredictions(commodityId?: string, aiModelId?: string, timeframe?: string): Promise<Prediction[]> {
     if (!this.isDbConnected) {
       throw new Error("Database connection required");
     }
     const conditions = [];
     if (commodityId) conditions.push(eq(predictions.commodityId, commodityId));
     if (aiModelId) conditions.push(eq(predictions.aiModelId, aiModelId));
+    if (timeframe) conditions.push(eq(predictions.timeframe, timeframe));
     
     let query = db.select().from(predictions);
     
@@ -586,9 +593,31 @@ export class DatabaseStorage implements IStorage {
   }
 
 
+  async getPredictionsByTimeframe(timeframe: string): Promise<Prediction[]> {
+    if (!this.isDbConnected) {
+      throw new Error("Database connection required");
+    }
+    return await db.select().from(predictions)
+      .where(eq(predictions.timeframe, timeframe))
+      .orderBy(desc(predictions.createdAt));
+  }
 
-  async getPredictionsByCommodity(commodityId: string): Promise<Prediction[]> {
-    return this.getPredictions(commodityId);
+  async getPredictionsByTimeframeCommodity(commodityId: string, timeframe: string): Promise<Prediction[]> {
+    if (!this.isDbConnected) {
+      throw new Error("Database connection required");
+    }
+    return await db.select().from(predictions)
+      .where(and(
+        eq(predictions.commodityId, commodityId),
+        eq(predictions.timeframe, timeframe)
+      ))
+      .orderBy(desc(predictions.createdAt));
+  }
+
+
+
+  async getPredictionsByCommodity(commodityId: string, timeframe?: string): Promise<Prediction[]> {
+    return this.getPredictions(commodityId, undefined, timeframe);
   }
 
   async getActualPrices(commodityId?: string, limit?: number): Promise<ActualPrice[]> {

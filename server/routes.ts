@@ -640,11 +640,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (commodityId && aiModelId) {
         // Generate for specific commodity and model
-        await aiPredictionService.generateManualPrediction(commodityId, aiModelId);
+        // Generate monthly predictions for all commodities (since weekly predictions are removed)
+        await aiPredictionService.generateMonthlyPredictions();
         res.json({ success: true, message: `AI prediction generated for commodity ${commodityId} with model ${aiModelId}` });
       } else {
         // Generate for all commodities and models
-        await aiPredictionService.generateWeeklyPredictions();
+        // Generate monthly predictions for all commodities
+        await aiPredictionService.generateMonthlyPredictions();
         res.json({ success: true, message: "AI predictions generated for all commodities" });
       }
     } catch (error: any) {
@@ -702,10 +704,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // Get future predictions with chart data
+  // Get future predictions with chart data (timeframe support)
   app.get("/api/commodities/:id/future-predictions", async (req, res) => {
     try {
       const commodityId = req.params.id;
+      const timeframe = req.query.timeframe as string; // Optional timeframe filter
       const commodity = await storage.getCommodity(commodityId);
       
       if (!commodity) {
@@ -715,44 +718,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get AI models
       const aiModels = await storage.getAiModels();
       
-      // Get future predictions (target date > current date)
-      const allPredictions = await storage.getPredictionsByCommodity(commodityId);
+      // Get future predictions (target date > current date) with optional timeframe filter
+      const allPredictions = timeframe 
+        ? await storage.getPredictionsByTimeframeCommodity(commodityId, timeframe)
+        : await storage.getPredictionsByCommodity(commodityId);
+      
       const currentDate = new Date();
       const futurePredictions = allPredictions.filter(p => new Date(p.targetDate) > currentDate);
       
-      // Group predictions by target date and AI model
-      const predictionMap = new Map<string, any>();
+      // Group predictions by timeframe and AI model
+      const timeframeMap = new Map<string, any>();
       
       futurePredictions.forEach(prediction => {
-        const dateKey = new Date(prediction.targetDate).toISOString().split('T')[0];
-        if (!predictionMap.has(dateKey)) {
-          predictionMap.set(dateKey, {
-            date: dateKey,
-            actualPrice: null, // Future dates don't have actual prices
+        const timeframeKey = prediction.timeframe || '3mo';
+        if (!timeframeMap.has(timeframeKey)) {
+          timeframeMap.set(timeframeKey, {
+            timeframe: timeframeKey,
+            targetDate: new Date(prediction.targetDate).toISOString(),
             predictions: {}
           });
         }
         
         const model = aiModels.find(m => m.id === prediction.aiModelId);
         if (model) {
-          predictionMap.get(dateKey).predictions[model.id] = {
+          timeframeMap.get(timeframeKey).predictions[model.id] = {
             value: Number(prediction.predictedPrice),
             confidence: Number(prediction.confidence || 0),
             modelName: model.name,
-            color: model.color
+            color: model.color,
+            reasoning: (prediction.metadata as any)?.reasoning || ''
           };
         }
       });
       
-      // Convert to array and sort by date
-      const chartData = Array.from(predictionMap.values())
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Convert to array and sort by timeframe order (3mo, 6mo, 9mo, 12mo)
+      const timeframeOrder = ['3mo', '6mo', '9mo', '12mo'];
+      const chartData = Array.from(timeframeMap.values())
+        .sort((a, b) => {
+          const aIndex = timeframeOrder.indexOf(a.timeframe);
+          const bIndex = timeframeOrder.indexOf(b.timeframe);
+          return aIndex - bIndex;
+        });
       
       res.json({
         commodity,
         aiModels,
         futurePredictions: chartData,
-        totalPredictions: futurePredictions.length
+        totalPredictions: futurePredictions.length,
+        availableTimeframes: ['3mo', '6mo', '9mo', '12mo']
       });
     } catch (error) {
       console.error("Error fetching future predictions:", error);
@@ -806,7 +819,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/predictions/generate/:commodityId", async (req, res) => {
     try {
       const { commodityId } = req.params;
-      await aiPredictionService.generatePredictionsForCommodity(commodityId);
+      // Generate monthly predictions for all commodities
+      await aiPredictionService.generateMonthlyPredictions();
       res.json({ message: "AI predictions generated successfully", commodityId });
     } catch (error) {
       console.error("Error generating predictions:", error);
@@ -816,7 +830,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/predictions/generate-all", async (req, res) => {
     try {
-      await aiPredictionService.generateWeeklyPredictions();
+      // Generate monthly predictions for all commodities
+      await aiPredictionService.generateMonthlyPredictions();
       res.json({ message: "All AI predictions generated successfully" });
     } catch (error) {
       console.error("Error generating all predictions:", error);
