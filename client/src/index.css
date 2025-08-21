@@ -169,6 +169,11 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Account for sticky header */
+  }
 
   body {
     @apply bg-background text-foreground;
@@ -182,6 +187,9 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     touch-action: manipulation;
+    
+    /* Enhanced smooth scrolling for webkit browsers */
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Enhanced Typography */
