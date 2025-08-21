@@ -10,8 +10,6 @@ export default function Policy() {
   
   return (
     <div className="min-h-screen bg-background">
-      {/* Enhanced background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-4">
