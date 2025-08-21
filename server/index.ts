@@ -65,6 +65,27 @@ console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
     throw err;
   });
 
+  // Add cache-control headers for production
+  if (app.get("env") === "production") {
+    app.use((req, res, next) => {
+      // Cache-bust HTML files - always check server for updates
+      if (req.path.endsWith('.html') || req.path === '/' || req.path === '/index.html') {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      } 
+      // Long-term cache for hashed assets (CSS, JS with hashes in filename)
+      else if (/\.(js|css)$/.test(req.path) && /-[a-zA-Z0-9]+\.(js|css)$/.test(req.path)) {
+        res.set('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+      }
+      // Short-term cache for other static assets
+      else if (/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/.test(req.path)) {
+        res.set('Cache-Control', 'public, max-age=3600'); // 1 hour
+      }
+      next();
+    });
+  }
+
   // Setup Vite or static serving
   if (app.get("env") === "development") {
     await setupVite(app, server);
