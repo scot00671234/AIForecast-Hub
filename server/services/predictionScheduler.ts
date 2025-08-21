@@ -28,14 +28,14 @@ export class PredictionScheduler {
       }
     });
 
-    // Schedule daily composite index updates every day at 2 AM
+    // Schedule daily composite index recalculation every day at 2 AM (no new predictions)
     cron.schedule('0 2 * * *', async () => {
-      console.log('Running daily AI Composite Index update...');
+      console.log('Recalculating AI Composite Index with existing predictions...');
       try {
         await compositeIndexService.calculateAndStoreIndex();
-        console.log('Daily composite index update completed successfully');
+        console.log('Daily composite index recalculation completed successfully');
       } catch (error) {
-        console.error('Daily composite index update failed:', error);
+        console.error('Daily composite index recalculation failed:', error);
       }
     });
 
@@ -44,6 +44,7 @@ export class PredictionScheduler {
     this.isScheduled = true;
     console.log('Prediction scheduler started with schedules:');
     console.log('- Monthly comprehensive: Every 1st of the month at 3 AM (3mo, 6mo, 9mo, 12mo predictions)');
+    console.log('- Daily composite index: Every day at 2 AM (recalculates index with existing predictions)');
     console.log('- Weekly predictions have been disabled');
   }
 
