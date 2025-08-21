@@ -111,32 +111,52 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="py-24 md:py-40 px-6 md:px-6 relative overflow-hidden">
-        {/* Vercel-style Background */}
-        <div className="absolute inset-0">
-          {/* Clean gradient base */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20" />
+        {/* Modern gradient background that extends to full screen */}
+        <div className="absolute inset-0 w-full h-full">
+          {/* Clean gradient base that covers entire section */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30" />
           
-          {/* Modern flowing gradient at bottom */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-64 opacity-60 dark:opacity-40"
-            style={{
-              backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='1200' height='300' viewBox='0 0 1200 300' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='modernWave1' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%23f8fafc;stop-opacity:0.8' /%3E%3Cstop offset='30%25' style='stop-color:%23e2e8f0;stop-opacity:0.5' /%3E%3Cstop offset='70%25' style='stop-color:%23cbd5e1;stop-opacity:0.6' /%3E%3Cstop offset='100%25' style='stop-color:%23f1f5f9;stop-opacity:0.7' /%3E%3C/linearGradient%3E%3ClinearGradient id='modernWave2' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%23f1f5f9;stop-opacity:0.4' /%3E%3Cstop offset='50%25' style='stop-color:%23e2e8f0;stop-opacity:0.3' /%3E%3Cstop offset='100%25' style='stop-color:%23f8fafc;stop-opacity:0.5' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0,180 Q300,140 600,160 T1200,140 L1200,300 L0,300 Z' fill='url(%23modernWave1)' /%3E%3Cpath d='M0,220 Q400,180 800,200 T1200,170 L1200,300 L0,300 Z' fill='url(%23modernWave2)' /%3E%3C/svg%3E")`,
-              backgroundSize: '1200px 300px',
-              backgroundRepeat: 'repeat-x',
-              backgroundPosition: 'bottom'
-            }}
-          />
+          {/* Smooth flowing gradient layers for light theme */}
+          <div className="absolute inset-0 dark:opacity-0">
+            {/* Base gradient layer */}
+            <div 
+              className="absolute bottom-0 left-0 w-full h-80 opacity-70"
+              style={{
+                background: 'linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.4) 30%, rgba(226, 232, 240, 0.6) 70%, rgba(203, 213, 225, 0.8) 100%)'
+              }}
+            />
+            {/* Soft wave overlay */}
+            <div 
+              className="absolute bottom-0 left-0 w-full h-64 opacity-50"
+              style={{
+                backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='100%25' height='100%25' viewBox='0 0 100 40' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,20 Q25,10 50,20 T100,18 V40 H0 Z' fill='rgba(241, 245, 249, 0.6)' /%3E%3C/svg%3E")`,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'bottom'
+              }}
+            />
+          </div>
           
-          {/* Dark theme modern waves */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-64 opacity-0 dark:opacity-30"
-            style={{
-              backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='1200' height='300' viewBox='0 0 1200 300' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='darkWave1' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%23334155;stop-opacity:0.6' /%3E%3Cstop offset='30%25' style='stop-color:%23475569;stop-opacity:0.4' /%3E%3Cstop offset='70%25' style='stop-color:%2364748b;stop-opacity:0.5' /%3E%3Cstop offset='100%25' style='stop-color:%23334155;stop-opacity:0.6' /%3E%3C/linearGradient%3E%3ClinearGradient id='darkWave2' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%23475569;stop-opacity:0.3' /%3E%3Cstop offset='50%25' style='stop-color:%23334155;stop-opacity:0.2' /%3E%3Cstop offset='100%25' style='stop-color:%2364748b;stop-opacity:0.4' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0,180 Q300,140 600,160 T1200,140 L1200,300 L0,300 Z' fill='url(%23darkWave1)' /%3E%3Cpath d='M0,220 Q400,180 800,200 T1200,170 L1200,300 L0,300 Z' fill='url(%23darkWave2)' /%3E%3C/svg%3E")`,
-              backgroundSize: '1200px 300px',
-              backgroundRepeat: 'repeat-x',
-              backgroundPosition: 'bottom'
-            }}
-          />
+          {/* Smooth flowing gradient layers for dark theme */}
+          <div className="absolute inset-0 opacity-0 dark:opacity-100">
+            {/* Base gradient layer */}
+            <div 
+              className="absolute bottom-0 left-0 w-full h-80 opacity-60"
+              style={{
+                background: 'linear-gradient(180deg, transparent 0%, rgba(51, 65, 85, 0.3) 30%, rgba(71, 85, 105, 0.5) 70%, rgba(100, 116, 139, 0.7) 100%)'
+              }}
+            />
+            {/* Soft wave overlay */}
+            <div 
+              className="absolute bottom-0 left-0 w-full h-64 opacity-40"
+              style={{
+                backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='100%25' height='100%25' viewBox='0 0 100 40' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,20 Q25,10 50,20 T100,18 V40 H0 Z' fill='rgba(71, 85, 105, 0.4)' /%3E%3C/svg%3E")`,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'bottom'
+              }}
+            />
+          </div>
           
           {/* Subtle grid overlay */}
           <div className="absolute inset-0 opacity-5 dark:opacity-10 bg-grid-minimal" />
