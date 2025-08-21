@@ -65,43 +65,41 @@ try {
   const dirNameCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
   console.log(`🔍 Found ${dirNameCount} import.meta.dirname references`);
   
-  if (dirNameCount > 0) {
-    console.log('🚨 CRITICAL: Applying comprehensive import.meta.dirname fixes...');
-    
-    // Add only the imports we need (check what's already there)
-    let importsToAdd = '';
-    
-    if (!indexContent.includes('fileURLToPath')) {
-      importsToAdd += 'import { fileURLToPath } from "url";\n';
-    }
-    
-    // Check if path is already imported (don't duplicate)
-    if (!indexContent.includes('import path from "path"') && !indexContent.includes('import path2 from "path"')) {
-      importsToAdd += 'import path from "path";\n';
-    }
-    
-    if (!indexContent.includes('const __dirname')) {
-      importsToAdd += 'const __dirname = path.dirname(fileURLToPath(import.meta.url));\n';
-    }
-    
-    if (importsToAdd) {
-      indexContent = importsToAdd + indexContent;
-      console.log('✅ Added required dirname setup (no duplicates)');
-    }
-    
-    // Replace ALL import.meta.dirname with __dirname
-    const beforeCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
-    indexContent = indexContent.replace(/import\.meta\.dirname/g, '__dirname');
-    const afterCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
-    
-    console.log(`✅ Replaced ${beforeCount - afterCount} import.meta.dirname references`);
-    console.log(`⚠️ Remaining references: ${afterCount}`);
-    
-    writeFileSync(indexPath, indexContent, 'utf-8');
-    console.log('✅ COMPREHENSIVE dirname fix applied successfully');
+  console.log('🚨 CRITICAL: Applying comprehensive import.meta.dirname fixes...');
+  
+  // Force add the required dirname setup at the top (always needed)
+  const dirnameSetup = `import { fileURLToPath } from "url";
+import path from "path";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+`;
+  
+  // Remove any existing similar imports to avoid duplication
+  indexContent = indexContent.replace(/import \{ fileURLToPath \} from "url";\n?/g, '');
+  indexContent = indexContent.replace(/import path from "path";\n?/g, '');
+  indexContent = indexContent.replace(/const __dirname = .*?;\n?/g, '');
+  
+  // Add our setup at the very top
+  indexContent = dirnameSetup + indexContent;
+  console.log('✅ Added required dirname setup');
+  
+  // Replace ALL import.meta.dirname with __dirname (force replacement)
+  const beforeCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
+  indexContent = indexContent.replace(/import\.meta\.dirname/g, '__dirname');
+  const afterCount = (indexContent.match(/import\.meta\.dirname/g) || []).length;
+  
+  console.log(`✅ Replaced ${beforeCount - afterCount} import.meta.dirname references`);
+  console.log(`⚠️ Remaining references: ${afterCount}`);
+  
+  // Verify the critical paths are fixed
+  if (indexContent.includes('path.resolve(__dirname')) {
+    console.log('✅ Critical path.resolve calls are now using __dirname');
   } else {
-    console.log('ℹ️ No import.meta.dirname references found');
+    console.warn('⚠️ No path.resolve(__dirname) calls found - this might indicate an issue');
   }
+  
+  writeFileSync(indexPath, indexContent, 'utf-8');
+  console.log('✅ COMPREHENSIVE dirname fix applied successfully');
   
   console.log('✅ Production build verified and optimized successfully');
   console.log(`   - dist/index.js: ${(readFileSync(indexPath).length / 1024).toFixed(1)}KB`);
