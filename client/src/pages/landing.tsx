@@ -79,8 +79,18 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24 px-6 md:px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-16 md:py-24 px-6 md:px-6 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div 
+          className="absolute inset-0 opacity-30 dark:opacity-20"
+          style={{
+            backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='800' height='600' viewBox='0 0 800 600' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='currentColor' stroke-width='0.5' opacity='0.1'/%3E%3C/pattern%3E%3ClinearGradient id='fadeGradient' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:currentColor;stop-opacity:0.05' /%3E%3Cstop offset='50%25' style='stop-color:currentColor;stop-opacity:0.02' /%3E%3Cstop offset='100%25' style='stop-color:currentColor;stop-opacity:0.08' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)' /%3E%3Ccircle cx='150' cy='120' r='60' fill='url(%23fadeGradient)' /%3E%3Ccircle cx='650' cy='480' r='80' fill='url(%23fadeGradient)' /%3E%3Cpolygon points='200,300 250,200 300,300' fill='currentColor' opacity='0.03' /%3E%3Cpolygon points='500,150 580,100 560,200' fill='currentColor' opacity='0.04' /%3E%3Cline x1='0' y1='200' x2='200' y2='200' stroke='currentColor' stroke-width='1' opacity='0.05' /%3E%3Cline x1='600' y1='400' x2='800' y2='400' stroke='currentColor' stroke-width='1' opacity='0.05' /%3E%3C/svg%3E")`,
+            backgroundSize: '800px 600px',
+            backgroundRepeat: 'repeat',
+            backgroundPosition: 'top left'
+          }}
+        />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-6xl font-light text-foreground leading-tight">
