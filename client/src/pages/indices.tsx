@@ -495,17 +495,24 @@ export default function Indices() {
       <BottomBanner />
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-border/50 mt-16 md:mt-32">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-8 md:py-16">
-          <div className="text-center space-y-6">
+      <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
+          <motion.div 
+            className="text-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
             <div className="flex items-center justify-center space-x-3">
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="font-bold text-lg text-foreground">AIForecast Hub</span>
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-semibold text-lg text-foreground">AIForecast Hub</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 Loremt ApS CVR-nr 41691360. Professional commodity forecasting platform.
-            </p>
-          </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">© 2025 AIForecast Hub</p>
+              <p className="text-sm text-muted-foreground">Loremt ApS CVR-nr 41691360</p>
+            </div>
+          </motion.div>
         </div>
       </footer>
     </div>
