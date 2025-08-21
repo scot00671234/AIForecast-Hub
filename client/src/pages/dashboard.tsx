@@ -68,7 +68,7 @@ export default function Dashboard() {
                           key={commodity.id}
                           className="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-b-0 transition-colors duration-150"
                           onClick={() => {
-                            setSearchQuery("");
+                            // Don't clear search query - keep the filtering active
                             // Better scroll targeting - look for the commodity card more reliably
                             const commodityCard = document.querySelector(`[data-commodity-id="${commodity.id}"]`) || 
                                                  document.getElementById(`commodity-${commodity.id}`) ||
@@ -79,6 +79,12 @@ export default function Dashboard() {
                               // Fallback: scroll to all commodities section
                               document.querySelector('[data-testid="all-commodities-section"]')?.scrollIntoView({ behavior: 'smooth' });
                             }
+                            
+                            // Close the search dropdown after a short delay
+                            setTimeout(() => {
+                              const searchInput = document.querySelector('[data-testid="input-search-commodities"]') as HTMLInputElement;
+                              searchInput?.blur();
+                            }, 100);
                           }}
                           data-testid={`search-result-${commodity.id}`}
                         >
