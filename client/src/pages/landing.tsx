@@ -63,23 +63,53 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Announcement Banner */}
+      <div className="bg-foreground text-background text-center py-3 px-4">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-sm font-medium">
+            <span className="inline-block bg-background/20 text-background px-2 py-1 rounded-full text-xs font-semibold mr-3">New</span>
+            AI Commodity Prediction Platform - Compare Claude, ChatGPT & Deepseek accuracy
+            <Link href="/dashboard" className="ml-2 underline hover:no-underline font-semibold">
+              Try Now →
+            </Link>
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-6 md:px-6 py-6 md:py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="text-lg font-medium text-foreground">AIForecast Hub</span>
+              <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </div>
-            <div className="flex items-center">
+            
+            {/* Navigation - hidden on mobile, shown on desktop */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+            </nav>
+            
+            <div className="flex items-center space-x-4">
               <ThemeToggle />
+              <Button 
+                onClick={handleGetStarted}
+                size="sm" 
+                className="hidden md:inline-flex"
+                data-testid="header-cta-button"
+              >
+                Get Started
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-24 px-6 md:px-6 relative overflow-hidden">
+      <section className="py-20 md:py-32 px-6 md:px-6 relative overflow-hidden">
         {/* Vercel-style Background */}
         <div className="absolute inset-0">
           {/* Clean gradient base */}
@@ -99,28 +129,38 @@ export default function Landing() {
           {/* Subtle grid overlay */}
           <div className="absolute inset-0 opacity-5 dark:opacity-10 bg-grid-minimal" />
         </div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-light text-foreground leading-tight">
-                AI Commodity Price
-                <span className="text-muted-foreground block font-normal">
-                  Prediction Analysis
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="space-y-12">
+            <div className="space-y-8">
+              <h1 className="text-5xl md:text-7xl font-semibold text-foreground leading-[1.1] tracking-tight">
+                Compare AI Models on
+                <span className="block text-muted-foreground font-medium">
+                  Commodity Predictions
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
-                Compare the accuracy of leading AI models in predicting commodity prices with real market data and comprehensive analytics.
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-normal">
+                Track and analyze the prediction accuracy of Claude, ChatGPT, and Deepseek 
+                across 14 major commodities with real market data.
               </p>
             </div>
             
-            <div className="pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-8 py-4 text-base font-medium min-h-[48px]"
+                className="px-8 py-4 text-base font-medium min-h-[52px] bg-foreground text-background hover:bg-foreground/90"
                 data-testid="get-started-button"
               >
-                Get Started <ArrowRightIcon className="ml-2 h-4 w-4" />
+                Start Analyzing <ArrowRightIcon className="ml-2 h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => navigate("/about")}
+                className="px-8 py-4 text-base font-medium min-h-[52px] border-border/50 hover:bg-muted/50"
+                data-testid="learn-more-button"
+              >
+                Learn More
               </Button>
             </div>
           </div>
@@ -128,14 +168,14 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 md:py-20 px-6 md:px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
+      <section className="py-20 md:py-32 px-6 md:px-6 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
               How It Works
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our platform provides comprehensive AI prediction analysis with real market data
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Get comprehensive insights into AI prediction performance with real-time market data
             </p>
           </div>
           
@@ -143,15 +183,15 @@ export default function Landing() {
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
-                <Card key={index} className="border-border/50 bg-background/50">
-                  <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <IconComponent className="h-6 w-6 text-primary" />
+                <Card key={index} className="border-border/30 bg-background/50 hover:bg-background/80 transition-colors">
+                  <CardHeader className="text-center pb-4">
+                    <div className="mx-auto mb-6 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <IconComponent className="h-8 w-8 text-primary" />
                     </div>
-                    <CardTitle className="text-xl font-medium">{feature.title}</CardTitle>
+                    <CardTitle className="text-2xl font-semibold mb-4">{feature.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-center leading-relaxed">
+                  <CardContent className="pt-0">
+                    <p className="text-muted-foreground text-center leading-relaxed text-lg">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -163,28 +203,28 @@ export default function Landing() {
       </section>
 
       {/* AI Models Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
+      <section className="py-20 md:py-32 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
               AI Models Compared
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Track and compare prediction accuracy across leading AI models
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {Object.entries(AI_MODELS).map(([key, model]) => (
-              <div key={key} className="text-center p-6">
+              <div key={key} className="text-center p-8 rounded-2xl border border-border/30 bg-background/50 hover:bg-background/80 transition-colors">
                 <div 
-                  className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-                  style={{ backgroundColor: `${model.color}20`, border: `2px solid ${model.color}40` }}
+                  className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                  style={{ backgroundColor: `${model.color}15`, border: `2px solid ${model.color}30` }}
                 >
-                  <BrainIcon className="h-8 w-8" style={{ color: model.color }} />
+                  <BrainIcon className="h-10 w-10" style={{ color: model.color }} />
                 </div>
-                <h3 className="text-xl font-medium mb-2">{model.name}</h3>
-                <p className="text-muted-foreground text-sm">{model.provider}</p>
+                <h3 className="text-xl font-semibold mb-3">{model.name}</h3>
+                <p className="text-muted-foreground">{model.provider}</p>
               </div>
             ))}
           </div>
@@ -192,13 +232,13 @@ export default function Landing() {
       </section>
 
       {/* Commodities Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-light text-foreground mb-4">
+      <section className="py-20 md:py-32 px-4 md:px-6 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
               Tracked Commodities
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Real-time price data and AI predictions for major commodity markets
             </p>
           </div>
@@ -248,52 +288,57 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-muted/30">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="space-y-6">
-            <h2 className="text-3xl font-light text-foreground">
+      <section className="py-24 md:py-32 px-6 bg-muted/30">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="space-y-8">
+            <h2 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight">
               Start Analyzing AI Predictions Today
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Get instant access to comprehensive AI model comparisons and real-time commodity price tracking.
             </p>
-            <Button
-              onClick={handleGetStarted}
-              size="lg"
-              className="px-8 py-3 text-base font-medium"
-              data-testid="cta-button"
-            >
-              Access Dashboard <ArrowRightIcon className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="pt-4">
+              <Button
+                onClick={handleGetStarted}
+                size="lg"
+                className="px-10 py-4 text-lg font-medium min-h-[56px] bg-foreground text-background hover:bg-foreground/90"
+                data-testid="cta-button"
+              >
+                Access Dashboard <ArrowRightIcon className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border/40">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+      <footer className="py-16 px-6 border-t border-border/40">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
             <div className="flex items-center space-x-3">
               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground"></div>
-              <span className="text-sm text-muted-foreground">AIForecast Hub</span>
+              <span className="text-base font-semibold text-foreground">AIForecast Hub</span>
             </div>
-            <div className="flex items-center space-x-6">
-              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <div className="flex items-center space-x-8">
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Dashboard
               </Link>
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 About
               </Link>
-              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 FAQ
               </Link>
-              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Blog
               </Link>
+              <Link href="/policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium">
+                Policy
+              </Link>
             </div>
-            <div className="text-xs text-muted-foreground space-y-1">
+            <div className="text-sm text-muted-foreground text-center md:text-right space-y-1">
               <p>© 2025 AIForecast Hub</p>
-              <p>Loremt ApS CVR-nr 41691360</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
             </div>
           </div>
         </div>
