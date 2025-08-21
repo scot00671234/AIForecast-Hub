@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { BrainIcon, TargetIcon, TrendingUpIcon, DatabaseIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
+import { motion } from "framer-motion";
 
 export default function About() {
   const [location] = useLocation();
   
   return (
     <div className="min-h-screen bg-background">
+      {/* Enhanced background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-4">
@@ -24,19 +27,24 @@ export default function About() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-20">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24">
         
         {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-3xl md:text-5xl font-normal text-foreground mb-6 tracking-wide">
+        <motion.section 
+          className="text-center mb-20 md:mb-24"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <h1 className="text-4xl md:text-6xl font-semibold text-foreground mb-8 tracking-tight">
             About AIForecast Hub
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Transparent AI-powered commodity price prediction platform providing unbiased analysis and performance tracking.
           </p>
-        </section>
+        </motion.section>
 
-        <div className="space-y-12">
+        <div className="space-y-16 md:space-y-20">
           {/* Mission */}
           <section>
             <Card className="border-0 shadow-sm">
@@ -198,13 +206,25 @@ export default function About() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-border/30">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>© 2025 AIForecast Hub</p>
-            <p>Loremt ApS CVR-nr 41691360</p>
-          </div>
+      {/* Modern Footer */}
+      <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
+          <motion.div 
+            className="text-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-semibold text-foreground">AIForecast Hub</span>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>© 2025 AIForecast Hub</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+            </div>
+          </motion.div>
         </div>
       </footer>
     </div>

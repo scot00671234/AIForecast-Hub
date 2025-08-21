@@ -5,6 +5,7 @@ import { NavigationMenu } from "../components/navigation-menu";
 import { useLocation, Link } from "wouter";
 import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon } from "lucide-react";
 import BottomBanner from "@/components/ads/BottomBanner";
+import { motion } from "framer-motion";
 import { useState } from "react";
 
 interface CompositeIndex {
@@ -125,6 +126,8 @@ export default function Indices() {
 
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Enhanced background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       {/* Minimal geometric background pattern */}
       <div className="absolute inset-0 text-foreground pointer-events-none">
         <svg className="w-full h-full object-cover opacity-20" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,14 +163,19 @@ export default function Indices() {
         <div className="space-y-8 md:space-y-16">
           
           {/* Page Title */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+          <motion.div 
+            className="text-center space-y-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-foreground">
               Market Indices
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Real-time market sentiment and AI-powered commodity indices for comprehensive market analysis
             </p>
-          </div>
+          </motion.div>
 
           {/* Market Indices Grid */}
           <section className="space-y-8">

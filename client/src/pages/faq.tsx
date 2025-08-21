@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { HelpCircleIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
+import { motion } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
@@ -78,6 +79,8 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Enhanced background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-4">
@@ -93,27 +96,38 @@ export default function FAQ() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-20">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24">
         
         {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-3xl md:text-5xl font-normal text-foreground mb-6 tracking-wide">
+        <motion.section 
+          className="text-center mb-20 md:mb-24"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <h1 className="text-4xl md:text-6xl font-semibold text-foreground mb-8 tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Everything you need to know about AI commodity prediction tracking and platform functionality.
           </p>
-        </section>
+        </motion.section>
 
-        <div className="space-y-8">
+        <div className="space-y-12 md:space-y-16">
           {/* FAQ Accordion */}
-          <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <HelpCircleIcon className="h-5 w-5" />
-                Common Questions
-              </CardTitle>
-            </CardHeader>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <Card className="border-border/30 bg-background/50 hover:bg-background/80 transition-colors duration-300">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl font-semibold">
+                  <HelpCircleIcon className="h-6 w-6" />
+                  Common Questions
+                </CardTitle>
+              </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq) => (
@@ -129,24 +143,31 @@ export default function FAQ() {
               </Accordion>
             </CardContent>
           </Card>
+          </motion.div>
 
           {/* Still Have Questions */}
-          <section className="text-center py-8">
-            <Card className="border-0 shadow-sm bg-muted/30">
-              <CardContent className="p-8">
-                <h3 className="text-xl font-medium text-foreground mb-4">
+          <motion.section 
+            className="text-center py-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <Card className="border-border/30 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all duration-300">
+              <CardContent className="p-10">
+                <h3 className="text-2xl font-semibold text-foreground mb-6">
                   Still Have Questions?
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
                   Explore our dashboard to see AI prediction tracking in action, or read our detailed methodology in the blog.
                 </p>
-                <div className="flex justify-center gap-4">
-                  <Button asChild>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Button asChild size="lg" className="font-semibold">
                     <Link href="/dashboard">
                       View Dashboard
                     </Link>
                   </Button>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild size="lg" className="font-semibold">
                     <Link href="/about">
                       Learn More
                     </Link>
@@ -154,17 +175,29 @@ export default function FAQ() {
                 </div>
               </CardContent>
             </Card>
-          </section>
+          </motion.section>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-border/30">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>© 2025 AIForecast Hub</p>
-            <p>Loremt ApS CVR-nr 41691360</p>
-          </div>
+      {/* Modern Footer */}
+      <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
+          <motion.div 
+            className="text-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-semibold text-foreground">AIForecast Hub</span>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>© 2025 AIForecast Hub</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+            </div>
+          </motion.div>
         </div>
       </footer>
     </div>

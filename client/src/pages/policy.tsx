@@ -3,12 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { ArrowLeftIcon, AlertTriangleIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
+import { motion } from "framer-motion";
 
 export default function Policy() {
   const [location] = useLocation();
   
   return (
     <div className="min-h-screen bg-background">
+      {/* Enhanced background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       {/* Header */}
       <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-6 md:px-8 py-4">
@@ -34,12 +37,17 @@ export default function Policy() {
           </Link>
         </div>
           
-          <article className="space-y-8">
-            <header className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-normal text-foreground leading-tight">
+          <motion.article 
+            className="space-y-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <header className="space-y-6">
+              <h1 className="text-4xl md:text-6xl font-semibold text-foreground leading-tight tracking-tight">
                 Data Usage Policy & Disclaimers
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
                 How we use data and important information about AI predictions
               </p>
             </header>
@@ -181,15 +189,28 @@ export default function Policy() {
                 </CardContent>
               </Card>
             </div>
-          </article>
+          </motion.article>
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-border/30">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            © 2025 AIForecast Hub
-          </p>
+      {/* Modern Footer */}
+      <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
+          <motion.div 
+            className="text-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-semibold text-foreground">AIForecast Hub</span>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>© 2025 AIForecast Hub</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+            </div>
+          </motion.div>
         </div>
       </footer>
     </div>
