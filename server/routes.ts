@@ -683,6 +683,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Force quarterly predictions generation (for initial setup)
+  app.post("/api/ai-predictions/generate-quarterly", async (req, res) => {
+    try {
+      console.log('🔮 Manual quarterly prediction generation triggered via API...');
+      console.log('📅 Generating 3mo, 6mo, 9mo, and 12mo predictions for all commodities and AI models');
+      
+      await aiPredictionService.generateMonthlyPredictions();
+      
+      res.json({ 
+        success: true, 
+        message: "Quarterly predictions generated successfully for all commodities",
+        timeframes: ["3mo", "6mo", "9mo", "12mo"],
+        note: "Predictions will be available on frontend charts once generation completes"
+      });
+    } catch (error: any) {
+      console.error("Error generating quarterly predictions:", error);
+      res.status(500).json({ 
+        message: "Failed to generate quarterly predictions", 
+        error: error?.message || 'Unknown error',
+        note: "This may be due to missing AI API keys in development environment"
+      });
+    }
+  });
+
   // Get AI prediction status and capabilities
   app.get("/api/ai-predictions/status", async (req, res) => {
     try {
