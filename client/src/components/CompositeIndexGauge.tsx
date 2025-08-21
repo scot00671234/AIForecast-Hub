@@ -86,21 +86,23 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (loading) {
     return (
-      <Card className={`${className} border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 hover:shadow-xl transition-all duration-300`}>
+      <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900`}>
         <CardHeader className="pb-4 space-y-1">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
-            <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">AI Composite Index</CardTitle>
+            <Activity className="h-4 w-4 text-amber-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">AI Composite Index</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="h-32 flex items-center justify-center">
+          <div className="h-32 flex flex-col items-center justify-center space-y-3">
             <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-800 border-t-blue-500 dark:border-t-blue-400 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-12 h-12 border-2 border-dashed border-amber-300 dark:border-amber-600 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
               </div>
             </div>
+            <p className="text-xs text-muted-foreground font-medium">
+              Initializing Market Data
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -109,21 +111,21 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (error || !latestIndex) {
     return (
-      <Card className={`${className} border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 hover:shadow-xl transition-all duration-300`}>
+      <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900`}>
         <CardHeader className="pb-4 space-y-1">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-amber-500" />
-            <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">AI Composite Index</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">AI Composite Index</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="h-32 flex flex-col items-center justify-center space-y-3">
             <div className="relative">
               <div className="w-12 h-12 border-2 border-dashed border-amber-300 dark:border-amber-600 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-5 w-5 text-amber-500" />
+                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
               </div>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-xs text-muted-foreground font-medium">
               Initializing Market Data
             </p>
           </div>
@@ -141,7 +143,7 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   const gaugeRotation = (gaugePosition / 100) * 180 - 90; // -90 to 90 degrees
 
   return (
-    <Card className={`${className} border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 hover:shadow-xl transition-all duration-500 group overflow-hidden relative`}>
+    <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900`}>
       {/* Animated background pattern */}
       <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 animate-pulse"></div>

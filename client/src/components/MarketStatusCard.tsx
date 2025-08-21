@@ -66,15 +66,13 @@ export default function MarketStatusCard() {
 
   if (loading) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm bg-white dark:bg-slate-900">
         <CardHeader className="pb-4 space-y-1">
           <CardTitle className="text-sm font-medium text-muted-foreground">Market Status</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="h-24 flex items-center justify-center">
-            <div className="animate-pulse">
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground/40"></div>
-            </div>
+            <div className="w-4 h-4 border-2 border-muted-foreground/40 border-t-muted-foreground rounded-full animate-spin"></div>
           </div>
         </CardContent>
       </Card>
@@ -100,7 +98,7 @@ export default function MarketStatusCard() {
   };
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm bg-white dark:bg-slate-900">
       <CardHeader className="pb-4 space-y-1">
         <CardTitle className="text-sm font-medium text-muted-foreground">Market Status</CardTitle>
       </CardHeader>
