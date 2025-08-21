@@ -41,7 +41,7 @@ export default function Dashboard() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/98 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-all duration-200">
@@ -61,12 +61,12 @@ export default function Dashboard() {
                   data-testid="input-search-commodities"
                 />
                 {searchQuery && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-background/95 dark:bg-black/95 backdrop-blur-md border border-border dark:border-white/20 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/98 dark:bg-black/98 backdrop-blur-xl border border-border/80 dark:border-white/30 rounded-lg shadow-xl ring-1 ring-black/5 dark:ring-white/10 max-h-60 overflow-y-auto z-50">
                     {filteredCommodities.length > 0 ? (
                       filteredCommodities.map(commodity => (
                         <div
                           key={commodity.id}
-                          className="px-4 py-3 hover:bg-muted/50 dark:hover:bg-white/5 cursor-pointer border-b border-border/50 last:border-b-0"
+                          className="px-4 py-3 hover:bg-slate-100/80 dark:hover:bg-white/10 cursor-pointer border-b border-border/30 dark:border-white/10 last:border-b-0 transition-colors duration-150"
                           onClick={() => {
                             setSearchQuery("");
                             document.getElementById(`commodity-${commodity.id}`)?.scrollIntoView({ behavior: 'smooth' });
@@ -75,17 +75,17 @@ export default function Dashboard() {
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium text-foreground">{commodity.name}</p>
-                              <p className="text-sm text-muted-foreground">{commodity.symbol} • {commodity.category}</p>
+                              <p className="font-semibold text-slate-900 dark:text-white">{commodity.name}</p>
+                              <p className="text-sm text-slate-600 dark:text-slate-300">{commodity.symbol} • {commodity.category}</p>
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                               {commodity.unit}
                             </div>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-3 text-muted-foreground text-center">
+                      <div className="px-4 py-3 text-slate-600 dark:text-slate-300 text-center font-medium">
                         No commodities found
                       </div>
                     )}
