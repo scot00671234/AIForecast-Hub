@@ -61,31 +61,40 @@ export default function Dashboard() {
                   data-testid="input-search-commodities"
                 />
                 {searchQuery && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white/98 dark:bg-black/98 backdrop-blur-xl border border-border/80 dark:border-white/30 rounded-lg shadow-xl ring-1 ring-black/5 dark:ring-white/10 max-h-60 overflow-y-auto z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-100/20 max-h-60 overflow-y-auto z-50">
                     {filteredCommodities.length > 0 ? (
                       filteredCommodities.map(commodity => (
                         <div
                           key={commodity.id}
-                          className="px-4 py-3 hover:bg-slate-100/80 dark:hover:bg-white/10 cursor-pointer border-b border-border/30 dark:border-white/10 last:border-b-0 transition-colors duration-150"
+                          className="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-b-0 transition-colors duration-150"
                           onClick={() => {
                             setSearchQuery("");
-                            document.getElementById(`commodity-${commodity.id}`)?.scrollIntoView({ behavior: 'smooth' });
+                            // Better scroll targeting - look for the commodity card more reliably
+                            const commodityCard = document.querySelector(`[data-commodity-id="${commodity.id}"]`) || 
+                                                 document.getElementById(`commodity-${commodity.id}`) ||
+                                                 document.querySelector(`[data-testid="commodity-card-${commodity.id}"]`);
+                            if (commodityCard) {
+                              commodityCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            } else {
+                              // Fallback: scroll to all commodities section
+                              document.querySelector('[data-testid="all-commodities-section"]')?.scrollIntoView({ behavior: 'smooth' });
+                            }
                           }}
                           data-testid={`search-result-${commodity.id}`}
                         >
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-semibold text-slate-900 dark:text-white">{commodity.name}</p>
-                              <p className="text-sm text-slate-600 dark:text-slate-300">{commodity.symbol} • {commodity.category}</p>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">{commodity.symbol} • {commodity.category}</p>
                             </div>
-                            <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                            <div className="text-sm text-slate-500 dark:text-slate-500 font-medium">
                               {commodity.unit}
                             </div>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-3 text-slate-600 dark:text-slate-300 text-center font-medium">
+                      <div className="px-4 py-3 text-slate-600 dark:text-slate-400 text-center font-medium">
                         No commodities found
                       </div>
                     )}
