@@ -28,6 +28,17 @@ export class PredictionScheduler {
       }
     });
 
+    // Schedule daily composite index updates every day at 2 AM
+    cron.schedule('0 2 * * *', async () => {
+      console.log('Running daily AI Composite Index update...');
+      try {
+        await compositeIndexService.calculateAndStoreIndex();
+        console.log('Daily composite index update completed successfully');
+      } catch (error) {
+        console.error('Daily composite index update failed:', error);
+      }
+    });
+
     // Hourly predictions have been disabled - only monthly predictions are generated
 
     this.isScheduled = true;
