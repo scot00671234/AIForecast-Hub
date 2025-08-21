@@ -1000,7 +1000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/fear-greed-index", async (req, res) => {
     try {
       // Use a more consistent approach based on market volatility
-      const latestIndex = await storage.getCompositeIndex();
+      const latestIndex = await storage.getLatestCompositeIndex();
       
       if (!latestIndex) {
         return res.status(404).json({ error: "No market data available" });
@@ -1031,11 +1031,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Predictions table data for commodity
+  app.get("/api/commodities/:commodityId/predictions-table", async (req, res) => {
+    try {
+      const { commodityId } = req.params;
+      
+      // Get predictions and AI models
+      const predictions = await storage.getPredictions(commodityId);
+      const aiModels = await storage.getAiModels();
+      const latestPrice = await storage.getLatestPrice(commodityId);
+      
+      // Transform predictions into table format
+      const tableData = predictions.map(prediction => {
+        const aiModel = aiModels.find(model => model.id === prediction.aiModelId);
+        
+        return {
+          id: prediction.id,
+          date: prediction.predictionDate,
+          aiModel: aiModel?.name || 'Unknown',
+          timeframe: prediction.timeframe || '3mo',
+          predictedPrice: prediction.predictedPrice,
+          confidence: prediction.confidence || '75',
+          currentPrice: latestPrice?.price,
+          accuracy: null, // Calculate based on historical data
+          status: new Date(prediction.predictionDate) > new Date() ? 'expired' : 'active'
+        };
+      });
+
+      res.json(tableData);
+    } catch (error) {
+      console.error("Error fetching predictions table data:", error);
+      res.status(500).json({ error: "Failed to fetch predictions table data" });
+    }
+  });
+
   // Category Composite Indices (Hard vs Soft Commodities)
   app.get("/api/composite-index/categories", async (req, res) => {
     try {
       // Get the latest composite index record which already includes hard/soft breakdown
-      const latestIndex = await storage.getCompositeIndex();
+      const latestIndex = await storage.getLatestCompositeIndex();
       
       if (!latestIndex) {
         return res.status(404).json({ error: "No composite index data available" });

@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import ModelAccuracyRanking from "./model-accuracy-ranking";
 import UnifiedChart from "./unified-chart";
+import { PredictionsTable } from "./predictions-table";
 import type { Commodity, AiModel, TimePeriod, LatestPrice } from "@shared/schema";
 
 interface EnhancedChartDialogProps {
@@ -134,6 +135,14 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
                 commodity={commodity}
                 aiModels={aiModels}
                 period="30d"
+              />
+            </div>
+
+            {/* Predictions Data Table */}
+            <div className="bg-card/30 border border-border/40 rounded-xl backdrop-blur-sm">
+              <PredictionsTable 
+                commodity={commodity}
+                aiModels={aiModels}
               />
             </div>
           </div>
