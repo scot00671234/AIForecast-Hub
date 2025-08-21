@@ -137,6 +137,14 @@
       hsl(var(--muted) / 0.2) 100%);
   }
   
+  /* Vercel-style hero gradient */
+  .bg-vercel-hero {
+    background: linear-gradient(180deg, 
+      hsl(var(--background)) 0%, 
+      hsl(var(--background)) 70%, 
+      hsl(var(--muted) / 0.15) 100%);
+  }
+  
   /* Dot pattern background */
   .bg-dots-minimal {
     background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.1) 1px, transparent 1px);
