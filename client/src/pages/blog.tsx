@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { ArrowLeftIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
+import { SmartBackButton } from "../components/smart-back-button";
 import { motion } from "framer-motion";
 
 export default function Blog() {
@@ -29,19 +30,7 @@ export default function Blog() {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24">
-        <motion.div 
-          className="mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Link href="/dashboard">
-            <Button variant="ghost" className="flex items-center space-x-2 mb-6 hover:scale-105 transition-transform duration-200">
-              <ArrowLeftIcon className="h-4 w-4" />
-              <span>Back to Home</span>
-            </Button>
-          </Link>
-        </motion.div>
+        <SmartBackButton className="mb-12" />
           
         <motion.article 
           className="space-y-12"

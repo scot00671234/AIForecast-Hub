@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "wouter";
 import { HelpCircleIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
+import { SmartBackButton } from "../components/smart-back-button";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -97,6 +98,7 @@ export default function FAQ() {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24">
+        <SmartBackButton className="mb-12" />
         
         {/* Hero Section */}
         <motion.section 

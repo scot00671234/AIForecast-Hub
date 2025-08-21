@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NavigationMenu } from "../components/navigation-menu";
+import { SmartBackButton } from "../components/smart-back-button";
 import { useLocation, Link } from "wouter";
 import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon } from "lucide-react";
 import BottomBanner from "@/components/ads/BottomBanner";
@@ -160,6 +161,8 @@ export default function Indices() {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8 md:py-16">
+        <SmartBackButton className="mb-12" />
+        
         <div className="space-y-8 md:space-y-16">
           
           {/* Page Title */}
