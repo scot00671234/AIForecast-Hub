@@ -39,35 +39,36 @@ export class AccuracyCalculator {
   async calculateAccuracy(predictions: Prediction[], actualPrices: ActualPrice[]): Promise<AccuracyResult | null> {
     if (predictions.length === 0 || actualPrices.length === 0) return null;
 
+    const now = new Date();
     const matches: Array<{ predicted: number; actual: number; date: Date }> = [];
 
-    // Match predictions with actual prices by date (with flexible matching)
-    predictions.forEach(pred => {
-      const predDate = new Date(pred.targetDate);
+    // Only evaluate predictions whose target dates have already passed
+    const eligiblePredictions = predictions.filter(pred => {
+      const targetDate = new Date(pred.targetDate);
+      return targetDate <= now; // Only predictions where target date has been reached
+    });
+
+    if (eligiblePredictions.length === 0) {
+      return null; // No predictions ready for evaluation yet
+    }
+
+    // Match predictions with actual prices by date (strict matching)
+    eligiblePredictions.forEach(pred => {
+      const targetDate = new Date(pred.targetDate);
       
-      // Try exact date match first
+      // Find actual price on or after the target date (within 7 days)
       let actualPrice = actualPrices.find(price => {
         const priceDate = new Date(price.date);
-        return Math.abs(predDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1000; // Within 24 hours
+        const daysDiff = (priceDate.getTime() - targetDate.getTime()) / (24 * 60 * 60 * 1000);
+        return daysDiff >= 0 && daysDiff <= 7; // Price must be on or after target date, within 7 days
       });
-      
-      // If no exact match, find closest price within 7 days
+
+      // If no price found within 7 days after target, try exact date match
       if (!actualPrice) {
-        let closestPrice = null;
-        let minDiff = Infinity;
-        
-        actualPrices.forEach(price => {
+        actualPrice = actualPrices.find(price => {
           const priceDate = new Date(price.date);
-          const diff = Math.abs(predDate.getTime() - priceDate.getTime());
-          const daysDiff = diff / (24 * 60 * 60 * 1000);
-          
-          if (daysDiff <= 7 && diff < minDiff) {
-            minDiff = diff;
-            closestPrice = price;
-          }
+          return Math.abs(targetDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1000;
         });
-        
-        actualPrice = closestPrice || undefined;
       }
 
       if (actualPrice) {
@@ -235,7 +236,12 @@ export class AccuracyCalculator {
         return predictions;
     }
 
-    return predictions.filter(pred => new Date(pred.createdAt!) >= cutoffDate);
+    // Filter by target date completion, not prediction creation date
+    // Only include predictions whose targets have been reached within the period
+    return predictions.filter(p => {
+      const targetDate = new Date(p.targetDate);
+      return targetDate >= cutoffDate && targetDate <= now;
+    });
   }
 
   private async getPreviousRankings(): Promise<Array<{aiModelId: string, rank: number}>> {
