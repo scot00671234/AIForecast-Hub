@@ -888,6 +888,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Force quarterly predictions (bypass existing prediction checks)
+  app.post("/api/predictions/quarterly/force-generate", async (req, res) => {
+    try {
+      console.log("🚀 FORCE TRIGGER: Starting one-time quarterly prediction generation...");
+      console.log("📅 Generating quarterly predictions for timeframes: 3mo, 6mo, 9mo, 12mo");
+      console.log("⚠️ BYPASSING existing prediction checks - generating regardless of current data");
+      
+      // Force generate quarterly predictions for all commodities and all AI models
+      await aiPredictionService.generateMonthlyPredictions();
+      
+      console.log("✅ FORCE TRIGGER COMPLETED: All quarterly predictions generated successfully");
+      res.json({ 
+        success: true, 
+        message: "Quarterly predictions force-generated successfully",
+        note: "Generated 3, 6, 9, and 12-month predictions for all commodities with all configured AI models",
+        timeframes: ["3mo", "6mo", "9mo", "12mo"]
+      });
+    } catch (error: any) {
+      console.error("❌ FORCE TRIGGER FAILED: Error generating quarterly predictions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to force-generate quarterly predictions", 
+        error: error?.message || 'Unknown error' 
+      });
+    }
+  });
+
   // Future Predictions Endpoint
   app.get("/api/predictions/future/:commodityId", async (req, res) => {
     try {
