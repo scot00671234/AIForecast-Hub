@@ -1,6 +1,9 @@
 # ULTRA SIMPLE - Direct Node.js deployment
 providers = ["node"]
 
+[variables]
+PORT = "3000"
+
 [phases.install]
 cmds = ["npm ci"]
 
