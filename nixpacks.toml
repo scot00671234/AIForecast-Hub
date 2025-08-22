@@ -1,12 +1,10 @@
 # Production configuration - CADDY DISABLED for direct serving
-providers = ["node"]
-
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
 HOST = "0.0.0.0"
 
-# Disable Caddy completely
+# Disable Caddy completely - Direct Node.js serving
 [providers.node]
 skipCaddy = true
 
