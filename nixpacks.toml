@@ -1,4 +1,6 @@
 # Production configuration - CADDY DISABLED for direct serving
+providers = ["node"]
+
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
