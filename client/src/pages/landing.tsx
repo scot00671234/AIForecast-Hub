@@ -430,8 +430,48 @@ export default function Landing() {
                         </div>
                       </div>
                     </div>
-                    <div className="h-32 bg-muted/30 rounded-lg flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">Interactive Chart Area</span>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="font-medium">Deepseek</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-green-600">87.4%</div>
+                          <div className="text-xs text-muted-foreground">#1 Overall</div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-muted/50 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '87.4%' }}></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="font-medium">Claude</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-blue-600">84.2%</div>
+                          <div className="text-xs text-muted-foreground">#2 Overall</div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-muted/50 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '84.2%' }}></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span className="font-medium">ChatGPT</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-purple-600">81.9%</div>
+                          <div className="text-xs text-muted-foreground">#3 Overall</div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-muted/50 rounded-full h-2">
+                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: '81.9%' }}></div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
