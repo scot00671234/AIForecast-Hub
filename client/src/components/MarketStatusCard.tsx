@@ -66,17 +66,17 @@ export default function MarketStatusCard() {
 
   if (loading) {
     return (
-      <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-        <CardHeader className="pb-4">
+      <Card className="border-border/40 bg-background h-[180px] flex flex-col">
+        <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-primary" />
             <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-0 flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-            <p className="text-sm text-muted-foreground">Checking status...</p>
+          <div className="flex flex-col items-center space-y-3">
+            <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p className="text-xs text-muted-foreground">Checking status...</p>
           </div>
         </CardContent>
       </Card>
@@ -102,16 +102,16 @@ export default function MarketStatusCard() {
   };
 
   return (
-    <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-      <CardHeader className="pb-4">
+    <Card className="border-border/40 bg-background h-[180px] flex flex-col">
+      <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
           <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-0 flex-1 flex flex-col space-y-6">
-        <div className="text-center space-y-4">
-          <div className={`text-sm font-semibold px-4 py-2 rounded-full inline-flex items-center gap-2 ${
+      <CardContent className="pt-0 flex-1 flex flex-col space-y-3">
+        <div className="text-center space-y-2">
+          <div className={`text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 ${
             status?.isMarketOpen && status?.systemHealth === 'healthy' 
               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
               : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
@@ -121,16 +121,16 @@ export default function MarketStatusCard() {
           </div>
         </div>
         
-        <div className="space-y-3 flex-1">
-          <div className="flex justify-between items-center py-2 border-b border-border/30">
+        <div className="space-y-2 flex-1">
+          <div className="flex justify-between items-center py-1 border-b border-border/30">
             <span className="text-xs text-muted-foreground font-medium">Data Source</span>
             <span className="text-xs font-semibold text-foreground">Yahoo Finance</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-border/30">
+          <div className="flex justify-between items-center py-1 border-b border-border/30">
             <span className="text-xs text-muted-foreground font-medium">Freshness</span>
             <span className="text-xs font-semibold text-foreground">{status?.dataFreshness}</span>
           </div>
-          <div className="flex justify-between items-center py-2">
+          <div className="flex justify-between items-center py-1">
             <span className="text-xs text-muted-foreground font-medium">Schedule</span>
             <span className="text-xs font-semibold text-foreground">{status?.nextUpdate}</span>
           </div>
