@@ -65,7 +65,7 @@ console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
     throw err;
   });
 
-  // Add cache-control headers for production
+  // Add cache-control headers for production with deployment-aware caching
   if (app.get("env") === "production") {
     app.use((req, res, next) => {
       // Cache-bust HTML files - always check server for updates
@@ -73,14 +73,16 @@ console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
         res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.set('Pragma', 'no-cache');
         res.set('Expires', '0');
+        res.set('X-Deployment', new Date().toISOString().slice(0, 10)); // Daily deployment marker
       } 
-      // Long-term cache for hashed assets (CSS, JS with hashes in filename)
+      // Moderate cache for hashed assets with deployment validation
       else if (/\.(js|css)$/.test(req.path) && /-[a-zA-Z0-9]+\.(js|css)$/.test(req.path)) {
-        res.set('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+        res.set('Cache-Control', 'public, max-age=86400, must-revalidate'); // 1 day but validate
+        res.set('X-Deployment', new Date().toISOString().slice(0, 10));
       }
       // Short-term cache for other static assets
       else if (/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/.test(req.path)) {
-        res.set('Cache-Control', 'public, max-age=3600'); // 1 hour
+        res.set('Cache-Control', 'public, max-age=1800'); // 30 minutes
       }
       next();
     });
@@ -95,7 +97,7 @@ console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
   }
 
   // Start server
-  const port = parseInt(process.env.PORT || '5000', 10);
+  const port = parseInt(process.env.PORT || '3000', 10);
   server.listen(port, "0.0.0.0", () => {
     log(`✅ Server running on port ${port}`);
     console.log("🎯 Application ready - all systems operational");

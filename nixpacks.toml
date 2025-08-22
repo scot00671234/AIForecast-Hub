@@ -11,11 +11,12 @@ cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = [
-  "echo 'CACHE BUST: Emergency migration fix v3.0.0'",
-  "rm -rf dist",
+  "echo 'DEPLOYMENT: Starting clean build at $(date)'",
+  "rm -rf dist server/public .vite",
+  "echo 'Cleaned build directories'",
   "npm run build",
   "node fix-build.js",
-  "echo 'Build completed with migration fixes at $(date)'"
+  "echo 'Build completed successfully at $(date)'"
 ]
 
 [start]

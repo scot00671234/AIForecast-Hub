@@ -35,6 +35,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           database: "connected",
           server: "running",
           yahooFinanceCache: `${cacheStats.priceCache} prices, ${cacheStats.chartCache} charts cached`
+        },
+        deployment: {
+          timestamp: new Date().toISOString(),
+          cacheBust: Date.now(),
+          port: process.env.PORT || "3000"
         }
       });
     } catch (error) {

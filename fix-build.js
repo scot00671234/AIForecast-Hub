@@ -37,21 +37,29 @@ try {
     process.exit(1);
   }
   
-  // Fix static file serving - copy public files to server/public
-  console.log('🔧 Fixing static file serving for production...');
+  // CRITICAL: Clean and fix static file serving for production
+  console.log('🧹 Cleaning and fixing static file serving for production...');
   const serverPublicPath = join(__dirname, 'server', 'public');
   
   try {
-    // Remove existing server/public if it exists
+    // Force remove existing server/public directory completely
     if (existsSync(serverPublicPath)) {
       const { rmSync } = await import('fs');
       rmSync(serverPublicPath, { recursive: true, force: true });
+      console.log('🗑️ Removed old server/public directory');
     }
     
-    // Copy dist/public to server/public  
+    // Ensure fresh copy of dist/public to server/public  
     const { cpSync } = await import('fs');
     cpSync(publicPath, serverPublicPath, { recursive: true });
-    console.log('✅ Static files copied to server/public for production serving');
+    console.log('✅ Fresh static files copied to server/public');
+    
+    // Add cache busting timestamp to verify clean deployment
+    const { writeFileSync } = await import('fs');
+    const deployTimestamp = new Date().toISOString();
+    writeFileSync(join(serverPublicPath, 'deploy-timestamp.txt'), deployTimestamp);
+    console.log(`🕒 Deployment timestamp: ${deployTimestamp}`);
+    
   } catch (error) {
     console.warn('⚠️ Could not copy static files:', error.message);
     console.warn('   Frontend serving may not work correctly');
