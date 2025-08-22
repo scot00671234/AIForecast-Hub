@@ -46,54 +46,63 @@ export default function PredictionStatsCard() {
 
   if (loading) {
     return (
-      <Card className="border-0 shadow-sm bg-white dark:bg-slate-900 h-[280px] flex flex-col">
-        <CardHeader className="pb-3 space-y-1">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Prediction Stats</CardTitle>
+      <Card className="border-border/40 bg-background h-[280px] flex flex-col">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-foreground">Prediction Stats</CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="pt-0 flex-1 flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-muted-foreground/40 border-t-muted-foreground rounded-full animate-spin"></div>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p className="text-sm text-muted-foreground">Loading stats...</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-0 shadow-sm bg-white dark:bg-slate-900 h-[280px] flex flex-col">
-      <CardHeader className="pb-3 space-y-1">
-        <CardTitle className="text-sm font-medium text-muted-foreground">Prediction Stats</CardTitle>
+    <Card className="border-border/40 bg-background h-[280px] flex flex-col">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-2">
+          <Brain className="h-4 w-4 text-primary" />
+          <CardTitle className="text-sm font-medium text-foreground">Prediction Stats</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="pt-0 flex-1 flex flex-col space-y-6">
         <div className="grid grid-cols-2 gap-6">
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-2">
             <div className="text-3xl font-bold text-foreground">
               {stats?.totalPredictions || 0}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground font-medium">
               Total Predictions
             </div>
           </div>
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-2">
             <div className="text-3xl font-bold text-foreground">
               {stats?.activeModels || 3}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground font-medium">
               AI Models
             </div>
           </div>
         </div>
         
-        <div className="space-y-4 flex-1">
-          <div className="flex justify-between items-center py-2">
-            <span className="text-xs text-muted-foreground">Coverage</span>
-            <span className="text-xs font-medium text-foreground">14 Commodities</span>
+        <div className="space-y-3 flex-1">
+          <div className="flex justify-between items-center py-2 border-b border-border/30">
+            <span className="text-xs text-muted-foreground font-medium">Coverage</span>
+            <span className="text-xs font-semibold text-foreground">14 Commodities</span>
           </div>
           
           <div className="flex justify-between items-center py-2">
-            <span className="text-xs text-muted-foreground">Recent Activity</span>
+            <span className="text-xs text-muted-foreground font-medium">Recent Activity</span>
             {stats?.totalPredictions === 0 ? (
-              <span className="text-xs text-muted-foreground/70">Pending</span>
+              <div className="px-2 py-1 bg-muted/50 text-muted-foreground text-xs rounded-full font-medium">Pending</div>
             ) : (
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Active</span>
+              <div className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-medium">Active</div>
             )}
           </div>
         </div>
