@@ -1,7 +1,0 @@
-PRODUCTION BUILD COMPLETED: Fri Aug 22 08:21:39 PM UTC 2025
-Backend fix: import.meta.dirname -> process.cwd()
-total 780
-drwxr-xr-x 1 runner runner     70 Aug 22 20:21 .
-drwxr-xr-x 1 runner runner     86 Aug 22 20:21 ..
--rw-r--r-- 1 runner runner 710557 Aug 22 20:21 index-BJnNqAHf.js
--rw-r--r-- 1 runner runner  84348 Aug 22 20:21 index-Rf80_Hl1.css

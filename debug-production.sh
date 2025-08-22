@@ -82,8 +82,8 @@ else
     echo "ERROR: No assets directory in server/public" > server/public/assets-list.txt
 fi
 
-# 9. Build backend with dirname fix
-esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --define:import.meta.dirname="process.cwd()"
+# 9. Build backend with dirname fix for Docker
+esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --define:import.meta.dirname='"/app"'
 
 echo "✅ PRODUCTION BUILD COMPLETE"
 echo "🌐 Test: https://your-domain.com/debug.html"
