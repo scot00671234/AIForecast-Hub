@@ -13,11 +13,15 @@ import {
   ArrowRightIcon,
   CheckIcon,
   BotIcon,
-  TargetIcon
+  TargetIcon,
+  ActivityIcon,
+  PlayIcon
 } from "lucide-react";
 import { ThemeToggle } from "../components/theme-toggle";
 import { AI_MODELS } from "@/lib/constants";
 import { motion } from "framer-motion";
+import { LivePriceCard } from "@/components/LivePriceCard";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -25,6 +29,12 @@ export default function Landing() {
   const handleGetStarted = () => {
     navigate("/dashboard");
   };
+
+  // Fetch live commodities data for the landing page
+  const { data: commodities = [] } = useQuery<any[]>({
+    queryKey: ['/api/commodities'],
+    staleTime: 300000, // 5 minutes
+  });
 
   const features = [
     {
@@ -53,14 +63,6 @@ export default function Landing() {
     "Clean, minimalist interface with dark/light themes"
   ];
 
-  const commodities = [
-    { name: "Oil", symbol: "CL=F", category: "Energy" },
-    { name: "Gold", symbol: "GC=F", category: "Precious Metals" },
-    { name: "Coffee", symbol: "KC=F", category: "Soft Commodities" },
-    { name: "Copper", symbol: "HG=F", category: "Industrial Metals" },
-    { name: "Natural Gas", symbol: "NG=F", category: "Energy" },
-    { name: "Silver", symbol: "SI=F", category: "Precious Metals" }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,56 +112,11 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-24 md:py-40 px-6 md:px-6 relative overflow-hidden">
-        {/* Modern gradient background that extends to full screen */}
+      <section className="py-32 md:py-48 px-6 md:px-6 relative overflow-hidden">
+        {/* Simplified, cleaner background */}
         <div className="absolute inset-0 w-full h-full">
-          {/* Clean gradient base that covers entire section */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30" />
-          
-          {/* Smooth flowing gradient layers for light theme */}
-          <div className="absolute inset-0 dark:opacity-0">
-            {/* Base gradient layer */}
-            <div 
-              className="absolute bottom-0 left-0 w-full h-80 opacity-70"
-              style={{
-                background: 'linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.4) 30%, rgba(226, 232, 240, 0.6) 70%, rgba(203, 213, 225, 0.8) 100%)'
-              }}
-            />
-            {/* Soft wave overlay */}
-            <div 
-              className="absolute bottom-0 left-0 w-full h-64 opacity-50"
-              style={{
-                backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='100%25' height='100%25' viewBox='0 0 100 40' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,20 Q25,10 50,20 T100,18 V40 H0 Z' fill='rgba(241, 245, 249, 0.6)' /%3E%3C/svg%3E")`,
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'bottom'
-              }}
-            />
-          </div>
-          
-          {/* Smooth flowing gradient layers for dark theme */}
-          <div className="absolute inset-0 opacity-0 dark:opacity-100">
-            {/* Base gradient layer */}
-            <div 
-              className="absolute bottom-0 left-0 w-full h-80 opacity-60"
-              style={{
-                background: 'linear-gradient(180deg, transparent 0%, rgba(51, 65, 85, 0.3) 30%, rgba(71, 85, 105, 0.5) 70%, rgba(100, 116, 139, 0.7) 100%)'
-              }}
-            />
-            {/* Soft wave overlay */}
-            <div 
-              className="absolute bottom-0 left-0 w-full h-64 opacity-40"
-              style={{
-                backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='100%25' height='100%25' viewBox='0 0 100 40' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,20 Q25,10 50,20 T100,18 V40 H0 Z' fill='rgba(71, 85, 105, 0.4)' /%3E%3C/svg%3E")`,
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'bottom'
-              }}
-            />
-          </div>
-          
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0 opacity-5 dark:opacity-10 bg-grid-minimal" />
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/40" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--muted)_0%,_transparent_50%)] opacity-30" />
         </div>
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <motion.div 
@@ -310,41 +267,182 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Commodities Section */}
-      <section className="py-20 md:py-32 px-4 md:px-6 bg-muted/30">
+      {/* Live Market Data Section */}
+      <section className="py-24 md:py-32 px-6 md:px-6 bg-muted/20">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 md:mb-20">
+          <motion.div 
+            className="text-center mb-16 md:mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-600 dark:text-green-400">LIVE PRICES</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
-              Tracked Commodities
+              Real-Time Market Data
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Real-time price data and AI predictions for major commodity markets
+              Live commodity prices powered by our optimized Yahoo Finance integration
             </p>
-          </div>
+          </motion.div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {commodities.map((commodity, index) => (
-              <div key={index} className="bg-background/70 rounded-lg p-6 border border-border/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-foreground">{commodity.name}</h3>
-                  <code className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                    {commodity.symbol}
-                  </code>
-                </div>
-                <p className="text-sm text-muted-foreground">{commodity.category}</p>
-              </div>
+          <motion.div 
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            {commodities.slice(0, 6).map((commodity, index: number) => (
+              <motion.div
+                key={commodity.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
+                viewport={{ once: true }}
+              >
+                <LivePriceCard
+                  commodityId={commodity.id}
+                  name={commodity.name}
+                  symbol={commodity.symbol}
+                  unit={commodity.unit}
+                />
+              </motion.div>
             ))}
-            <div className="bg-background/70 rounded-lg p-6 border border-dashed border-border/50 flex items-center justify-center">
-              <p className="text-muted-foreground text-sm">
-                + 8 more commodities
+          </motion.div>
+          
+          {commodities.length > 6 && (
+            <div className="text-center">
+              <p className="text-muted-foreground mb-6">
+                + {commodities.length - 6} more commodities tracked
               </p>
+              <Button
+                onClick={handleGetStarted}
+                variant="outline"
+                className="bg-background/80 backdrop-blur-sm hover:bg-background"
+              >
+                View All Markets <ArrowRightIcon className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-          </div>
+          )}
+        </div>
+      </section>
+
+      {/* Dashboard Preview Section */}
+      <section className="py-24 md:py-32 px-6 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center mb-16 md:mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+              See It In Action
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Get a preview of our comprehensive analytics dashboard
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            className="relative max-w-6xl mx-auto"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <div className="relative bg-gradient-to-br from-background via-background to-muted/40 rounded-2xl border border-border/40 p-6 md:p-8 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">aiforecast-hub.com/dashboard</span>
+                </div>
+                <Button
+                  onClick={handleGetStarted}
+                  size="sm"
+                  variant="outline"
+                  className="backdrop-blur-sm"
+                >
+                  <PlayIcon className="h-4 w-4 mr-2" />
+                  Open Dashboard
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Predictions Made</span>
+                        <ActivityIcon className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <div className="text-2xl font-bold">1,247</div>
+                      <div className="text-xs text-green-600">+23% this week</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Top Model</span>
+                        <TargetIcon className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div className="text-2xl font-bold">Deepseek</div>
+                      <div className="text-xs text-green-600">89.4% accuracy</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Markets</span>
+                        <BarChart3Icon className="h-4 w-4 text-purple-500" />
+                      </div>
+                      <div className="text-2xl font-bold">14</div>
+                      <div className="text-xs text-blue-600">All active</div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold">AI Model Performance</h3>
+                      <div className="flex space-x-2 text-xs">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Claude</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>ChatGPT</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span>Deepseek</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="h-32 bg-muted/30 rounded-lg flex items-center justify-center">
+                      <span className="text-muted-foreground text-sm">Interactive Chart Area</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-muted/20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-light text-foreground mb-4">
