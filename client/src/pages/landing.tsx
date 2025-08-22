@@ -66,6 +66,11 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* DEPLOYMENT TEST BANNER */}
+      <div className="bg-red-600 text-white text-center py-4 px-4 font-bold text-xl">
+        🚀 DEPLOYMENT TEST - VERSION AUG 22 2025 - IF YOU SEE THIS, DEPLOYMENT WORKS! 🚀
+      </div>
+      
       {/* Announcement Banner */}
       <div className="bg-foreground text-background text-center py-3 px-4">
         <div className="max-w-7xl mx-auto">
