@@ -2,7 +2,7 @@
 NODE_ENV = "production"
 PORT = "80"
 HOST = "0.0.0.0"
-NIXPACKS_NO_CADDY = "false"
+NIXPACKS_NO_CADDY = "true"
 NIXPACKS_NO_WEB_SERVER = "1"
 
 [phases.install]
