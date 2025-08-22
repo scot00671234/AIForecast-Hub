@@ -1,4 +1,4 @@
-# Minimal Production Setup
+# Fixed Production Setup - Resolves static file serving
 providers = ["node"]
 
 [variables]
@@ -12,10 +12,11 @@ cmds = ["npm ci"]
 cmds = [
   "rm -rf dist server/public",
   "vite build",
-  "mkdir -p server/public",
+  "mkdir -p server/public dist",
   "cp -r dist/public/* server/public/",
-  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"
+  "cp -r server/public/* dist/",
+  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --define:import.meta.dirname='\"/app\"'"
 ]
 
 [start]
-cmd = "node dist/index.js"
+cmd = "cd /app && node dist/index.js"
