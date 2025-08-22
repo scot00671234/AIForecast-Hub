@@ -8,7 +8,7 @@ HOST = "0.0.0.0"
 NIXPACKS_NO_CADDY = "1"
 NIXPACKS_NO_WEB_SERVER = "1"
 
-# Explicitly disable web server detection
+# Node.js configuration
 [providers.node]
 version = "20"
 
