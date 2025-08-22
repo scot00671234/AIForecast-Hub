@@ -5,23 +5,19 @@ providers = ["node"]
 NODE_ENV = "production"
 PORT = "80"
 HOST = "0.0.0.0"
-NIXPACKS_NO_CADDY = "1"
-NIXPACKS_NO_WEB_SERVER = "1"
+NIXPACKS_NO_CADDY = "true"
+NIXPACKS_NO_WEB_SERVER = "true"
 
-# Node.js configuration
 [providers.node]
 version = "20"
 
 [phases.install]
-cmds = ["npm ci --production=false"]
+cmds = ["npm ci --only=production"]
 
 [phases.build] 
 cmds = [
-  "echo 'BUILDING: NO WEB SERVER - Node.js only'",
-  "npm run build",
-  "node fix-build.js",
-  "echo 'BUILD COMPLETE: Direct Node.js serving on port 80'"
+  "npm run build"
 ]
 
 [start]
-cmd = "PORT=80 HOST=0.0.0.0 node production-start.js"
+cmd = "node production-start.js"
