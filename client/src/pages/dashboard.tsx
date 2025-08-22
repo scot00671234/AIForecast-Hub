@@ -32,9 +32,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background relative">
       
-      {/* MASSIVE DEPLOYMENT TEST BANNER */}
+      {/* MASSIVE DEPLOYMENT TEST BANNER - FORCE CACHE BUST */}
       <div className="bg-red-600 text-white text-center py-6 px-4 font-bold text-2xl z-50 relative">
-        🚨 DEPLOYMENT TEST - AUG 22 2025 - 7:10 PM - CHANGES DEPLOYED! 🚨
+        🚨 CACHE BUST TEST - AUG 22 2025 - 8:16 PM - FORCE DEPLOY! 🚨
       </div>
       
       {/* Modern background pattern matching landing page */}
