@@ -364,7 +364,7 @@ export default function Landing() {
                     <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                   </div>
-                  <span className="text-sm text-muted-foreground">aiforecast-hub.com/dashboard</span>
+                  <span className="text-sm text-muted-foreground">aiforecasthub.com/dashboard</span>
                 </div>
                 <Button
                   onClick={handleGetStarted}
@@ -377,100 +377,106 @@ export default function Landing() {
                 </Button>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Predictions Made</span>
+                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-muted-foreground">Predictions Made</span>
                         <ActivityIcon className="h-4 w-4 text-blue-500" />
                       </div>
-                      <div className="text-2xl font-bold">1,247</div>
-                      <div className="text-xs text-green-600">+23% this week</div>
+                      <div className="text-3xl font-bold mb-1">1,247</div>
+                      <div className="text-xs text-green-600 font-medium">+23% this week</div>
                     </CardContent>
                   </Card>
-                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Top Model</span>
+                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-muted-foreground">Top Model</span>
                         <TargetIcon className="h-4 w-4 text-green-500" />
                       </div>
-                      <div className="text-2xl font-bold">Deepseek</div>
-                      <div className="text-xs text-green-600">89.4% accuracy</div>
+                      <div className="text-3xl font-bold mb-1">Deepseek</div>
+                      <div className="text-xs text-green-600 font-medium">87.4% accuracy</div>
                     </CardContent>
                   </Card>
-                  <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Markets</span>
+                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-muted-foreground">Markets</span>
                         <BarChart3Icon className="h-4 w-4 text-purple-500" />
                       </div>
-                      <div className="text-2xl font-bold">14</div>
-                      <div className="text-xs text-blue-600">All active</div>
+                      <div className="text-3xl font-bold mb-1">14</div>
+                      <div className="text-xs text-blue-600 font-medium">All active</div>
                     </CardContent>
                   </Card>
                 </div>
                 
-                <Card className="border-border/30 bg-background/60 backdrop-blur-sm">
+                <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold">AI Model Performance</h3>
-                      <div className="flex space-x-2 text-xs">
-                        <div className="flex items-center space-x-1">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-semibold text-lg">AI Model Performance</h3>
+                      <div className="flex space-x-4 text-xs">
+                        <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span>Claude</span>
+                          <span className="text-muted-foreground">Claude</span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>ChatGPT</span>
+                          <span className="text-muted-foreground">ChatGPT</span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span>Deepseek</span>
+                          <span className="text-muted-foreground">Deepseek</span>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between py-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="font-medium">Deepseek</span>
+                    <div className="space-y-5">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span className="font-medium">Deepseek</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-green-600">87.4%</div>
+                            <div className="text-xs text-muted-foreground">#1 Overall</div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-green-600">87.4%</div>
-                          <div className="text-xs text-muted-foreground">#1 Overall</div>
+                        <div className="w-full bg-muted/40 rounded-full h-2">
+                          <div className="bg-green-500 h-2 rounded-full transition-all duration-1000" style={{ width: '87.4%' }}></div>
                         </div>
-                      </div>
-                      <div className="w-full bg-muted/50 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '87.4%' }}></div>
                       </div>
                       
-                      <div className="flex items-center justify-between py-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="font-medium">Claude</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span className="font-medium">Claude</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-blue-600">84.2%</div>
+                            <div className="text-xs text-muted-foreground">#2 Overall</div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-blue-600">84.2%</div>
-                          <div className="text-xs text-muted-foreground">#2 Overall</div>
+                        <div className="w-full bg-muted/40 rounded-full h-2">
+                          <div className="bg-blue-500 h-2 rounded-full transition-all duration-1000" style={{ width: '84.2%' }}></div>
                         </div>
-                      </div>
-                      <div className="w-full bg-muted/50 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '84.2%' }}></div>
                       </div>
                       
-                      <div className="flex items-center justify-between py-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span className="font-medium">ChatGPT</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span className="font-medium">ChatGPT</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-purple-600">81.9%</div>
+                            <div className="text-xs text-muted-foreground">#3 Overall</div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-purple-600">81.9%</div>
-                          <div className="text-xs text-muted-foreground">#3 Overall</div>
+                        <div className="w-full bg-muted/40 rounded-full h-2">
+                          <div className="bg-purple-500 h-2 rounded-full transition-all duration-1000" style={{ width: '81.9%' }}></div>
                         </div>
-                      </div>
-                      <div className="w-full bg-muted/50 rounded-full h-2">
-                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: '81.9%' }}></div>
                       </div>
                     </div>
                   </CardContent>
