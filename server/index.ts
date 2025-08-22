@@ -66,35 +66,10 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // 🔧 DEPLOYMENT: ULTRA-AGGRESSIVE anti-caching to bypass Caddy
+  // Simple anti-caching
   app.use((req, res, next) => {
-    const timestamp = Date.now();
-    const random = Math.random().toString(36);
-    
-    // Prevent ALL caching - ULTRA AGGRESSIVE
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '-1');
-    res.setHeader('Surrogate-Control', 'no-store, max-age=0');
-    res.setHeader('X-Accel-Expires', '0');
-    
-    // Force revalidation
-    res.setHeader('Vary', '*');
-    res.setHeader('Last-Modified', new Date().toUTCString());
-    
-    // ETag prevention - make every response unique
-    res.setHeader('ETag', `"NOCACHE-${timestamp}-${random}"`);
-    
-    // Caddy-specific headers to force bypass
-    res.setHeader('X-Cache-Status', 'MISS');
-    res.setHeader('X-Cache-Control', 'BYPASS');
-    res.setHeader('X-No-Cache', 'FORCE');
-    
-    // Deployment fingerprint
-    res.setHeader('X-Deployment-Fix', `v1.0.2-${timestamp}`);
-    res.setHeader('X-Cache-Buster', `${timestamp}-${random}`);
-    res.setHeader('X-Timestamp', timestamp.toString());
-    
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('X-Deployment-Time', Date.now().toString());
     next();
   });
 
@@ -107,7 +82,7 @@ app.use((req, res, next) => {
   }
 
   // Start server
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = parseInt(process.env.PORT || '80', 10);
   server.listen(port, "0.0.0.0", () => {
     log(`✅ Server running on port ${port}`);
     console.log("🎯 Application ready - all systems operational");
