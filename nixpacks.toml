@@ -1,25 +1,14 @@
-# Direct Node.js serving - No Caddy
 providers = ["node"]
 
 [variables]
-NODE_ENV = "production"
+NODE_ENV = "production"  
 PORT = "3000"
-HOST = "0.0.0.0"
 
 [providers.node]
 skipCaddy = true
 
-[phases.install]
-cmds = ["npm ci --production=false"]
-
 [phases.build]
-cmds = [
-  "echo 'Direct Node.js build - No Caddy'",
-  "rm -rf dist server/public .vite",
-  "npm run build", 
-  "node fix-build.js",
-  "echo 'Build complete'"
-]
+cmds = ["npm run build", "node fix-build.js"]
 
 [start]
-cmd = "PORT=3000 HOST=0.0.0.0 node production-start.js"
+cmd = "node production-start.js"
