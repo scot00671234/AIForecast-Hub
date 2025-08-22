@@ -1,14 +1,15 @@
 providers = ["node"]
 
 [variables]
-NODE_ENV = "production"  
+NODE_ENV = "production"
 PORT = "3000"
+HOST = "0.0.0.0"
 
-[providers.node]
-skipCaddy = true
+[phases.install]
+cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = ["npm run build", "node fix-build.js"]
 
 [start]
-cmd = "node production-start.js"
+cmd = "PORT=3000 HOST=0.0.0.0 node production-start.js"
