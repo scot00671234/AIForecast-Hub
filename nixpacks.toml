@@ -1,4 +1,4 @@
-# Production configuration - CADDY DISABLED for direct serving
+# Direct Node.js serving - No Caddy
 providers = ["node"]
 
 [variables]
@@ -6,7 +6,6 @@ NODE_ENV = "production"
 PORT = "3000"
 HOST = "0.0.0.0"
 
-# Disable Caddy completely - Direct Node.js serving
 [providers.node]
 skipCaddy = true
 
@@ -15,12 +14,11 @@ cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = [
-  "echo 'NO CADDY: Direct Node.js serving at $(date)'",
+  "echo 'Direct Node.js build - No Caddy'",
   "rm -rf dist server/public .vite",
-  "echo 'Cleaned build directories'",
-  "npm run build",
+  "npm run build", 
   "node fix-build.js",
-  "echo 'Build completed - no reverse proxy caching at $(date)'"
+  "echo 'Build complete'"
 ]
 
 [start]
