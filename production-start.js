@@ -92,7 +92,7 @@ if (missingRecommended.length > 0) {
 }
 
 console.log('✅ Production environment validated');
-console.log(`   Port: ${process.env.PORT || '5000'}`);
+console.log(`   Port: ${process.env.PORT || '3000'}`);
 console.log(`   Database: ${process.env.DATABASE_URL ? 'configured' : 'missing'}`);
 console.log(`   AI APIs: ${recommendedEnvVars.filter(v => process.env[v]).length}/${recommendedEnvVars.length} configured`);
 console.log(`   Index file: ${validIndexPath}`);

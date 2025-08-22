@@ -39,8 +39,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  console.log("🚀 Starting AIForecast Hub (Professional Edition) - Emergency Migration Fix v3.0.0");
-console.log("🔧 CACHE BUST: Force rebuild with migration timing fixes");
+  console.log("🚀 Starting AIForecast Hub (Professional Edition) - DEPLOYMENT FIX v1.0.1");
+  console.log("🔧 DEPLOYMENT: Fixed port, caching, and build process");
+  console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}, Port: ${parseInt(process.env.PORT || '3000', 10)}`);
   
   // Initialize startup manager
   const startupManager = new StartupManager(storage);

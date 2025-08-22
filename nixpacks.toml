@@ -20,4 +20,4 @@ cmds = [
 ]
 
 [start]
-cmd = "node production-start.js"
+cmd = "PORT=3000 node production-start.js"

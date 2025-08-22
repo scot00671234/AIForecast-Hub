@@ -54,11 +54,38 @@ try {
     cpSync(publicPath, serverPublicPath, { recursive: true });
     console.log('✅ Fresh static files copied to server/public');
     
-    // Add cache busting timestamp to verify clean deployment
+    // CRITICAL: Add multiple cache-busting mechanisms
     const { writeFileSync } = await import('fs');
     const deployTimestamp = new Date().toISOString();
+    const cacheBustId = Date.now();
+    
+    // Create deployment verification file
     writeFileSync(join(serverPublicPath, 'deploy-timestamp.txt'), deployTimestamp);
-    console.log(`🕒 Deployment timestamp: ${deployTimestamp}`);
+    writeFileSync(join(serverPublicPath, '.deployment-id'), cacheBustId.toString());
+    
+    // Update index.html with cache-busting parameters
+    const indexPath = join(serverPublicPath, 'index.html');
+    if (existsSync(indexPath)) {
+      let indexContent = readFileSync(indexPath, 'utf-8');
+      
+      // Add cache-busting to script and CSS imports
+      indexContent = indexContent.replace(
+        /(src|href)="([^"]+\.(js|css))"/g, 
+        `$1="$2?v=${cacheBustId}"`
+      );
+      
+      // Add deployment meta tag
+      indexContent = indexContent.replace(
+        '<head>',
+        `<head><meta name="deployment" content="${deployTimestamp}" data-cache-bust="${cacheBustId}">`
+      );
+      
+      writeFileSync(indexPath, indexContent);
+      console.log(`📋 Updated index.html with cache-busting: v${cacheBustId}`);
+    }
+    
+    console.log(`🕒 Deployment ID: ${cacheBustId} at ${deployTimestamp}`);
+    console.log(`📝 Verify deployment at: https://your-domain.com/deploy-timestamp.txt`);
     
   } catch (error) {
     console.warn('⚠️ Could not copy static files:', error.message);
@@ -108,6 +135,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
   
   writeFileSync(indexPath, indexContent, 'utf-8');
   console.log('✅ COMPREHENSIVE dirname fix applied successfully');
+  
+  // FORCE: Add build validation checks
+  const buildValidation = {
+    indexExists: existsSync(indexPath),
+    publicExists: existsSync(publicPath),
+    serverPublicExists: existsSync(join(__dirname, 'server', 'public')),
+    buildSize: (readFileSync(indexPath).length / 1024).toFixed(1)
+  };
+  
+  console.log('🔍 Build validation:', buildValidation);
+  
+  if (!buildValidation.serverPublicExists) {
+    console.error('❌ CRITICAL: server/public directory missing - frontend will not serve!');
+    process.exit(1);
+  }
   
   console.log('✅ Production build verified and optimized successfully');
   console.log(`   - dist/index.js: ${(readFileSync(indexPath).length / 1024).toFixed(1)}KB`);
