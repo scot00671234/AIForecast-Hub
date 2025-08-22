@@ -1,9 +1,12 @@
+providers = ["node"]
+
 [variables]
 NODE_ENV = "production"
 PORT = "80"
 HOST = "0.0.0.0"
 NIXPACKS_NO_CADDY = "true"
-NIXPACKS_NO_WEB_SERVER = "1"
+NIXPACKS_NO_WEB_SERVER = "true"
+NIXPACKS_NO_CACHE = "true"
 
 [phases.install]
 cmds = ["npm ci --production=false"]
