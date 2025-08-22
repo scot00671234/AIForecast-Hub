@@ -1,4 +1,4 @@
-# Clean Production Deployment - No Caching Issues
+# Minimal Production Setup
 providers = ["node"]
 
 [variables]
@@ -6,17 +6,16 @@ NODE_ENV = "production"
 PORT = "5000"
 
 [phases.install]
-# Fresh install, no cache
-cmds = [
-  "rm -rf dist/ server/public/ node_modules/.cache/ .vite/",
-  "npm ci --no-cache"
-]
+cmds = ["npm ci"]
 
 [phases.build]
-# Clean build process
 cmds = [
-  "npm run build"
+  "rm -rf dist server/public",
+  "vite build",
+  "mkdir -p server/public",
+  "cp -r dist/public/* server/public/",
+  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"
 ]
 
 [start]
-cmd = "npm start"
+cmd = "node dist/index.js"
