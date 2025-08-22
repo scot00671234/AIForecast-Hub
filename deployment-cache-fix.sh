@@ -26,7 +26,6 @@ echo "📅 Deployment ID: $DEPLOYMENT_ID"
 # 4. Run build with fresh environment
 echo "🔨 Running fresh build..."
 npm ci --production=false
-npm run build
 node fix-build.js
 
 # 5. Verify build output

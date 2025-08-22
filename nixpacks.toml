@@ -2,7 +2,7 @@
 providers = ["node"]
 
 [variables]
-PORT = "3000"
+PORT = "5000"
 
 [phases.install]
 cmds = ["npm ci"]
