@@ -1,14 +1,22 @@
-# ULTRA SIMPLE - Direct Node.js deployment
+# Clean Production Deployment - No Caching Issues
 providers = ["node"]
 
 [variables]
+NODE_ENV = "production"
 PORT = "5000"
 
 [phases.install]
-cmds = ["npm ci"]
+# Fresh install, no cache
+cmds = [
+  "rm -rf dist/ server/public/ node_modules/.cache/ .vite/",
+  "npm ci --no-cache"
+]
 
-[phases.build]  
-cmds = ["chmod +x debug-production.sh", "./debug-production.sh"]
+[phases.build]
+# Clean build process
+cmds = [
+  "npm run build"
+]
 
 [start]
-cmd = "node dist/index.js"
+cmd = "npm start"
