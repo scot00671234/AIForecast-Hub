@@ -1,15 +1,27 @@
+# Force ONLY Node.js - NO web servers
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
+PORT = "80"
 HOST = "0.0.0.0"
+NIXPACKS_NO_CADDY = "1"
+NIXPACKS_NO_WEB_SERVER = "1"
+
+# Explicitly disable web server detection
+[providers.node]
+version = "20"
 
 [phases.install]
 cmds = ["npm ci --production=false"]
 
-[phases.build]
-cmds = ["npm run build", "node fix-build.js"]
+[phases.build] 
+cmds = [
+  "echo 'BUILDING: NO WEB SERVER - Node.js only'",
+  "npm run build",
+  "node fix-build.js",
+  "echo 'BUILD COMPLETE: Direct Node.js serving on port 80'"
+]
 
 [start]
-cmd = "PORT=3000 HOST=0.0.0.0 node production-start.js"
+cmd = "PORT=80 HOST=0.0.0.0 node production-start.js"
