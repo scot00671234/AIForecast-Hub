@@ -86,21 +86,17 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (loading) {
     return (
-      <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900 h-[280px]`}>
-        <CardHeader className="pb-4 space-y-1">
+      <Card className={`${className} border-border/40 bg-background h-[280px]`}>
+        <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-amber-500" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">AI Composite Index</CardTitle>
+            <Activity className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-foreground">AI Composite Index</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-0 flex-1 flex flex-col justify-center">
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="relative">
-              <div className="w-12 h-12 border-2 border-dashed border-amber-300 dark:border-amber-600 rounded-full flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground font-medium">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <p className="text-sm text-muted-foreground">
               Initializing Market Data
             </p>
           </div>
@@ -111,23 +107,27 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
 
   if (error || !latestIndex) {
     return (
-      <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900 h-[280px]`}>
-        <CardHeader className="pb-4 space-y-1">
+      <Card className={`${className} border-border/40 bg-background h-[280px]`}>
+        <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-amber-500" />
-            <CardTitle className="text-sm font-medium text-muted-foreground">AI Composite Index</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-foreground">AI Composite Index</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-0 flex-1 flex flex-col justify-center">
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="relative">
-              <div className="w-12 h-12 border-2 border-dashed border-amber-300 dark:border-amber-600 rounded-full flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <AlertCircle className="h-8 w-8 text-muted-foreground" />
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground">
+                {error || 'No data available'}
+              </p>
+              <button 
+                onClick={fetchLatestIndex}
+                className="text-xs text-primary hover:underline"
+              >
+                Try again
+              </button>
             </div>
-            <p className="text-xs text-muted-foreground font-medium">
-              Initializing Market Data
-            </p>
           </div>
         </CardContent>
       </Card>
@@ -143,11 +143,11 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   const gaugeRotation = (gaugePosition / 100) * 180 - 90; // -90 to 90 degrees
 
   return (
-    <Card className={`${className} border-0 shadow-sm bg-white dark:bg-slate-900 h-[280px] flex flex-col`}>
-      <CardHeader className="pb-3 space-y-1">
+    <Card className={`${className} border-border/40 bg-background h-[280px] flex flex-col`}>
+      <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-blue-500" />
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Activity className="h-4 w-4 text-primary" />
+          <CardTitle className="text-sm font-medium text-foreground">
             AI Composite Index
           </CardTitle>
           <Badge variant={getSentimentBadgeVariant(latestIndex.marketSentiment)} className="ml-auto text-xs px-2 py-0.5">
@@ -165,9 +165,9 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
           <div className="text-xs text-muted-foreground">
             {getIndexDescription(indexValue)}
           </div>
-          <div className="w-full bg-muted/30 rounded-full h-2">
+          <div className="w-full bg-muted/40 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-700"
+              className="bg-primary h-2 rounded-full transition-all duration-700"
               style={{ width: `${gaugePosition}%` }}
             />
           </div>
