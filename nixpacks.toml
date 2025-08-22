@@ -1,0 +1,20 @@
+[variables]
+NODE_ENV = "production"
+PORT = "80"
+HOST = "0.0.0.0"
+NIXPACKS_NO_CADDY = "false"
+NIXPACKS_NO_WEB_SERVER = "1"
+
+[phases.install]
+cmds = ["npm ci --production=false"]
+
+[phases.build] 
+cmds = [
+  "echo 'BUILDING: NO WEB SERVER - Node.js only'",
+  "npm run build",
+  "node fix-build.js",
+  "echo 'BUILD COMPLETE: Direct Node.js serving on port 80'"
+]
+
+[start]
+cmd = "PORT=80 HOST=0.0.0.0 node production-start.js"
