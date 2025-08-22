@@ -66,23 +66,37 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // AGGRESSIVE: Add anti-caching headers for production
-  if (app.get("env") === "production") {
-    app.use((req, res, next) => {
-      // FORCE: No caching for everything until deployment issue is resolved
-      res.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
-      res.set('X-Deployment-Fix', 'v1.0.1');
-      res.set('X-Timestamp', Date.now().toString());
-      
-      // Additional cache-busting headers
-      res.set('Last-Modified', new Date().toUTCString());
-      res.set('ETag', Date.now().toString());
-      
-      next();
-    });
-  }
+  // 🔧 DEPLOYMENT: ULTRA-AGGRESSIVE anti-caching to bypass Caddy
+  app.use((req, res, next) => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36);
+    
+    // Prevent ALL caching - ULTRA AGGRESSIVE
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '-1');
+    res.setHeader('Surrogate-Control', 'no-store, max-age=0');
+    res.setHeader('X-Accel-Expires', '0');
+    
+    // Force revalidation
+    res.setHeader('Vary', '*');
+    res.setHeader('Last-Modified', new Date().toUTCString());
+    
+    // ETag prevention - make every response unique
+    res.setHeader('ETag', `"NOCACHE-${timestamp}-${random}"`);
+    
+    // Caddy-specific headers to force bypass
+    res.setHeader('X-Cache-Status', 'MISS');
+    res.setHeader('X-Cache-Control', 'BYPASS');
+    res.setHeader('X-No-Cache', 'FORCE');
+    
+    // Deployment fingerprint
+    res.setHeader('X-Deployment-Fix', `v1.0.2-${timestamp}`);
+    res.setHeader('X-Cache-Buster', `${timestamp}-${random}`);
+    res.setHeader('X-Timestamp', timestamp.toString());
+    
+    next();
+  });
 
   // Setup Vite or static serving
   if (app.get("env") === "development") {
