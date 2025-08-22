@@ -1,4 +1,4 @@
-# Production configuration for Dokploy VPS deployment - CACHE FIX v1.0.1
+# Production configuration - CADDY DISABLED for direct serving
 providers = ["node"]
 
 [variables]
@@ -6,18 +6,22 @@ NODE_ENV = "production"
 PORT = "3000"
 HOST = "0.0.0.0"
 
+# Disable Caddy completely
+[providers.node]
+skipCaddy = true
+
 [phases.install]
 cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = [
-  "echo 'DEPLOYMENT: Starting clean build at $(date)'",
+  "echo 'NO CADDY: Direct Node.js serving at $(date)'",
   "rm -rf dist server/public .vite",
   "echo 'Cleaned build directories'",
   "npm run build",
   "node fix-build.js",
-  "echo 'Build completed successfully at $(date)'"
+  "echo 'Build completed - no reverse proxy caching at $(date)'"
 ]
 
 [start]
-cmd = "PORT=3000 node production-start.js"
+cmd = "PORT=3000 HOST=0.0.0.0 node production-start.js"
