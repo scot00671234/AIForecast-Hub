@@ -66,7 +66,7 @@ export default function MarketStatusCard() {
 
   if (loading) {
     return (
-      <Card className="border-border/40 bg-background h-[180px] flex flex-col">
+      <Card className="border-border/40 bg-background h-[280px] flex flex-col">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-primary" />
@@ -102,7 +102,7 @@ export default function MarketStatusCard() {
   };
 
   return (
-    <Card className="border-border/40 bg-background h-[180px] flex flex-col">
+    <Card className="border-border/40 bg-background h-[280px] flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-primary" />
