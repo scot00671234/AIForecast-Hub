@@ -68,11 +68,15 @@ app.use((req, res, next) => {
 
 
   // Setup Vite or static serving
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+  const isProduction = process.env.NODE_ENV === "production";
+  console.log(`🔧 Environment detection: NODE_ENV=${process.env.NODE_ENV}, isProduction=${isProduction}`);
+  
+  if (isProduction) {
     serveStatic(app);
     console.log("✅ Static file serving configured for production");
+  } else {
+    await setupVite(app, server);
+    console.log("✅ Vite development server configured");
   }
 
   // Start server
