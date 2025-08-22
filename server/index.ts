@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 (async () => {
   console.log("🚀 Starting AIForecast Hub (Professional Edition) - DEPLOYMENT FIX v1.0.1");
   console.log("🔧 DEPLOYMENT: Fixed port, caching, and build process");
-  console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}, Port: ${parseInt(process.env.PORT || '3000', 10)}`);
+  console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}, Port: ${parseInt(process.env.PORT || '5000', 10)}`);
   
   // Initialize startup manager
   const startupManager = new StartupManager(storage);
@@ -79,8 +79,8 @@ app.use((req, res, next) => {
     console.log("✅ Vite development server configured");
   }
 
-  // Start server
-  const port = parseInt(process.env.PORT || '3000', 10);
+  // Start server - FIXED PORT ISSUE
+  const port = parseInt(process.env.PORT || '5000', 10);
   server.listen(port, "0.0.0.0", () => {
     log(`✅ Server running on port ${port}`);
     console.log("🎯 Application ready - all systems operational");
