@@ -66,12 +66,6 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Simple anti-caching
-  app.use((req, res, next) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('X-Deployment-Time', Date.now().toString());
-    next();
-  });
 
   // Setup Vite or static serving
   if (app.get("env") === "development") {
