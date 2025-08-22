@@ -1,4 +1,4 @@
-# Production configuration for Dokploy VPS deployment
+# Production configuration for Dokploy VPS deployment - CACHE FIX v1.0.1
 providers = ["node"]
 
 [variables]

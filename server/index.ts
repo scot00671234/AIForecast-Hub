@@ -66,25 +66,20 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Add cache-control headers for production with deployment-aware caching
+  // AGGRESSIVE: Add anti-caching headers for production
   if (app.get("env") === "production") {
     app.use((req, res, next) => {
-      // Cache-bust HTML files - always check server for updates
-      if (req.path.endsWith('.html') || req.path === '/' || req.path === '/index.html') {
-        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.set('Pragma', 'no-cache');
-        res.set('Expires', '0');
-        res.set('X-Deployment', new Date().toISOString().slice(0, 10)); // Daily deployment marker
-      } 
-      // Moderate cache for hashed assets with deployment validation
-      else if (/\.(js|css)$/.test(req.path) && /-[a-zA-Z0-9]+\.(js|css)$/.test(req.path)) {
-        res.set('Cache-Control', 'public, max-age=86400, must-revalidate'); // 1 day but validate
-        res.set('X-Deployment', new Date().toISOString().slice(0, 10));
-      }
-      // Short-term cache for other static assets
-      else if (/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/.test(req.path)) {
-        res.set('Cache-Control', 'public, max-age=1800'); // 30 minutes
-      }
+      // FORCE: No caching for everything until deployment issue is resolved
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.set('X-Deployment-Fix', 'v1.0.1');
+      res.set('X-Timestamp', Date.now().toString());
+      
+      // Additional cache-busting headers
+      res.set('Last-Modified', new Date().toUTCString());
+      res.set('ETag', Date.now().toString());
+      
       next();
     });
   }
