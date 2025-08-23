@@ -10,14 +10,18 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 interface CompositeIndex {
-  value: number;
-  timestamp: string;
-  components: {
-    directional: number;
-    confidence: number;
-    accuracy: number;
-    momentum: number;
-  };
+  id: string;
+  date: string;
+  overallIndex: string;
+  hardCommoditiesIndex: string;
+  softCommoditiesIndex: string;
+  directionalComponent: string;
+  confidenceComponent: string;
+  accuracyComponent: string;
+  momentumComponent: string;
+  totalPredictions: number;
+  marketSentiment: 'bullish' | 'bearish' | 'neutral';
+  createdAt: string;
 }
 
 interface FearGreedIndex {
@@ -192,14 +196,14 @@ export default function Indices() {
                 </Card>
               ) : (
                 <IndexGauge
-                  value={overallComposite?.value || 50}
+                  value={parseFloat(overallComposite?.overallIndex || '50')}
                   title="AI Composite"
                   subtitle="All Commodities"
                   classification={
-                    (overallComposite?.value || 50) >= 75 ? "Extremely Bullish" :
-                    (overallComposite?.value || 50) >= 60 ? "Bullish" :
-                    (overallComposite?.value || 50) >= 40 ? "Neutral" :
-                    (overallComposite?.value || 50) >= 25 ? "Bearish" : "Extremely Bearish"
+                    parseFloat(overallComposite?.overallIndex || '50') >= 75 ? "Extremely Bullish" :
+                    parseFloat(overallComposite?.overallIndex || '50') >= 60 ? "Bullish" :
+                    parseFloat(overallComposite?.overallIndex || '50') >= 40 ? "Neutral" :
+                    parseFloat(overallComposite?.overallIndex || '50') >= 25 ? "Bearish" : "Extremely Bearish"
                   }
                   onClick={() => setSelectedIndex("composite")}
                 />
@@ -231,14 +235,14 @@ export default function Indices() {
                 </Card>
               ) : (
                 <IndexGauge
-                  value={categoryComposite?.hard?.value || 50}
+                  value={parseFloat(categoryComposite?.hard?.overallIndex || '50')}
                   title="Hard Commodities"
                   subtitle="Metals & Energy"
                   classification={
-                    (categoryComposite?.hard?.value || 50) >= 75 ? "Very Bullish" :
-                    (categoryComposite?.hard?.value || 50) >= 60 ? "Bullish" :
-                    (categoryComposite?.hard?.value || 50) >= 40 ? "Neutral" :
-                    (categoryComposite?.hard?.value || 50) >= 25 ? "Bearish" : "Very Bearish"
+                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 75 ? "Very Bullish" :
+                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 60 ? "Bullish" :
+                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 40 ? "Neutral" :
+                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
                   }
                   onClick={() => setSelectedIndex("hard")}
                 />
@@ -253,14 +257,14 @@ export default function Indices() {
                 </Card>
               ) : (
                 <IndexGauge
-                  value={categoryComposite?.soft?.value || 50}
+                  value={parseFloat(categoryComposite?.soft?.overallIndex || '50')}
                   title="Soft Commodities"
                   subtitle="Agriculture & Food"
                   classification={
-                    (categoryComposite?.soft?.value || 50) >= 75 ? "Very Bullish" :
-                    (categoryComposite?.soft?.value || 50) >= 60 ? "Bullish" :
-                    (categoryComposite?.soft?.value || 50) >= 40 ? "Neutral" :
-                    (categoryComposite?.soft?.value || 50) >= 25 ? "Bearish" : "Very Bearish"
+                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 75 ? "Very Bullish" :
+                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 60 ? "Bullish" :
+                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 40 ? "Neutral" :
+                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
                   }
                   onClick={() => setSelectedIndex("soft")}
                 />
@@ -283,7 +287,7 @@ export default function Indices() {
               <Card className="bg-muted/5">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-foreground">
-                    {(overallComposite?.value || 50).toFixed(0)}
+                    {parseFloat(overallComposite?.overallIndex || '50').toFixed(0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Overall Index</div>
                 </CardContent>
@@ -301,7 +305,7 @@ export default function Indices() {
               <Card className="bg-muted/5">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-foreground">
-                    {(categoryComposite?.hard?.value || 50).toFixed(0)}
+                    {parseFloat(categoryComposite?.hard?.overallIndex || '50').toFixed(0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Hard Commodities</div>
                 </CardContent>
@@ -310,7 +314,7 @@ export default function Indices() {
               <Card className="bg-muted/5">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-foreground">
-                    {(categoryComposite?.soft?.value || 50).toFixed(0)}
+                    {parseFloat(categoryComposite?.soft?.overallIndex || '50').toFixed(0)}
                   </div>
                   <div className="text-sm text-muted-foreground">Soft Commodities</div>
                 </CardContent>
