@@ -5,4 +5,4 @@
 [x] 5. Created PostgreSQL database and connected successfully
 [x] 6. Migration and production setup completed successfully
 [x] 7. Verify the project is working using the feedback tool
-[ ] 8. Inform user the import is completed and mark import as completed
+[x] 8. Inform user the import is completed and mark import as completed
