@@ -290,13 +290,13 @@ export default function Landing() {
           </motion.div>
           
           <motion.div 
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-12"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-12"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true, margin: "-50px" }}
           >
-            {commodities.slice(0, 6).map((commodity, index: number) => (
+            {commodities.slice(0, 8).map((commodity, index: number) => (
               <motion.div
                 key={commodity.id}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -314,10 +314,10 @@ export default function Landing() {
             ))}
           </motion.div>
           
-          {commodities.length > 6 && (
+          {commodities.length > 8 && (
             <div className="text-center">
               <p className="text-muted-foreground mb-6">
-                + {commodities.length - 6} more commodities tracked
+                + {commodities.length - 8} more commodities tracked
               </p>
               <Button
                 onClick={handleGetStarted}
