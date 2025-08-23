@@ -422,6 +422,4 @@ async function main() {
 }
 
 // Run the script
-if (require.main === module) {
-  main();
-}
+main();
