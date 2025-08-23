@@ -1,4 +1,4 @@
-# Fixed Production Setup - Resolves static file serving
+# Clean Production Setup - Fixed build artifacts issue
 providers = ["node"]
 
 [variables]
@@ -10,11 +10,10 @@ cmds = ["npm ci"]
 
 [phases.build]
 cmds = [
-  "rm -rf dist server/public",
-  "vite build",
+  "rm -rf dist server/public public",
+  "npm run build",
   "mkdir -p server/public",
-  "cp -r dist/public/* server/public/",
-  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --define:import.meta.dirname='\"/app\"'"
+  "cp -r dist/public/* server/public/"
 ]
 
 [start]
