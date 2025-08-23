@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { CalendarIcon, TrendingUpIcon, BrainIcon, RefreshCwIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CalendarIcon, TrendingUpIcon, BrainIcon, RefreshCwIcon, DownloadIcon, FileSpreadsheetIcon, FileTextIcon, DatabaseIcon, ChevronDownIcon } from "lucide-react";
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { useToast } from "@/hooks/use-toast";
 import type { Commodity, AiModel } from "@shared/schema";
 
@@ -37,6 +41,137 @@ export function FuturePredictionsChart({ commodityId }: FuturePredictionsChartPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null);
+
+  const handleExportJSON = () => {
+    if (!data?.futurePredictions.length) return;
+
+    const jsonData = {
+      metadata: {
+        commodity: {
+          name: data.commodity.name,
+          symbol: data.commodity.symbol
+        },
+        totalPredictions: data.totalPredictions,
+        availableTimeframes: data.availableTimeframes,
+        exportedAt: new Date().toISOString(),
+        selectedTimeframe: selectedTimeframe || 'all'
+      },
+      predictions: data.futurePredictions.map(prediction => ({
+        timeframe: prediction.timeframe,
+        targetDate: prediction.targetDate,
+        models: Object.entries(prediction.predictions).map(([modelId, pred]) => ({
+          modelId,
+          modelName: pred.modelName,
+          predictedPrice: pred.value,
+          confidence: Math.round(pred.confidence * 100), // Convert to percentage
+          reasoning: pred.reasoning,
+          color: pred.color
+        }))
+      }))
+    };
+
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${data.commodity.symbol}_future_predictions_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportExcel = () => {
+    if (!data?.futurePredictions.length) return;
+
+    const excelData = data.futurePredictions.flatMap(prediction => 
+      Object.entries(prediction.predictions).map(([modelId, pred]) => ({
+        'Timeframe': prediction.timeframe.toUpperCase(),
+        'Target Date': new Date(prediction.targetDate).toLocaleDateString(),
+        'AI Model': pred.modelName,
+        'Predicted Price': `$${pred.value.toFixed(2)}`,
+        'Confidence': `${Math.round(pred.confidence * 100)}%`,
+        'Reasoning': pred.reasoning
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    const columnWidths = [
+      { wch: 12 }, // Timeframe
+      { wch: 15 }, // Target Date
+      { wch: 15 }, // AI Model
+      { wch: 18 }, // Predicted Price
+      { wch: 12 }, // Confidence
+      { wch: 50 }  // Reasoning
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    const metadataSheet = XLSX.utils.json_to_sheet([
+      { Property: 'Commodity', Value: data.commodity.name },
+      { Property: 'Symbol', Value: data.commodity.symbol },
+      { Property: 'Total Predictions', Value: data.totalPredictions },
+      { Property: 'Exported At', Value: new Date().toLocaleString() },
+      { Property: 'Selected Timeframe', Value: selectedTimeframe || 'All' }
+    ]);
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Future Predictions');
+    XLSX.utils.book_append_sheet(workbook, metadataSheet, 'Metadata');
+
+    XLSX.writeFile(workbook, `${data.commodity.symbol}_future_predictions_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    if (!data?.futurePredictions.length) return;
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.text(`${data.commodity.name} (${data.commodity.symbol}) - Future Predictions`, 20, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 35);
+    doc.text(`Total Predictions: ${data.totalPredictions}`, 20, 45);
+    doc.text(`Selected Timeframe: ${selectedTimeframe || 'All'}`, 20, 55);
+
+    const tableData = data.futurePredictions.flatMap(prediction => 
+      Object.entries(prediction.predictions).map(([modelId, pred]) => [
+        prediction.timeframe.toUpperCase(),
+        new Date(prediction.targetDate).toLocaleDateString(),
+        pred.modelName,
+        `$${pred.value.toFixed(2)}`,
+        `${Math.round(pred.confidence * 100)}%`
+      ])
+    );
+
+    (doc as any).autoTable({
+      head: [['Timeframe', 'Target Date', 'AI Model', 'Predicted Price', 'Confidence']],
+      body: tableData,
+      startY: 70,
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [66, 139, 202],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
+    });
+
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+    }
+
+    doc.save(`${data.commodity.symbol}_future_predictions_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   const { data, isLoading, error } = useQuery<FuturePredictionsData>({
     queryKey: ['/api/commodities', commodityId, 'future-predictions', selectedTimeframe],
@@ -180,7 +315,7 @@ export function FuturePredictionsChart({ commodityId }: FuturePredictionsChartPr
                   <div className="font-medium">${entry.value?.toFixed(2)}</div>
                   {confidence && (
                     <div className="text-xs text-muted-foreground">
-                      {confidence}% confidence
+                      {Math.round(confidence * 100)}% confidence
                     </div>
                   )}
                 </div>
@@ -227,19 +362,46 @@ export function FuturePredictionsChart({ commodityId }: FuturePredictionsChartPr
               </div>
             )}
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => generatePredictionsMutation.mutate()}
-            disabled={generatePredictionsMutation.isPending}
-            data-testid="button-refresh-predictions"
-          >
-            {generatePredictionsMutation.isPending ? (
-              <RefreshCwIcon className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCwIcon className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            {data?.futurePredictions?.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <DownloadIcon className="h-3 w-3 mr-1" />
+                    Export
+                    <ChevronDownIcon className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExportExcel}>
+                    <FileSpreadsheetIcon className="h-4 w-4 mr-2" />
+                    Export as Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <FileTextIcon className="h-4 w-4 mr-2" />
+                    Export as PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportJSON}>
+                    <DatabaseIcon className="h-4 w-4 mr-2" />
+                    Export as JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-          </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => generatePredictionsMutation.mutate()}
+              disabled={generatePredictionsMutation.isPending}
+              data-testid="button-refresh-predictions"
+            >
+              {generatePredictionsMutation.isPending ? (
+                <RefreshCwIcon className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCwIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -320,7 +482,7 @@ export function FuturePredictionsChart({ commodityId }: FuturePredictionsChartPr
                           <div>
                             <div className="font-medium">{model.name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {prediction.confidence}% confidence
+                              {Math.round(prediction.confidence * 100)}% confidence
                             </div>
                           </div>
                         </div>

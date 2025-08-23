@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon, ChevronUpIcon, DownloadIcon, FileSpreadsheetIcon, FileTextIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, DownloadIcon, FileSpreadsheetIcon, FileTextIcon, DatabaseIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -48,7 +48,7 @@ export function PredictionsTable({ commodity, aiModels }: PredictionsTableProps)
       'AI Model': row.aiModel,
       'Timeframe': row.timeframe,
       'Predicted Price': `$${parseFloat(row.predictedPrice).toFixed(2)}`,
-      'Confidence': `${row.confidence}%`,
+      'Confidence': `${parseFloat(row.confidence) * 100}%`,
       'Status': row.status
     }));
 
@@ -83,6 +83,46 @@ export function PredictionsTable({ commodity, aiModels }: PredictionsTableProps)
     XLSX.writeFile(workbook, `${commodity.symbol}_predictions_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
+  const handleExportJSON = () => {
+    if (!displayData.length) return;
+
+    // Prepare data for JSON export
+    const jsonData = {
+      metadata: {
+        commodity: {
+          name: commodity.name,
+          symbol: commodity.symbol
+        },
+        totalPredictions: predictions?.length || 0,
+        exportedRecords: displayData.length,
+        exportedAt: new Date().toISOString(),
+        dataRange: `Latest ${displayData.length} predictions`
+      },
+      predictions: displayData.map(row => ({
+        id: row.id,
+        date: row.date,
+        aiModel: row.aiModel,
+        timeframe: row.timeframe,
+        predictedPrice: parseFloat(row.predictedPrice),
+        confidence: parseFloat(row.confidence) * 100, // Convert to percentage
+        currentPrice: row.currentPrice,
+        accuracy: row.accuracy,
+        status: row.status
+      }))
+    };
+
+    // Create and download JSON file
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${commodity.symbol}_predictions_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportPDF = () => {
     if (!displayData.length) return;
 
@@ -103,7 +143,7 @@ export function PredictionsTable({ commodity, aiModels }: PredictionsTableProps)
       row.aiModel,
       row.timeframe,
       `$${parseFloat(row.predictedPrice).toFixed(2)}`,
-      `${row.confidence}%`,
+      `${Math.round(parseFloat(row.confidence) * 100)}%`,
       row.status
     ]);
 
@@ -200,6 +240,10 @@ export function PredictionsTable({ commodity, aiModels }: PredictionsTableProps)
                 <FileTextIcon className="h-4 w-4 mr-2" />
                 Export as PDF
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJSON}>
+                <DatabaseIcon className="h-4 w-4 mr-2" />
+                Export as JSON
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -240,7 +284,7 @@ export function PredictionsTable({ commodity, aiModels }: PredictionsTableProps)
                       ${parseFloat(row.predictedPrice).toFixed(2)}
                     </div>
                     <div className="text-muted-foreground text-xs">
-                      {row.confidence}%
+                      {Math.round(parseFloat(row.confidence) * 100)}%
                     </div>
                   </div>
                 </div>
