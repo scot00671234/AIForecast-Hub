@@ -4,5 +4,5 @@
 [x] 4. Fixed static file serving path resolution issue for production
 [x] 5. Created PostgreSQL database and connected successfully
 [x] 6. Migration and production setup completed successfully
-[x] 7. Verified the project is working using the feedback tool
-[x] 8. Informed user the import is completed and marked import as completed
+[ ] 7. Verify the project is working using the feedback tool
+[ ] 8. Inform user the import is completed and mark import as completed
