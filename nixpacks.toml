@@ -13,9 +13,8 @@ cmds = [
   "rm -rf dist server/public public",
   "vite build",
   "mkdir -p server/public",
-  "cp -r dist/public/* server/public/",
-  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:__dirname"
+  "cp -r dist/public/* server/public/"
 ]
 
 [start]
-cmd = "cd /app && node dist/index.js"
+cmd = "cd /app && NODE_ENV=production tsx server/index.ts"
