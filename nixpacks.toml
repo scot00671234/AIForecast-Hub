@@ -17,4 +17,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd /app && NODE_ENV=production tsx server/index.ts"
+cmd = "cd /app && NODE_ENV=production tsx server/production.ts"
