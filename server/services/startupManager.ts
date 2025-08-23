@@ -29,6 +29,18 @@ export class StartupManager {
     console.log('⚡ Starting heavy initialization (background)...');
     
     try {
+      // PRODUCTION: Clean up fake historical data on startup
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          console.log('🧹 Running production database cleanup...');
+          const { cleanupFakeData } = await import('../scripts/production-cleanup');
+          await cleanupFakeData();
+          console.log('✅ Production database cleanup completed');
+        } catch (error) {
+          console.error('⚠️ Production cleanup failed (non-critical):', error);
+        }
+      }
+      
       // Get commodities from verified database
       const commodities = await this.storage.getCommodities();
       console.log(`📊 Found ${commodities.length} commodities in database`);
@@ -90,20 +102,24 @@ export class StartupManager {
       if (quarterlyPredictions.length === 0) {
         console.log('🚀 No quarterly predictions found - triggering automatic quarterly prediction generation...');
         
-        // Import AI prediction service
-        const { aiPredictionService } = await import('./aiPredictionService');
+        // ONLY generate predictions if we have API keys configured (no fake data)
+        const hasApiKeys = process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.DEEPSEEK_API_KEY;
         
-        // Force quarterly prediction generation regardless of API key configuration
-        // This will work in production with AI keys, and gracefully handle missing keys in dev
-        console.log('🔮 Starting automatic quarterly prediction generation for all commodities...');
-        console.log('📅 This will generate 3mo, 6mo, 9mo, and 12mo predictions for all AI models');
-        
-        try {
-          await aiPredictionService.generateMonthlyPredictions();
-          console.log('✅ Automatic quarterly prediction generation completed successfully');
-        } catch (error) {
-          console.log('⚠️ Quarterly prediction generation encountered issues (this is expected in dev without AI keys):', (error as Error).message);
-          console.log('💡 This will work properly in production with configured AI keys');
+        if (hasApiKeys) {
+          // Import AI prediction service
+          const { aiPredictionService } = await import('./aiPredictionService');
+          
+          console.log('🔮 Starting automatic quarterly prediction generation for all commodities...');
+          console.log('📅 This will generate REAL 3mo, 6mo, 9mo, and 12mo predictions');
+          
+          try {
+            await aiPredictionService.generateMonthlyPredictions();
+            console.log('✅ Automatic quarterly prediction generation completed successfully');
+          } catch (error) {
+            console.log('⚠️ Quarterly prediction generation encountered issues:', (error as Error).message);
+          }
+        } else {
+          console.log('⚠️ No AI API keys configured - skipping prediction generation (prevents fake data)');
         }
       } else {
         console.log(`📊 Found ${quarterlyPredictions.length} existing quarterly predictions - skipping automatic generation`);
