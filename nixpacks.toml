@@ -3,7 +3,7 @@ providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
-PORT = "5000"
+PORT = "3000"
 
 [phases.install]
 cmds = ["npm ci"]
