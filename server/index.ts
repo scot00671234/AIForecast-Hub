@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
+import { log } from "./vite";
 import { storage } from "./storage";
 import { StartupManager } from "./services/startupManager";
 import path from "path";
@@ -88,6 +88,7 @@ app.use((req, res, next) => {
     });
     console.log("✅ Simple static file serving configured for production");
   } else {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
     console.log("✅ Vite development server configured");
   }
