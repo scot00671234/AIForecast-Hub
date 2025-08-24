@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Full report export - download all prediction data as Excel file
   app.get("/api/export/full-report", async (req, res) => {
     try {
-      const { default: XLSX } = await import('xlsx');
+      const XLSX = await import('xlsx');
       
       // Get all data needed for the report
       const [predictions, commodities, aiModels] = await Promise.all([
@@ -1181,10 +1181,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create workbook with multiple sheets
-      const workbook = XLSX.utils.book_new();
+      const workbook = XLSX.default.utils.book_new();
       
       // Main predictions sheet
-      const predictionsSheet = XLSX.utils.json_to_sheet(reportData);
+      const predictionsSheet = XLSX.default.utils.json_to_sheet(reportData);
       
       // Set column widths for better readability
       const columnWidths = [
@@ -1200,7 +1200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       predictionsSheet['!cols'] = columnWidths;
       
-      XLSX.utils.book_append_sheet(workbook, predictionsSheet, "All Predictions");
+      XLSX.default.utils.book_append_sheet(workbook, predictionsSheet, "All Predictions");
 
       // Commodities summary sheet
       const commoditiesData = commodities.map(commodity => ({
@@ -1209,13 +1209,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Category': commodity.category || 'General'
       }));
       
-      const commoditiesSheet = XLSX.utils.json_to_sheet(commoditiesData);
+      const commoditiesSheet = XLSX.default.utils.json_to_sheet(commoditiesData);
       commoditiesSheet['!cols'] = [
         { wch: 20 }, // Name
         { wch: 10 }, // Symbol
         { wch: 15 }  // Category
       ];
-      XLSX.utils.book_append_sheet(workbook, commoditiesSheet, "Commodities");
+      XLSX.default.utils.book_append_sheet(workbook, commoditiesSheet, "Commodities");
 
       // AI Models sheet
       const aiModelsData = aiModels.map(model => ({
@@ -1224,16 +1224,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Status': model.isActive ? 'Active' : 'Inactive'
       }));
       
-      const aiModelsSheet = XLSX.utils.json_to_sheet(aiModelsData);
+      const aiModelsSheet = XLSX.default.utils.json_to_sheet(aiModelsData);
       aiModelsSheet['!cols'] = [
         { wch: 15 }, // Model Name
         { wch: 12 }, // Provider
         { wch: 12 }  // Status
       ];
-      XLSX.utils.book_append_sheet(workbook, aiModelsSheet, "AI Models");
+      XLSX.default.utils.book_append_sheet(workbook, aiModelsSheet, "AI Models");
 
       // Generate Excel buffer
-      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      const excelBuffer = XLSX.default.write(workbook, { type: 'buffer', bookType: 'xlsx' });
       
       // Set response headers for file download
       const timestamp = new Date().toISOString().split('T')[0];

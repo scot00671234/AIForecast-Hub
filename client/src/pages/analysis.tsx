@@ -208,22 +208,6 @@ export default function Analysis() {
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Real-time market sentiment and AI-powered commodity indices for comprehensive market analysis
             </p>
-            
-            {/* Download Report Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Button 
-                onClick={handleDownloadReport} 
-                disabled={isDownloading}
-                className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3"
-              >
-                <DownloadIcon className="h-4 w-4 mr-2" />
-                {isDownloading ? 'Generating Report...' : 'Download Full Report (Excel)'}
-              </Button>
-            </motion.div>
           </motion.div>
 
           {/* Market Indices Grid */}
@@ -362,6 +346,44 @@ export default function Analysis() {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Data Export Section */}
+          <section className="space-y-8 mt-16">
+            <motion.div 
+              className="text-center space-y-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+                Complete Data Export
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Download a comprehensive Excel report containing all AI prediction data, commodity information, and model performance metrics across all timeframes.
+              </p>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="pt-4"
+              >
+                <Button 
+                  onClick={handleDownloadReport} 
+                  disabled={isDownloading}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-medium"
+                  size="lg"
+                >
+                  <DownloadIcon className="h-5 w-5 mr-3" />
+                  {isDownloading ? 'Generating Report...' : 'Download Full Report (Excel)'}
+                </Button>
+                
+                <div className="mt-4 text-sm text-muted-foreground">
+                  <p>Includes: All predictions • Commodities data • AI model information • Historical performance</p>
+                </div>
+              </motion.div>
+            </motion.div>
           </section>
 
         </div>
