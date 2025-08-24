@@ -21,7 +21,7 @@ const blogPosts: Record<string, BlogPost> = {
     id: "ai-commodity-forecasting",
     title: "The Future of AI-Powered Commodity Forecasting",
     excerpt: "How artificial intelligence is revolutionizing commodity price predictions and what this means for traders and investors.",
-    publishedDate: "January 16, 2025",
+    publishedDate: "August 23, 2025",
     readTime: "6 min read",
     category: "AI & Markets",
     content: (
