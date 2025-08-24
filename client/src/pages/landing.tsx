@@ -22,7 +22,7 @@ import { AI_MODELS } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { LivePriceCard } from "@/components/LivePriceCard";
 import { useQuery } from "@tanstack/react-query";
-import UnifiedChart from "@/components/dashboard/unified-chart";
+import LandingChart from "@/components/dashboard/landing-chart";
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -337,7 +337,7 @@ export default function Landing() {
                 </div>
                 <div className="p-6">
                   {commodities.length > 0 && (
-                    <UnifiedChart 
+                    <LandingChart 
                       commodityId={commodities.find(c => c.name === 'Gold')?.id || commodities[0]?.id} 
                       period="3mo" 
                       height={400} 
