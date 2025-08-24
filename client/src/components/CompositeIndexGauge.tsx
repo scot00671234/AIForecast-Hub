@@ -53,19 +53,11 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
   };
 
   const getSentimentColor = (sentiment: string): string => {
-    switch (sentiment) {
-      case 'bullish': return 'text-green-600 dark:text-green-400';
-      case 'bearish': return 'text-red-600 dark:text-red-400';
-      default: return 'text-yellow-600 dark:text-yellow-400';
-    }
+    return 'text-foreground';
   };
 
   const getSentimentBadgeVariant = (sentiment: string) => {
-    switch (sentiment) {
-      case 'bullish': return 'default';
-      case 'bearish': return 'destructive';
-      default: return 'secondary';
-    }
+    return 'secondary';
   };
 
   const getSentimentIcon = (sentiment: string) => {
@@ -150,7 +142,7 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
           <CardTitle className="text-sm font-medium text-foreground">
             AI Composite Index
           </CardTitle>
-          <Badge variant={getSentimentBadgeVariant(latestIndex.marketSentiment)} className="ml-auto text-xs px-2 py-0.5">
+          <Badge variant="outline" className="ml-auto text-xs px-2 py-0.5 border-border/50 text-muted-foreground">
             {latestIndex.marketSentiment.toUpperCase()}
           </Badge>
         </div>
@@ -165,9 +157,9 @@ export function CompositeIndexGauge({ className }: CompositeIndexGaugeProps) {
           <div className="text-xs text-muted-foreground">
             {getIndexDescription(indexValue)}
           </div>
-          <div className="w-full bg-muted/40 rounded-full h-2">
+          <div className="w-full bg-border/30 rounded-full h-1">
             <div 
-              className="bg-primary h-2 rounded-full transition-all duration-700"
+              className="bg-foreground/60 h-1 rounded-full transition-all duration-700"
               style={{ width: `${gaugePosition}%` }}
             />
           </div>

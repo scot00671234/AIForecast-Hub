@@ -84,9 +84,7 @@ export default function MarketStatusCard() {
   }
 
   const getStatusColor = () => {
-    if (status?.systemHealth === 'error') return 'text-red-600 dark:text-red-400';
-    if (!status?.isMarketOpen) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-green-600 dark:text-green-400';
+    return 'text-muted-foreground';
   };
 
   const getStatusIcon = () => {
@@ -111,11 +109,7 @@ export default function MarketStatusCard() {
       </CardHeader>
       <CardContent className="pt-0 flex-1 flex flex-col space-y-3">
         <div className="text-center space-y-2">
-          <div className={`text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 ${
-            status?.isMarketOpen && status?.systemHealth === 'healthy' 
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
-              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-          }`}>
+          <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-foreground border border-border/50">
             {getStatusIcon()}
             {getStatusText()}
           </div>

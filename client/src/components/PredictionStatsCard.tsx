@@ -102,7 +102,7 @@ export default function PredictionStatsCard() {
             {stats?.totalPredictions === 0 ? (
               <div className="px-2 py-1 bg-muted/50 text-muted-foreground text-xs rounded-full font-medium">Pending</div>
             ) : (
-              <div className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-medium">Active</div>
+              <div className="px-2 py-1 bg-muted/50 text-foreground text-xs rounded-full font-medium">Active</div>
             )}
           </div>
         </div>
