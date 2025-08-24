@@ -6,6 +6,7 @@ import { SmartBackButton } from "../components/smart-back-button";
 import { useLocation, Link } from "wouter";
 import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon } from "lucide-react";
 import BottomBanner from "@/components/ads/BottomBanner";
+import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -188,26 +189,9 @@ export default function Indices() {
           <section className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {/* Overall AI Commodity Composite Index */}
-              {loadingOverall ? (
-                <Card className="bg-muted/10 aspect-square flex items-center justify-center">
-                  <div className="animate-spin">
-                    <ActivityIcon className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </Card>
-              ) : (
-                <IndexGauge
-                  value={parseFloat(overallComposite?.overallIndex || '50')}
-                  title="AI Composite"
-                  subtitle="All Commodities"
-                  classification={
-                    parseFloat(overallComposite?.overallIndex || '50') >= 75 ? "Extremely Bullish" :
-                    parseFloat(overallComposite?.overallIndex || '50') >= 60 ? "Bullish" :
-                    parseFloat(overallComposite?.overallIndex || '50') >= 40 ? "Neutral" :
-                    parseFloat(overallComposite?.overallIndex || '50') >= 25 ? "Bearish" : "Extremely Bearish"
-                  }
-                  onClick={() => setSelectedIndex("composite")}
-                />
-              )}
+              <div onClick={() => setSelectedIndex("composite")} className="cursor-pointer">
+                <CompositeIndexGauge />
+              </div>
 
               {/* Fear & Greed Index */}
               {loadingFearGreed ? (
