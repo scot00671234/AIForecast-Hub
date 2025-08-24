@@ -14,7 +14,7 @@ cmds = [
   "vite build",
   "mkdir -p server/public",
   "cp -r dist/public/* server/public/",
-  "esbuild server/index-production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --outfile=dist/index.js"
+  "esbuild server/index-production.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js"
 ]
 
 [start]
