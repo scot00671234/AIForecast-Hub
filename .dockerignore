@@ -1,68 +1,11 @@
-# Development files
 node_modules
-.env
-.env.local
-
-# Build artifacts
-.next/
-.nuxt/
-dist/
-build/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Cache directories
-.cache/
-.parcel-cache/
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Temporary files
-*.tmp
-*.temp
-
-# Documentation
-*.md
-docs/
-
-# Git
-.git/
+dist
+.git
 .gitignore
-
-# Production build optimization
-# Allow built assets for production deployment
-!dist/
-!dist/public/
-!dist/public/*
-!dist/index.js
-
-# Block Caddy detection but allow our built static files
-Caddyfile*
-caddy.*
-*.caddy
-caddy/
-
-# Force Node.js detection
-!package.json
-!package-lock.json
-!*.js
-!*.ts
-!nixpacks.toml
-!fix-build.js
+README.md
+.env*
+attached_assets
+.local
+.replit
+.nixpacks
+*.log
