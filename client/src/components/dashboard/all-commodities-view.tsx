@@ -9,10 +9,10 @@ export default function AllCommoditiesView({ filteredCommodities }: AllCommoditi
   return (
     <div className="space-y-6 md:space-y-8" data-testid="all-commodities-section">
       <div className="text-center mb-8 md:mb-12">
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground mb-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-foreground mb-4 md:mb-6">
           {filteredCommodities ? 'Search Results' : 'All Commodities Overview'}
         </h2>
-        <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
+        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Tap any chart to view detailed analysis with multiple time periods and Yahoo Finance data
         </p>
       </div>
