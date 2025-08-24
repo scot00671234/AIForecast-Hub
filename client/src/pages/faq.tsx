@@ -67,14 +67,9 @@ export default function FAQ() {
       answer: "Yes, AIForecast Hub is fully responsive and optimized for mobile devices. All features, charts, and analytics are accessible on smartphones and tablets, ensuring you can track AI prediction performance wherever you are."
     },
     {
-      id: "api",
-      question: "Do you offer an API for developers?",
-      answer: "We're currently developing API access for developers and institutional users. This will allow programmatic access to prediction data, accuracy metrics, and historical performance. Contact us if you're interested in early access to our API services."
-    },
-    {
       id: "contact",
       question: "How can I get in touch or provide feedback?",
-      answer: "We welcome feedback and suggestions for improving AIForecast Hub. You can reach us through our blog comments, or through our official channels. We're constantly working to enhance the platform based on user needs and market developments."
+      answer: "We welcome feedback and suggestions for improving AIForecast Hub. You can reach us through our official channels. We're constantly working to enhance the platform based on user needs and market developments."
     }
   ];
 

@@ -124,8 +124,7 @@ export default function About() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-foreground leading-relaxed">
-                  Built with modern web technologies including React, TypeScript, and PostgreSQL, 
+                <p className="text-foreground leading-relaxed"> 
                   AIForecast Hub processes thousands of data points daily to provide accurate, 
                   up-to-date performance metrics.
                 </p>

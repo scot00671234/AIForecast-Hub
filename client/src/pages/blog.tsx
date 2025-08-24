@@ -1,10 +1,32 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowRightIcon, CalendarIcon, ClockIcon } from "lucide-react";
 import { NavigationMenu } from "../components/navigation-menu";
 import { SmartBackButton } from "../components/smart-back-button";
 import { motion } from "framer-motion";
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  publishedDate: string;
+  readTime: string;
+  category: string;
+}
+
+const blogPosts: BlogPost[] = [
+  {
+    id: "ai-commodity-forecasting",
+    title: "The Future of AI-Powered Commodity Forecasting",
+    excerpt: "How artificial intelligence is revolutionizing commodity price predictions and what this means for traders and investors.",
+    content: "In an era where artificial intelligence is reshaping industries, commodity trading stands at the forefront of this transformation...",
+    publishedDate: "January 16, 2025",
+    readTime: "6 min read",
+    category: "AI & Markets"
+  }
+];
 
 export default function Blog() {
   const [location] = useLocation();
@@ -29,84 +51,47 @@ export default function Blog() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-24">
         <SmartBackButton className="mb-12" />
-          
-        <motion.article 
-          className="space-y-12"
+        
+        {/* Page Header */}
+        <motion.div 
+          className="text-center space-y-4 mb-16"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          transition={{ duration: 0.6 }}
         >
-            <header className="space-y-6">
-              <h1 className="text-4xl md:text-6xl font-semibold text-foreground leading-tight tracking-tight">
-                The Future of AI-Powered Commodity Forecasting
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                How artificial intelligence is revolutionizing commodity price predictions
-              </p>
-              <div className="text-sm text-muted-foreground font-medium">
-                Published on January 16, 2025
+          <h1 className="text-4xl md:text-5xl font-semibold text-foreground leading-tight tracking-tight">
+            Blog
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Insights, analysis, and perspectives on AI-powered commodity forecasting
+          </p>
+        </motion.div>
+
+        {/* Blog Posts Grid */}
+        <motion.div 
+          className="space-y-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          {blogPosts.map((post, index) => (
+            <BlogPostCard key={post.id} post={post} index={index} />
+          ))}
+          
+          {/* Coming Soon Card */}
+          <Card className="bg-muted/20 border-border/30 border-dashed">
+            <CardContent className="p-8 text-center">
+              <div className="space-y-3">
+                <h3 className="text-lg font-medium text-muted-foreground">More articles coming soon</h3>
+                <p className="text-sm text-muted-foreground">
+                  We're working on more insights about AI forecasting, market analysis, and trading strategies.
+                </p>
               </div>
-            </header>
-
-            <Card className="bg-background/50 border-border/30 hover:bg-background/80 transition-colors duration-300">
-              <CardContent className="p-10 space-y-8">
-                <h2 className="text-3xl font-semibold text-foreground">The Purpose Behind AIForecast Hub</h2>
-                
-                <p className="text-foreground leading-relaxed">
-                  In an era where artificial intelligence is reshaping industries, commodity trading stands at the forefront of this transformation. AIForecast Hub was created to bridge the gap between cutting-edge AI technology and practical market insights, providing traders, investors, and analysts with unprecedented clarity into how different AI models perform in real-world forecasting scenarios.
-                </p>
-
-                <h3 className="text-2xl font-semibold text-foreground mt-10">Why Compare AI Models?</h3>
-                
-                <p className="text-foreground leading-relaxed">
-                  Not all AI models are created equal. While Claude, ChatGPT, and Deepseek each bring unique strengths to the table, their performance can vary significantly across different commodities and market conditions. Our platform provides comprehensive analysis of:
-                </p>
-
-                <ul className="list-disc pl-6 space-y-2 text-foreground">
-                  <li>Prediction accuracy across 10 major commodities including oil, gold, natural gas, and agricultural products</li>
-                  <li>Performance consistency over various time periods (7-day, 30-day, 90-day windows)</li>
-                  <li>Model behavior during market volatility and trending periods</li>
-                  <li>Comparative analysis to help users choose the most reliable AI model for their specific needs</li>
-                </ul>
-
-                <h3 className="text-2xl font-semibold text-foreground mt-10">Real Data, Real Insights</h3>
-                
-                <p className="text-foreground leading-relaxed">
-                  Our platform integrates directly with Yahoo Finance to ensure all commodity price data is authentic and up-to-date. Every Monday, our system generates fresh 7-day predictions from all three AI models, creating a continuously updated dataset that reflects current market conditions and model performance.
-                </p>
-
-                <p className="text-foreground leading-relaxed">
-                  This approach ensures that users receive genuine insights based on real market data, not synthetic or outdated information. The result is a reliable resource for understanding how AI models actually perform in today's dynamic commodity markets.
-                </p>
-
-                <h3 className="text-xl font-medium text-foreground mt-8">The Technology Stack</h3>
-                
-                <p className="text-foreground leading-relaxed">
-                  Built with modern web technologies and designed for scalability, AIForecast Hub leverages:
-                </p>
-
-                <ul className="list-disc pl-6 space-y-2 text-foreground">
-                  <li>React with TypeScript for a robust, type-safe frontend</li>
-                  <li>Real-time data integration with Yahoo Finance API</li>
-                  <li>PostgreSQL database for reliable data storage and historical tracking</li>
-                  <li>Advanced charting capabilities with interactive visualizations</li>
-                  <li>Responsive design optimized for desktop and mobile use</li>
-                </ul>
-
-                <h3 className="text-xl font-medium text-foreground mt-8">Looking Forward</h3>
-                
-                <p className="text-foreground leading-relaxed">
-                  As AI technology continues to evolve, so too will the capabilities of commodity forecasting. AIForecast Hub represents not just a current snapshot of AI performance, but a foundation for understanding how these models improve over time. We're committed to expanding our analysis, adding new commodities, and providing even deeper insights into the fascinating world of AI-powered market prediction.
-                </p>
-
-                <p className="text-foreground leading-relaxed">
-                  Whether you're a seasoned trader looking to leverage AI insights, a data scientist studying model performance, or simply curious about the intersection of artificial intelligence and financial markets, AIForecast Hub provides the tools and data you need to make informed decisions.
-                </p>
-              </CardContent>
-            </Card>
-        </motion.article>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
 
       {/* Modern Footer */}
@@ -131,5 +116,60 @@ export default function Blog() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function BlogPostCard({ post, index }: { post: BlogPost; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
+    >
+      <Card className="bg-background/50 border-border/30 hover:bg-background/80 transition-all duration-300 group cursor-pointer">
+        <CardContent className="p-8">
+          <div className="space-y-4">
+            {/* Category & Metadata */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                {post.category}
+              </span>
+              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                <div className="flex items-center space-x-1">
+                  <CalendarIcon className="h-3 w-3" />
+                  <span>{post.publishedDate}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <ClockIcon className="h-3 w-3" />
+                  <span>{post.readTime}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Title & Excerpt */}
+            <div className="space-y-3">
+              <h2 className="text-2xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                {post.title}
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                {post.excerpt}
+              </p>
+            </div>
+
+            {/* Read More Button */}
+            <Link href={`/blog/${post.id}`}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-0 h-auto text-foreground hover:text-primary transition-colors group-hover:translate-x-1 transform duration-200"
+              >
+                <span className="text-sm font-medium">Read article</span>
+                <ArrowRightIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

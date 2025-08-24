@@ -10,6 +10,7 @@ import Indices from "@/pages/indices";
 import About from "@/pages/about";
 import FAQ from "@/pages/faq";
 import Blog from "@/pages/blog";
+import BlogPost from "@/pages/blog-post";
 import Policy from "@/pages/policy";
 import NotFound from "@/pages/not-found";
 
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/blog" component={Blog} />
+      <Route path="/blog/:id" component={BlogPost} />
       <Route path="/policy" component={Policy} />
       <Route component={NotFound} />
     </Switch>
