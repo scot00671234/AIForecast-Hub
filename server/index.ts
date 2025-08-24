@@ -1,8 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 import { storage } from "./storage";
 import { StartupManager } from "./services/startupManager";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
@@ -72,8 +74,19 @@ app.use((req, res, next) => {
   console.log(`🔧 Environment detection: NODE_ENV=${process.env.NODE_ENV}, isProduction=${isProduction}`);
   
   if (isProduction) {
-    serveStatic(app);
-    console.log("✅ Static file serving configured for production");
+    // Simple production static serving - no complex dependencies
+    const distPath = path.resolve(process.cwd(), "dist", "public");
+    console.log(`📁 Looking for frontend files at: ${distPath}`);
+    
+    if (!fs.existsSync(distPath)) {
+      throw new Error(`Frontend build not found at: ${distPath}`);
+    }
+    
+    app.use(express.static(distPath));
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
+    console.log("✅ Simple static file serving configured for production");
   } else {
     await setupVite(app, server);
     console.log("✅ Vite development server configured");
