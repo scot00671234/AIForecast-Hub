@@ -1,4 +1,4 @@
-# Clean Production Setup - Fixed build artifacts issue
+# Production Setup - Fixed frontend deployment issue
 providers = ["node"]
 
 [variables]
@@ -10,11 +10,12 @@ cmds = ["npm ci"]
 
 [phases.build]
 cmds = [
-  "rm -rf dist server/public public",
+  "rm -rf dist server/public",
   "vite build",
   "mkdir -p server/public",
-  "cp -r dist/public/* server/public/"
+  "cp -r dist/public/* server/public/",
+  "esbuild server/index-production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --outfile=dist/index.js"
 ]
 
 [start]
-cmd = "cd /app && NODE_ENV=production tsx server/production.ts"
+cmd = "cd /app && NODE_ENV=production node dist/index.js"
