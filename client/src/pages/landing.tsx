@@ -88,31 +88,63 @@ export default function Landing() {
               <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </div>
             
-            {/* Navigation - hidden on mobile, shown on desktop */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
-              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
-              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
-            </nav>
-            
+            {/* Navigation - mobile menu integrated */}
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
-              <Button 
-                onClick={handleGetStarted}
-                size="sm" 
-                className="hidden md:inline-flex"
-                data-testid="header-cta-button"
-              >
-                Get Started
-              </Button>
+              <div className="hidden md:flex items-center space-x-8">
+                <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
+                <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <ThemeToggle />
+                <Button 
+                  onClick={handleGetStarted}
+                  size="sm" 
+                  className="hidden md:inline-flex"
+                  data-testid="header-cta-button"
+                >
+                  Get Started
+                </Button>
+                {/* Mobile menu - only show on mobile */}
+                <div className="md:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+                        <MenuIcon className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="w-full">Dashboard</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/analysis" className="w-full">Analysis</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/about" className="w-full">About</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/faq" className="w-full">FAQ</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/blog" className="w-full">Blog</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/policy" className="w-full">Policy</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-32 md:py-48 px-6 md:px-6 relative overflow-hidden">
+      <section className="py-16 md:py-32 lg:py-48 px-4 md:px-6 relative overflow-hidden">
         {/* Simplified, cleaner background */}
         <div className="absolute inset-0 w-full h-full">
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/40" />
@@ -127,7 +159,7 @@ export default function Landing() {
           >
             <div className="space-y-10">
               <motion.h1 
-                className="text-5xl md:text-7xl font-semibold text-foreground leading-[1.05] tracking-tight"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-foreground leading-[1.05] tracking-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
@@ -138,7 +170,7 @@ export default function Landing() {
                 </span>
               </motion.h1>
               <motion.p 
-                className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-normal"
+                className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-normal px-4 sm:px-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}

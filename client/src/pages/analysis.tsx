@@ -190,7 +190,7 @@ export default function Analysis() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-8 md:py-16">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-16">
         <SmartBackButton className="mb-12" />
         
         <div className="space-y-8 md:space-y-16">
@@ -202,10 +202,10 @@ export default function Analysis() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-foreground">
               Analysis
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
               Real-time market sentiment and AI-powered commodity indices for comprehensive market analysis
             </p>
           </motion.div>
@@ -356,10 +356,10 @@ export default function Analysis() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
                 Complete Data Export
               </h2>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
                 Download a comprehensive Excel report containing all AI prediction data, commodity information, and model performance metrics across all timeframes.
               </p>
               
@@ -372,7 +372,7 @@ export default function Analysis() {
                 <Button 
                   onClick={handleDownloadReport} 
                   disabled={isDownloading}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-medium"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium min-h-[44px]"
                   size="lg"
                 >
                   <DownloadIcon className="h-5 w-5 mr-3" />
