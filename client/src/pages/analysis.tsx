@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { NavigationMenu } from "../components/navigation-menu";
 import { SmartBackButton } from "../components/smart-back-button";
 import { useLocation, Link } from "wouter";
-import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon } from "lucide-react";
+import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon, DownloadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import BottomBanner from "@/components/ads/BottomBanner";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -113,9 +114,34 @@ function IndexGauge({ value, title, subtitle, classification, onClick }: {
   );
 }
 
-export default function Indices() {
+export default function Analysis() {
   const [location] = useLocation();
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch('/api/export/full-report');
+      if (!response.ok) {
+        throw new Error('Failed to download report');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `AIForecast_Hub_Full_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const { data: overallComposite, isLoading: loadingOverall } = useQuery<CompositeIndex>({
     queryKey: ["/api/composite-index/latest"],
@@ -177,11 +203,27 @@ export default function Indices() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-foreground">
-              Market Indices
+              Analysis
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Real-time market sentiment and AI-powered commodity indices for comprehensive market analysis
             </p>
+            
+            {/* Download Report Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Button 
+                onClick={handleDownloadReport} 
+                disabled={isDownloading}
+                className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3"
+              >
+                <DownloadIcon className="h-4 w-4 mr-2" />
+                {isDownloading ? 'Generating Report...' : 'Download Full Report (Excel)'}
+              </Button>
+            </motion.div>
           </motion.div>
 
           {/* Market Indices Grid */}

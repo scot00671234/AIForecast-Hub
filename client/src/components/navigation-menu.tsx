@@ -42,7 +42,7 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
 
   const menuItems = [
     { path: "/dashboard", label: "Dashboard", description: "View AI predictions and analytics" },
-    { path: "/indices", label: "Indices", description: "Market indices and sentiment analysis" },
+    { path: "/analysis", label: "Analysis", description: "Market indices and sentiment analysis" },
     { path: "/about", label: "About", description: "Learn about our platform and methodology" },
     { path: "/faq", label: "FAQ", description: "Frequently asked questions" },
     { path: "/blog", label: "Blog", description: "Insights and market analysis" },

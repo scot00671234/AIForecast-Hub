@@ -1150,6 +1150,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Full report export - download all prediction data as Excel file
+  app.get("/api/export/full-report", async (req, res) => {
+    try {
+      const { default: XLSX } = await import('xlsx');
+      
+      // Get all data needed for the report
+      const [predictions, commodities, aiModels] = await Promise.all([
+        storage.getPredictions(), // Get all predictions
+        storage.getCommodities(),
+        storage.getAiModels()
+      ]);
+
+      // Transform predictions data for Excel
+      const reportData = predictions.map(prediction => {
+        const commodity = commodities.find(c => c.id === prediction.commodityId);
+        const aiModel = aiModels.find(m => m.id === prediction.aiModelId);
+        
+        return {
+          'Commodity': commodity?.name || 'Unknown',
+          'Symbol': commodity?.yahooSymbol || 'N/A',
+          'AI Model': aiModel?.name || 'Unknown',
+          'Prediction Date': new Date(prediction.predictionDate).toLocaleDateString(),
+          'Target Date': new Date(prediction.targetDate).toLocaleDateString(),
+          'Timeframe': prediction.timeframe || '3mo',
+          'Predicted Price': `$${parseFloat(prediction.predictedPrice).toFixed(2)}`,
+          'Confidence': prediction.confidence || '75%',
+          'Created At': new Date(prediction.createdAt).toLocaleDateString(),
+        };
+      });
+
+      // Create workbook with multiple sheets
+      const workbook = XLSX.utils.book_new();
+      
+      // Main predictions sheet
+      const predictionsSheet = XLSX.utils.json_to_sheet(reportData);
+      
+      // Set column widths for better readability
+      const columnWidths = [
+        { wch: 15 }, // Commodity
+        { wch: 10 }, // Symbol
+        { wch: 12 }, // AI Model
+        { wch: 15 }, // Prediction Date
+        { wch: 15 }, // Target Date
+        { wch: 12 }, // Timeframe
+        { wch: 15 }, // Predicted Price
+        { wch: 12 }, // Confidence
+        { wch: 15 }  // Created At
+      ];
+      predictionsSheet['!cols'] = columnWidths;
+      
+      XLSX.utils.book_append_sheet(workbook, predictionsSheet, "All Predictions");
+
+      // Commodities summary sheet
+      const commoditiesData = commodities.map(commodity => ({
+        'Name': commodity.name,
+        'Symbol': commodity.yahooSymbol,
+        'Category': commodity.category || 'General'
+      }));
+      
+      const commoditiesSheet = XLSX.utils.json_to_sheet(commoditiesData);
+      commoditiesSheet['!cols'] = [
+        { wch: 20 }, // Name
+        { wch: 10 }, // Symbol
+        { wch: 15 }  // Category
+      ];
+      XLSX.utils.book_append_sheet(workbook, commoditiesSheet, "Commodities");
+
+      // AI Models sheet
+      const aiModelsData = aiModels.map(model => ({
+        'Model Name': model.name,
+        'Provider': model.provider,
+        'Status': model.isActive ? 'Active' : 'Inactive'
+      }));
+      
+      const aiModelsSheet = XLSX.utils.json_to_sheet(aiModelsData);
+      aiModelsSheet['!cols'] = [
+        { wch: 15 }, // Model Name
+        { wch: 12 }, // Provider
+        { wch: 12 }  // Status
+      ];
+      XLSX.utils.book_append_sheet(workbook, aiModelsSheet, "AI Models");
+
+      // Generate Excel buffer
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      
+      // Set response headers for file download
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `AIForecast_Hub_Full_Report_${timestamp}.xlsx`;
+      
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', excelBuffer.length);
+      
+      res.send(excelBuffer);
+      
+    } catch (error) {
+      console.error("Error generating full report:", error);
+      res.status(500).json({ error: "Failed to generate full report" });
+    }
+  });
+
   // Professional startup management
   const { StartupManager } = await import('./services/startupManager');
   const startupManager = new StartupManager(storage);
