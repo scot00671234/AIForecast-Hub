@@ -9,3 +9,4 @@
 [x] 9. EMERGENCY CLEANUP: Removed ALL fake historical data from production database
 [x] 10. EMERGENCY CLEANUP: Deleted generate-historical-predictions.ts script that created fake data
 [x] 11. Inform user the import is completed and mark import as completed
+[x] 12. Updated dashboard title typography - made "AI Prediction Performance" smaller and cleaner

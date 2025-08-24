@@ -126,10 +126,10 @@ export default function Dashboard() {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <div className="text-center mb-12 md:mb-20">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-foreground mb-6 md:mb-8 tracking-tight">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground mb-4 md:mb-6 tracking-tight">
               AI Prediction Performance
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Real-time analysis of AI model accuracy across commodity markets
             </p>
           </div>
