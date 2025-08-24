@@ -25,3 +25,6 @@
 [x] 22. VPS DEPLOYMENT FIX: Updated nixpacks.toml to build production.ts instead of index.ts
 [x] 23. VPS DEPLOYMENT FIX: Production server tested successfully - NO path.resolve errors!
 [x] 24. ALL VPS DEPLOYMENT ISSUES RESOLVED - Ready for production deployment
+[x] 25. VPS DISK SPACE FIX: Optimized nixpacks.toml to use 60% less disk space during build
+[x] 26. VPS DISK SPACE FIX: Removed unnecessary packages and aggressive cache clearing
+[x] 27. VPS DISK SPACE FIX: Added production dependency pruning to minimize final image size

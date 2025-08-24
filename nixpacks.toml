@@ -1,27 +1,24 @@
-# Anti-Cache Production Setup - Force Fresh Everything
+# Optimized Production Setup - Minimal Disk Usage
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
-NIXPACKS_NO_CACHE = "1"
 
 [phases.setup]
-nixPkgs = ["nodejs_18", "npm-9_x", "openssl"]
-cmds = ["echo 'Cache bust: '$(date +%s)"]
+nixPkgs = ["nodejs_18", "openssl"]
 
 [phases.install]
 cmds = [
-  "rm -rf node_modules .npm",
-  "npm cache clean --force",
-  "npm ci"
+  "npm ci --production=false --no-audit --no-fund",
+  "npm cache clean --force"
 ]
 
 [phases.build]
 cmds = [
-  "rm -rf dist node_modules/.vite node_modules/.cache",
-  "NODE_ENV=production vite build --emptyOutDir",
-  "esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js"
+  "NODE_ENV=production npm run build",
+  "rm -rf node_modules/.vite node_modules/.cache .npm",
+  "npm prune --production"
 ]
 
 [start]
