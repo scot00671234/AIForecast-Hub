@@ -325,29 +325,6 @@ const UnifiedChart: React.FC<UnifiedChartProps> = ({
 
   return (
     <div className="w-full">
-      {/* Chart Header with Legend */}
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-foreground">Price Movement & AI Predictions</h3>
-        <div className="flex items-center space-x-6 text-sm">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-0.5 bg-black dark:bg-white"></div>
-            <span className="text-foreground font-medium">Actual Price</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-0.5 border-t-2 border-dotted border-green-500"></div>
-            <span className="text-muted-foreground">Claude</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-0.5 border-t-2 border-dotted border-blue-500"></div>
-            <span className="text-muted-foreground">ChatGPT</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-0.5 border-t-2 border-dotted border-purple-500"></div>
-            <span className="text-muted-foreground">Deepseek</span>
-          </div>
-        </div>
-      </div>
-      
       <div 
         ref={chartContainerRef} 
         className="w-full border border-border rounded-lg bg-background"
