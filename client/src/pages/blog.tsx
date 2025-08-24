@@ -79,18 +79,6 @@ export default function Blog() {
           {blogPosts.map((post, index) => (
             <BlogPostCard key={post.id} post={post} index={index} />
           ))}
-          
-          {/* Coming Soon Card */}
-          <Card className="bg-muted/20 border-border/30 border-dashed">
-            <CardContent className="p-8 text-center">
-              <div className="space-y-3">
-                <h3 className="text-lg font-medium text-muted-foreground">More articles coming soon</h3>
-                <p className="text-sm text-muted-foreground">
-                  We're working on more insights about AI forecasting, market analysis, and trading strategies.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </motion.div>
       </main>
 
