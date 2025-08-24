@@ -88,56 +88,24 @@ export default function Landing() {
               <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </div>
             
-            {/* Navigation - mobile menu integrated */}
+            {/* Navigation - hidden on mobile, shown on desktop */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+            </nav>
+            
             <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-8">
-                <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
-                <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</Link>
-                <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <ThemeToggle />
-                <Button 
-                  onClick={handleGetStarted}
-                  size="sm" 
-                  className="hidden md:inline-flex"
-                  data-testid="header-cta-button"
-                >
-                  Get Started
-                </Button>
-                {/* Mobile menu - only show on mobile */}
-                <div className="md:hidden">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
-                        <MenuIcon className="h-5 w-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="w-full">Dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/analysis" className="w-full">Analysis</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/about" className="w-full">About</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/faq" className="w-full">FAQ</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/blog" className="w-full">Blog</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/policy" className="w-full">Policy</Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+              <ThemeToggle />
+              <Button 
+                onClick={handleGetStarted}
+                size="sm" 
+                className="hidden md:inline-flex"
+                data-testid="header-cta-button"
+              >
+                Get Started
+              </Button>
             </div>
           </div>
         </div>
