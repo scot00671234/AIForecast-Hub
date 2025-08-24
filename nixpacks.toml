@@ -1,17 +1,22 @@
-# Ultra-Clean Production Setup
+# Ultra-Clean Production Setup - Cache Busting
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+# Force cache invalidation
+NIXPACKS_NO_CACHE = "1"
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = [
+  "npm ci --no-cache",
+  "npm cache clean --force"
+]
 
 [phases.build]
 cmds = [
-  "rm -rf dist",
-  "NODE_ENV=production vite build",
+  "rm -rf dist node_modules/.cache .vite",
+  "NODE_ENV=production vite build --force",
   "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js"
 ]
 
