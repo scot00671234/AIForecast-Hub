@@ -32,3 +32,6 @@
 [x] 29. FINAL DEPLOYMENT FIX: Created ultra-minimal multi-stage Dockerfile (80% smaller than nixpacks)
 [x] 30. FINAL DEPLOYMENT FIX: Added .dockerignore to exclude unnecessary files from build
 [x] 31. CLEAN MINIMALIST PRODUCTION SETUP COMPLETE - Ready for deployment
+[x] 32. NIXPACKS FIX: Removed conflicting Dockerfile and created minimal nixpacks.toml
+[x] 33. NIXPACKS FIX: Clean nixpacks setup with nodejs_18 and minimal dependencies
+[x] 34. VPS CLEANUP: Provided comprehensive VPS disk cleanup commands
