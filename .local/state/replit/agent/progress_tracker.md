@@ -11,5 +11,8 @@
 [x] 11. Inform user the import is completed and mark import as completed
 [x] 12. Updated dashboard title typography - made "AI Prediction Performance" smaller and cleaner
 [x] 13. Migration completed - application running successfully on Replit
+[x] 14. PRODUCTION FIX: Fixed path.resolve undefined error (import.meta.dirname → process.cwd())
+[x] 15. PRODUCTION FIX: Created clean production server bypassing vite.ts issues
+[x] 16. PRODUCTION FIX: Simplified nixpacks.toml build process for reliable frontend updates
 [x] 14. PRODUCTION DEPLOYMENT FIX: Simplified nixpacks.toml and removed redundant production files
 [x] 15. Fixed frontend deployment issue - removed complex file copying and unified server entry point
