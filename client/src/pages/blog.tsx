@@ -22,7 +22,7 @@ const blogPosts: BlogPost[] = [
     title: "The Future of AI-Powered Commodity Forecasting",
     excerpt: "How artificial intelligence is revolutionizing commodity price predictions and what this means for traders and investors.",
     content: "In an era where artificial intelligence is reshaping industries, commodity trading stands at the forefront of this transformation...",
-    publishedDate: "January 16, 2025",
+    publishedDate: "August 23, 2025",
     readTime: "6 min read",
     category: "AI & Markets"
   }
