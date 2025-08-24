@@ -22,6 +22,7 @@ import { AI_MODELS } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { LivePriceCard } from "@/components/LivePriceCard";
 import { useQuery } from "@tanstack/react-query";
+import UnifiedChart from "@/components/dashboard/unified-chart";
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -113,10 +114,12 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="py-16 md:py-32 lg:py-48 px-4 md:px-6 relative overflow-hidden">
-        {/* Simplified, cleaner background */}
+        {/* Enhanced gradient blur background */}
         <div className="absolute inset-0 w-full h-full">
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--muted)_0%,_transparent_50%)] opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/50" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(var(--primary)_/_0.1)_0%,_transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(var(--muted-foreground)_/_0.05)_0%,_transparent_50%)]" />
+          <div className="absolute inset-0 backdrop-blur-[0.5px]" />
         </div>
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <motion.div 
@@ -149,7 +152,7 @@ export default function Landing() {
             </div>
             
             <motion.div 
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
@@ -157,7 +160,7 @@ export default function Landing() {
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-8 py-4 text-base font-medium min-h-[52px] bg-foreground text-background hover:bg-foreground/90 hover:scale-105 transition-all duration-200"
+                className="px-10 py-5 text-base font-normal min-h-[56px] bg-foreground text-background hover:bg-foreground/95 hover:scale-[1.02] transition-all duration-300 rounded-xl border-0 shadow-lg hover:shadow-xl backdrop-blur-sm"
                 data-testid="get-started-button"
               >
                 Start Analyzing <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -166,7 +169,7 @@ export default function Landing() {
                 variant="outline"
                 size="lg"
                 onClick={() => navigate("/about")}
-                className="px-8 py-4 text-base font-medium min-h-[52px] border-border/50 hover:bg-muted/50 hover:scale-105 transition-all duration-200"
+                className="px-10 py-5 text-base font-normal min-h-[56px] border-border/30 hover:bg-background/80 hover:scale-[1.02] transition-all duration-300 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md"
                 data-testid="learn-more-button"
               >
                 Learn More
@@ -177,7 +180,10 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 md:py-40 px-6 md:px-6 bg-muted/20">
+      <section className="py-24 md:py-40 px-6 md:px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(var(--muted-foreground)_/_0.03)_0%,_transparent_70%)]" />
+        <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
             className="text-center mb-20 md:mb-24"
@@ -223,6 +229,7 @@ export default function Landing() {
             })}
           </div>
         </div>
+        </div>
       </section>
 
       {/* AI Models Section */}
@@ -267,8 +274,106 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Real Chart Preview Section */}
+      <section className="py-24 md:py-32 px-6 md:px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(var(--primary)_/_0.05)_0%,_transparent_70%)]" />
+        <div className="relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center mb-16 md:mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">LIVE PREDICTIONS</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+              Real AI Prediction Chart
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              See how our AI models compare with real market data and predictions
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <Card className="border-border/20 bg-background/80 backdrop-blur-sm shadow-lg rounded-2xl overflow-hidden">
+              <CardContent className="p-0">
+                <div className="bg-gradient-to-r from-background via-muted/5 to-background p-6 border-b border-border/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <h3 className="text-lg font-semibold text-foreground">Gold Price Predictions</h3>
+                      <span className="text-sm text-muted-foreground bg-muted/40 px-3 py-1 rounded-full">Live Data</span>
+                    </div>
+                    <div className="flex items-center space-x-4 text-xs">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-white dark:bg-black rounded-full"></div>
+                        <span className="text-muted-foreground">Actual Price</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-muted-foreground">Claude</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-muted-foreground">ChatGPT</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span className="text-muted-foreground">Deepseek</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  {commodities.length > 0 && (
+                    <UnifiedChart 
+                      commodityId={commodities.find(c => c.name === 'Gold')?.id || commodities[0]?.id} 
+                      period="3mo" 
+                      height={400} 
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          <motion.div 
+            className="text-center mt-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <p className="text-muted-foreground mb-6">
+              Interactive charts with 14 commodities and real-time AI predictions
+            </p>
+            <Button
+              onClick={handleGetStarted}
+              className="px-8 py-3 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 rounded-xl font-normal transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm"
+            >
+              Explore All Charts <ArrowRightIcon className="ml-2 h-4 w-4" />
+            </Button>
+          </motion.div>
+        </div>
+        </div>
+      </section>
+
       {/* Live Market Data Section */}
-      <section className="py-24 md:py-32 px-6 md:px-6 bg-muted/20">
+      <section className="py-24 md:py-32 px-6 md:px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(var(--muted-foreground)_/_0.03)_0%,_transparent_70%)]" />
+        <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
             className="text-center mb-16 md:mb-20"
@@ -328,6 +433,7 @@ export default function Landing() {
               </Button>
             </div>
           )}
+        </div>
         </div>
       </section>
 
