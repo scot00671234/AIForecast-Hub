@@ -2404,133 +2404,8 @@ var init_startupManager = __esm({
   }
 });
 
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-var vite_config_default;
-var init_vite_config = __esm({
-  async "vite.config.ts"() {
-    "use strict";
-    vite_config_default = defineConfig({
-      plugins: [
-        react(),
-        runtimeErrorOverlay(),
-        ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
-          await import("@replit/vite-plugin-cartographer").then(
-            (m) => m.cartographer()
-          )
-        ] : []
-      ],
-      resolve: {
-        alias: {
-          "@": path.resolve(import.meta.dirname, "client", "src"),
-          "@shared": path.resolve(import.meta.dirname, "shared"),
-          "@assets": path.resolve(import.meta.dirname, "attached_assets")
-        }
-      },
-      root: path.resolve(import.meta.dirname, "client"),
-      build: {
-        outDir: path.resolve(import.meta.dirname, "dist/public"),
-        emptyOutDir: true
-      },
-      server: {
-        fs: {
-          strict: true,
-          deny: ["**/.*"]
-        }
-      }
-    });
-  }
-});
-
-// server/vite.ts
-var vite_exports = {};
-__export(vite_exports, {
-  log: () => log,
-  serveStatic: () => serveStatic,
-  setupVite: () => setupVite
-});
+// server/production.ts
 import express from "express";
-import fs from "fs";
-import path2 from "path";
-import { createServer as createViteServer, createLogger } from "vite";
-import { nanoid } from "nanoid";
-function log(message, source = "express") {
-  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-async function setupVite(app2, server) {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
-    allowedHosts: true
-  };
-  const vite = await createViteServer({
-    ...vite_config_default,
-    configFile: false,
-    customLogger: {
-      ...viteLogger,
-      error: (msg, options) => {
-        viteLogger.error(msg, options);
-        process.exit(1);
-      }
-    },
-    server: serverOptions,
-    appType: "custom"
-  });
-  app2.use(vite.middlewares);
-  app2.use("*", async (req, res, next) => {
-    const url = req.originalUrl;
-    try {
-      const clientTemplate = path2.resolve(
-        import.meta.dirname,
-        "..",
-        "client",
-        "index.html"
-      );
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`
-      );
-      const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
-    } catch (e) {
-      vite.ssrFixStacktrace(e);
-      next(e);
-    }
-  });
-}
-function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
-    );
-  }
-  app2.use(express.static(distPath));
-  app2.use("*", (_req, res) => {
-    res.sendFile(path2.resolve(distPath, "index.html"));
-  });
-}
-var viteLogger;
-var init_vite = __esm({
-  async "server/vite.ts"() {
-    "use strict";
-    await init_vite_config();
-    viteLogger = createLogger();
-  }
-});
-
-// server/index.ts
-import express2 from "express";
 
 // server/routes.ts
 init_storage();
@@ -4094,12 +3969,12 @@ async function registerRoutes(app2) {
   return httpServer;
 }
 
-// server/index.ts
+// server/production.ts
 init_storage();
 init_startupManager();
-import path3 from "path";
-import fs2 from "fs";
-function log2(message, source = "express") {
+import path from "path";
+import fs from "fs";
+function log(message, source = "express") {
   const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -4108,12 +3983,12 @@ function log2(message, source = "express") {
   });
   console.log(`${formattedTime} [${source}] ${message}`);
 }
-var app = express2();
-app.use(express2.json());
-app.use(express2.urlencoded({ extended: false }));
+var app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   const start = Date.now();
-  const path4 = req.path;
+  const path2 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -4122,23 +3997,23 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path4.startsWith("/api")) {
-      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
+    if (path2.startsWith("/api")) {
+      let logLine = `${req.method} ${path2} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "\u2026";
       }
-      log2(logLine);
+      log(logLine);
     }
   });
   next();
 });
 (async () => {
-  console.log("\u{1F680} Starting AIForecast Hub (Professional Edition) - FIXED v1.0.2");
-  console.log("\u{1F527} FIXED: Removed vite import causing production errors");
-  console.log(`\u{1F680} Environment: ${process.env.NODE_ENV || "development"}, Port: ${parseInt(process.env.PORT || "3000", 10)}`);
+  console.log("\u{1F680} Starting AIForecast Hub (Production) - Clean Deployment v1.0.3");
+  console.log("\u{1F527} PRODUCTION: No vite dependencies, clean build");
+  console.log(`\u{1F680} Environment: ${process.env.NODE_ENV || "production"}, Port: ${parseInt(process.env.PORT || "3000", 10)}`);
   const startupManager = new StartupManager(storage);
   try {
     await startupManager.initializeCritical();
@@ -4154,27 +4029,19 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
-  const isProduction = process.env.NODE_ENV === "production";
-  console.log(`\u{1F527} Environment detection: NODE_ENV=${process.env.NODE_ENV}, isProduction=${isProduction}`);
-  if (isProduction) {
-    const distPath = path3.resolve(process.cwd(), "dist", "public");
-    console.log(`\u{1F4C1} Looking for frontend files at: ${distPath}`);
-    if (!fs2.existsSync(distPath)) {
-      throw new Error(`Frontend build not found at: ${distPath}`);
-    }
-    app.use(express2.static(distPath));
-    app.use("*", (_req, res) => {
-      res.sendFile(path3.resolve(distPath, "index.html"));
-    });
-    console.log("\u2705 Production static file serving configured");
-  } else {
-    const { setupVite: setupVite2 } = await init_vite().then(() => vite_exports);
-    await setupVite2(app, server);
-    console.log("\u2705 Vite development server configured");
+  const distPath = path.resolve(process.cwd(), "dist", "public");
+  console.log(`\u{1F4C1} Looking for frontend files at: ${distPath}`);
+  if (!fs.existsSync(distPath)) {
+    throw new Error(`Frontend build not found at: ${distPath}. Make sure to run 'npm run build' first.`);
   }
+  app.use(express.static(distPath));
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+  console.log("\u2705 Production static file serving configured");
   const port = parseInt(process.env.PORT || "3000", 10);
   server.listen(port, "0.0.0.0", () => {
-    log2(`\u2705 Server running on port ${port}`);
+    log(`\u2705 Server running on port ${port}`);
     console.log("\u{1F3AF} Application ready - all systems operational");
     startupManager.initializeHeavy().catch((error) => {
       console.error("\u26A0\uFE0F Background initialization failed (non-critical):", error);
