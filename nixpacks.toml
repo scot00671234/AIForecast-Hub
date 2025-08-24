@@ -8,11 +8,10 @@ NIXPACKS_NO_CACHE = "1"
 
 [phases.setup]
 nixPkgs = ["nodejs_18", "npm-9_x", "openssl"]
-cmds = ["echo 'Cache bust: '$(cat .cachebust)"]
+cmds = ["echo 'Cache bust: '$(date +%s)"]
 
 [phases.install]
 cmds = [
-  "cat .cachebust",
   "rm -rf node_modules .npm",
   "npm cache clean --force",
   "npm ci"
@@ -22,8 +21,8 @@ cmds = [
 cmds = [
   "rm -rf dist node_modules/.vite node_modules/.cache",
   "NODE_ENV=production vite build --emptyOutDir",
-  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js"
+  "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js"
 ]
 
 [start]
-cmd = "NODE_ENV=production node dist/server.js"
+cmd = "NODE_ENV=production node dist/index.js"

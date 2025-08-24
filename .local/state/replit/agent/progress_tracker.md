@@ -16,3 +16,6 @@
 [x] 16. PRODUCTION FIX: Simplified nixpacks.toml build process for reliable frontend updates
 [x] 14. PRODUCTION DEPLOYMENT FIX: Simplified nixpacks.toml and removed redundant production files
 [x] 15. Fixed frontend deployment issue - removed complex file copying and unified server entry point
+[x] 16. VPS DEPLOYMENT FIX: Fixed nixpacks.toml file name mismatch (server.js → index.js)
+[x] 17. VPS DEPLOYMENT FIX: Removed missing .cachebust file dependency  
+[x] 18. VPS DEPLOYMENT FIX: Removed conflicting server/public directory with old static files
