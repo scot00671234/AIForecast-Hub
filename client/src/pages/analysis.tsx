@@ -151,8 +151,9 @@ export default function Analysis() {
     queryKey: ["/api/fear-greed-index"],
   });
 
-  const { data: categoryComposite, isLoading: loadingCategories } = useQuery<CategoryCompositeIndex>({
-    queryKey: ["/api/composite-index/categories"],
+  // Use the same data source as dashboard for consistency
+  const { data: latestCompositeIndex, isLoading: loadingCategories } = useQuery<CompositeIndex>({
+    queryKey: ["/api/composite-index/latest"],
   });
 
   return (
@@ -261,14 +262,14 @@ export default function Analysis() {
                 </Card>
               ) : (
                 <IndexGauge
-                  value={parseFloat(categoryComposite?.hard?.overallIndex || '50')}
+                  value={parseFloat(latestCompositeIndex?.hardCommoditiesIndex || '50')}
                   title="Hard Commodities"
                   subtitle="Metals & Energy"
                   classification={
-                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 75 ? "Very Bullish" :
-                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 60 ? "Bullish" :
-                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 40 ? "Neutral" :
-                    parseFloat(categoryComposite?.hard?.overallIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
+                    parseFloat(latestCompositeIndex?.hardCommoditiesIndex || '50') >= 75 ? "Very Bullish" :
+                    parseFloat(latestCompositeIndex?.hardCommoditiesIndex || '50') >= 60 ? "Bullish" :
+                    parseFloat(latestCompositeIndex?.hardCommoditiesIndex || '50') >= 40 ? "Neutral" :
+                    parseFloat(latestCompositeIndex?.hardCommoditiesIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
                   }
                   onClick={() => setSelectedIndex("hard")}
                 />
@@ -283,14 +284,14 @@ export default function Analysis() {
                 </Card>
               ) : (
                 <IndexGauge
-                  value={parseFloat(categoryComposite?.soft?.overallIndex || '50')}
+                  value={parseFloat(latestCompositeIndex?.softCommoditiesIndex || '50')}
                   title="Soft Commodities"
                   subtitle="Agriculture & Food"
                   classification={
-                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 75 ? "Very Bullish" :
-                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 60 ? "Bullish" :
-                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 40 ? "Neutral" :
-                    parseFloat(categoryComposite?.soft?.overallIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
+                    parseFloat(latestCompositeIndex?.softCommoditiesIndex || '50') >= 75 ? "Very Bullish" :
+                    parseFloat(latestCompositeIndex?.softCommoditiesIndex || '50') >= 60 ? "Bullish" :
+                    parseFloat(latestCompositeIndex?.softCommoditiesIndex || '50') >= 40 ? "Neutral" :
+                    parseFloat(latestCompositeIndex?.softCommoditiesIndex || '50') >= 25 ? "Bearish" : "Very Bearish"
                   }
                   onClick={() => setSelectedIndex("soft")}
                 />
