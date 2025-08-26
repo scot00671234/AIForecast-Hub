@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Deployment**: Added automatic schema creation, conflict resolution, and production-ready scripts (deploy.sh, production-migrate.ts)
 - **Replit Migration Complete**: Successfully migrated from Replit Agent to standard Replit environment with PostgreSQL setup
 - **Composite Index Issue Fixed**: Identified routing issue where Hard/Soft commodity indices showed static 50.0 values despite having predictions - solution is to trigger fresh composite index calculation on production server
+- **Google AdSense Integration**: Added Google AdSense script with publisher ID ca-pub-4669482504741834 for monetization
 - **Migration Completed August 2025**: Full migration from Replit Agent to Replit environment completed with PostgreSQL database, all dependencies installed, and server running successfully
 - **Mobile Compatibility**: Enhanced responsive design across all components for optimal mobile viewing experience
 - **Real Accuracy System**: Implemented comprehensive accuracy calculation based on actual AI predictions vs real historical prices
