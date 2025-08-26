@@ -298,56 +298,6 @@ export default function Analysis() {
             </div>
           </section>
 
-          {/* Quick Stats Overview */}
-          <section className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Index Performance Summary
-              </h2>
-              <p className="text-muted-foreground">
-                Real-time market intelligence updated continuously
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-muted/5">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {parseFloat(overallComposite?.overallIndex || '50').toFixed(0)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Overall Index</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-muted/5">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {(fearGreedIndex?.value || 50).toFixed(0)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Fear & Greed</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-muted/5">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {parseFloat(categoryComposite?.hard?.overallIndex || '50').toFixed(0)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Hard Commodities</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-muted/5">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {parseFloat(categoryComposite?.soft?.overallIndex || '50').toFixed(0)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Soft Commodities</div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
           {/* Data Export Section */}
           <section className="space-y-8 mt-16">
             <motion.div 
