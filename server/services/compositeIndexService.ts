@@ -90,13 +90,15 @@ export class CompositeIndexService {
       
       // Calculate hard commodities index
       const hardCommodities = commodityPredictions.filter(cp => cp.category === 'hard');
+      console.log(`📊 Hard commodities found: ${hardCommodities.length} (${hardCommodities.map(h => h.commodity).join(', ')})`);
       const hardComponents = await this.calculateIndexComponents(hardCommodities);
-      const hardIndex = this.combineComponents(hardComponents);
+      const hardIndex = hardCommodities.length > 0 ? this.combineComponents(hardComponents) : 50.0;
       
       // Calculate soft commodities index
       const softCommodities = commodityPredictions.filter(cp => cp.category === 'soft');
+      console.log(`📊 Soft commodities found: ${softCommodities.length} (${softCommodities.map(s => s.commodity).join(', ')})`);
       const softComponents = await this.calculateIndexComponents(softCommodities);
-      const softIndex = this.combineComponents(softComponents);
+      const softIndex = softCommodities.length > 0 ? this.combineComponents(softComponents) : 50.0;
       
       // Determine market sentiment
       const sentiment = this.determineSentiment(overallIndex);
