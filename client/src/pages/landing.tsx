@@ -371,26 +371,26 @@ export default function Landing() {
       </section>
 
       {/* Live Market Data Section */}
-      <section className="py-24 md:py-32 px-6 md:px-6 relative">
+      <section className="py-16 md:py-24 px-6 md:px-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(var(--muted-foreground)_/_0.03)_0%,_transparent_70%)]" />
         <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16 md:mb-20"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-green-600 dark:text-green-400">LIVE PRICES</span>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">Live Prices</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
               Real-Time Market Data
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Live commodity prices powered by our optimized Yahoo Finance integration
             </p>
           </motion.div>
@@ -428,9 +428,10 @@ export default function Landing() {
               <Button
                 onClick={handleGetStarted}
                 variant="outline"
-                className="bg-background/80 backdrop-blur-sm hover:bg-background"
+                size="sm"
+                className="px-4 py-2 text-sm font-medium rounded-lg"
               >
-                View All Markets <ArrowRightIcon className="ml-2 h-4 w-4" />
+                View All Markets <ArrowRightIcon className="ml-2 h-3.5 w-3.5" />
               </Button>
             </div>
           )}
@@ -439,19 +440,19 @@ export default function Landing() {
       </section>
 
       {/* Dashboard Preview Section */}
-      <section className="py-24 md:py-32 px-6 md:px-6">
+      <section className="py-16 md:py-24 px-6 md:px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16 md:mb-20"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
               See It In Action
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Get a preview of our comprehensive analytics dashboard
             </p>
           </motion.div>
@@ -595,13 +596,13 @@ export default function Landing() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-6 bg-muted/20">
+      <section className="py-16 px-6 bg-muted/10">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-light text-foreground mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-medium text-foreground mb-3">
               Why Choose AIForecast Hub
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Everything you need to analyze AI prediction performance
             </p>
           </div>
@@ -618,23 +619,23 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 md:py-32 px-6 bg-muted/30">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="space-y-8">
-            <h2 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight">
+      <section className="py-16 md:py-20 px-6 bg-muted/20">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="space-y-6">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground tracking-tight">
               Start Analyzing AI Predictions Today
             </h2>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Get instant access to comprehensive AI model comparisons and real-time commodity price tracking.
             </p>
-            <div className="pt-4">
+            <div className="pt-2">
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-10 py-4 text-lg font-medium min-h-[56px] bg-foreground text-background hover:bg-foreground/90"
+                className="px-6 py-2.5 text-sm font-medium rounded-lg shadow-sm hover:shadow-md"
                 data-testid="cta-button"
               >
-                Access Dashboard <ArrowRightIcon className="ml-2 h-5 w-5" />
+                Access Dashboard <ArrowRightIcon className="ml-2 h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
