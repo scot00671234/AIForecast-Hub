@@ -102,7 +102,8 @@ export default function Landing() {
               <Button 
                 onClick={handleGetStarted}
                 size="sm" 
-                className="hidden md:inline-flex"
+                variant="minimal"
+                className="hidden md:inline-flex text-xs font-medium"
                 data-testid="header-cta-button"
               >
                 Get Started
@@ -113,7 +114,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 md:py-32 lg:py-48 px-4 md:px-6 relative overflow-hidden">
+      <section className="py-12 md:py-20 lg:py-28 px-4 md:px-6 relative overflow-hidden">
         {/* Enhanced gradient blur background */}
         <div className="absolute inset-0 w-full h-full">
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/50" />
@@ -123,25 +124,25 @@ export default function Landing() {
         </div>
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <motion.div 
-            className="space-y-12"
+            className="space-y-10"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="space-y-10">
+            <div className="space-y-8">
               <motion.h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-foreground leading-[1.05] tracking-tight"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-foreground leading-[1.1] tracking-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
               >
                 Compare AI Models on
-                <span className="block text-muted-foreground font-medium mt-2">
+                <span className="block text-muted-foreground font-normal mt-1">
                   Commodity Predictions
                 </span>
               </motion.h1>
               <motion.p 
-                className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-normal px-4 sm:px-0"
+                className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-normal px-4 sm:px-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
@@ -152,7 +153,7 @@ export default function Landing() {
             </div>
             
             <motion.div 
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
@@ -160,16 +161,16 @@ export default function Landing() {
               <Button
                 onClick={handleGetStarted}
                 size="lg"
-                className="px-10 py-5 text-base font-normal min-h-[56px] bg-foreground text-background hover:bg-foreground/95 hover:scale-[1.02] transition-all duration-300 rounded-xl border-0 shadow-lg hover:shadow-xl backdrop-blur-sm"
+                className="px-6 py-2.5 text-sm font-medium rounded-lg shadow-sm hover:shadow-md"
                 data-testid="get-started-button"
               >
-                Start Analyzing <ArrowRightIcon className="ml-2 h-4 w-4" />
+                Start Analyzing <ArrowRightIcon className="ml-2 h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => navigate("/about")}
-                className="px-10 py-5 text-base font-normal min-h-[56px] border-border/30 hover:bg-background/80 hover:scale-[1.02] transition-all duration-300 rounded-xl backdrop-blur-sm shadow-sm hover:shadow-md"
+                className="px-6 py-2.5 text-sm font-medium rounded-lg"
                 data-testid="learn-more-button"
               >
                 Learn More
@@ -180,27 +181,27 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 md:py-40 px-6 md:px-6 relative">
+      <section className="py-16 md:py-24 px-6 md:px-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(var(--muted-foreground)_/_0.03)_0%,_transparent_70%)]" />
         <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-20 md:mb-24"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
               How It Works
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Get comprehensive insights into AI prediction performance with real-time market data
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
@@ -211,15 +212,15 @@ export default function Landing() {
                   transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
                   viewport={{ once: true, margin: "-50px" }}
                 >
-                  <Card className="border-border/30 bg-background/50 hover:bg-background/80 hover:scale-105 transition-all duration-300 h-full">
-                    <CardHeader className="text-center pb-6">
-                      <div className="mx-auto mb-6 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                        <IconComponent className="h-8 w-8 text-primary" />
+                  <Card className="border-border/20 bg-background hover:bg-muted/30 hover:scale-[1.02] transition-all duration-200 h-full">
+                    <CardHeader className="text-center pb-4">
+                      <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <IconComponent className="h-6 w-6 text-primary" />
                       </div>
-                      <CardTitle className="text-2xl font-semibold mb-4">{feature.title}</CardTitle>
+                      <CardTitle className="text-lg font-medium mb-2">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <p className="text-muted-foreground text-center leading-relaxed text-lg">
+                      <p className="text-muted-foreground text-center leading-relaxed text-sm">
                         {feature.description}
                       </p>
                     </CardContent>
@@ -233,41 +234,41 @@ export default function Landing() {
       </section>
 
       {/* AI Models Section */}
-      <section className="py-24 md:py-40 px-4 md:px-6">
+      <section className="py-16 md:py-24 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-20 md:mb-24"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
               AI Models Compared
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Track and compare prediction accuracy across leading AI models
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {Object.entries(AI_MODELS).map(([key, model], index) => (
               <motion.div 
                 key={key} 
-                className="text-center p-8 rounded-2xl border border-border/30 bg-background/50 hover:bg-background/80 hover:scale-105 transition-all duration-300"
+                className="text-center p-6 rounded-xl border border-border/20 bg-background hover:bg-muted/30 hover:scale-[1.02] transition-all duration-200"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
                 viewport={{ once: true, margin: "-50px" }}
               >
                 <div 
-                  className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
-                  style={{ backgroundColor: `${model.color}15`, border: `2px solid ${model.color}30` }}
+                  className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                  style={{ backgroundColor: `${model.color}15`, border: `1px solid ${model.color}30` }}
                 >
-                  <BrainIcon className="h-10 w-10" style={{ color: model.color }} />
+                  <BrainIcon className="h-6 w-6" style={{ color: model.color }} />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{model.name}</h3>
-                <p className="text-muted-foreground">{model.provider}</p>
+                <h3 className="text-lg font-medium mb-2">{model.name}</h3>
+                <p className="text-muted-foreground text-sm">{model.provider}</p>
               </motion.div>
             ))}
           </div>
@@ -275,26 +276,26 @@ export default function Landing() {
       </section>
 
       {/* Real Chart Preview Section */}
-      <section className="py-24 md:py-32 px-6 md:px-6 relative">
+      <section className="py-16 md:py-24 px-6 md:px-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(var(--primary)_/_0.05)_0%,_transparent_70%)]" />
         <div className="relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16 md:mb-20"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">LIVE PREDICTIONS</span>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">Live Predictions</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
               Real AI Prediction Chart
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               See how our AI models compare with real market data and predictions
             </p>
           </motion.div>
