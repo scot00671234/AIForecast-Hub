@@ -116,14 +116,38 @@ class YahooFinanceService {
   }
 
   async getCurrentPrice(yahooSymbol: string): Promise<{ price: number; change?: number; changePercent?: number } | null> {
-    const data = await this.fetchHistoricalData(yahooSymbol, "1d");
+    // Fetch 5 days of data to ensure we have enough for calculating 24h change
+    const data = await this.fetchHistoricalData(yahooSymbol, "5d", "1d");
     
-    if (data?.chart?.result?.[0]?.meta) {
-      const meta = data.chart.result[0].meta;
+    if (data?.chart?.result?.[0]) {
+      const result = data.chart.result[0];
+      const meta = result.meta;
+      const currentPrice = meta.regularMarketPrice;
+      
+      // Try to get change from Yahoo Finance API first
+      let change = meta.regularMarketChange;
+      let changePercent = meta.regularMarketChangePercent;
+      
+      // If Yahoo doesn't provide change data, calculate it manually
+      if ((change === undefined || change === 0) && result.indicators?.quote?.[0]?.close) {
+        const prices = result.indicators.quote[0].close;
+        const timestamps = result.timestamp || [];
+        
+        if (prices.length >= 2 && timestamps.length >= 2) {
+          // Get the previous trading day's closing price
+          const previousClose = prices[prices.length - 2];
+          
+          if (previousClose && !isNaN(previousClose) && currentPrice && !isNaN(currentPrice)) {
+            change = currentPrice - previousClose;
+            changePercent = (change / previousClose) * 100;
+          }
+        }
+      }
+      
       return {
-        price: meta.regularMarketPrice,
-        change: meta.regularMarketChange || 0,
-        changePercent: meta.regularMarketChangePercent || 0
+        price: currentPrice,
+        change: change || 0,
+        changePercent: changePercent || 0
       };
     }
     
