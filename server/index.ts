@@ -89,13 +89,33 @@ app.use((req, res, next) => {
     console.log(`📁 Looking for frontend files at: ${distPath}`);
     
     if (!fs.existsSync(distPath)) {
+      console.error(`❌ Frontend build not found at: ${distPath}`);
+      console.log("📋 Current working directory:", process.cwd());
+      console.log("📋 Directory contents:", fs.readdirSync(process.cwd()));
+      if (fs.existsSync(path.join(process.cwd(), "dist"))) {
+        console.log("📋 Dist directory contents:", fs.readdirSync(path.join(process.cwd(), "dist")));
+      }
       throw new Error(`Frontend build not found at: ${distPath}`);
     }
     
-    app.use(express.static(distPath));
-    app.use("*", (_req, res) => {
-      res.sendFile(path.resolve(distPath, "index.html"));
+    // Log files in dist/public for debugging
+    console.log("📁 Frontend files found:", fs.readdirSync(distPath));
+    
+    // Serve static files with proper cache headers
+    app.use(express.static(distPath, {
+      maxAge: '1h',
+      etag: true,
+      index: false
+    }));
+    
+    // Serve index.html for all non-API routes (SPA routing)
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api')) {
+        console.log(`📄 Serving index.html for: ${req.path}`);
+        res.sendFile(path.resolve(distPath, "index.html"));
+      }
     });
+    
     console.log("✅ Production static file serving configured");
   } else {
     // Only import vite in development

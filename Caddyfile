@@ -1,0 +1,34 @@
+:3000 {
+	# Handle API routes first
+	handle /api/* {
+		reverse_proxy localhost:3000
+	}
+	
+	# Handle static assets with proper caching
+	handle /assets/* {
+		root * /app/dist/public
+		file_server
+		header Cache-Control "public, max-age=31536000, immutable"
+	}
+	
+	# Handle all other routes (SPA fallback)
+	handle * {
+		root * /app/dist/public
+		try_files {path} /index.html
+		file_server
+	}
+	
+	# Add GZIP compression
+	encode gzip
+	
+	# Security headers
+	header {
+		X-Frame-Options DENY
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		# Add cache busting for index.html
+		Cache-Control "no-cache, no-store, must-revalidate" {
+			path /index.html
+		}
+	}
+}

@@ -5,6 +5,10 @@ providers = ["node"]
 NODE_ENV = "production"
 PORT = "3000"
 
+# Ensure proper static file serving
+[static]
+dir = "dist/public"
+
 [phases.setup]
 nixPkgs = ["nodejs_18", "openssl"]
 

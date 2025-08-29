@@ -51,6 +51,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Frontend Deployment Verification Endpoint
+  app.get("/api/deployment/verify", (req, res) => {
+    const isProduction = process.env.NODE_ENV === "production";
+    
+    if (isProduction) {
+      // Verify frontend files exist
+      const fs = require('fs');
+      const path = require('path');
+      const distPath = path.resolve(process.cwd(), "dist", "public");
+      const indexPath = path.resolve(distPath, "index.html");
+      
+      const verification = {
+        environment: "production",
+        timestamp: new Date().toISOString(),
+        cacheBust: Date.now(),
+        frontend: {
+          distExists: fs.existsSync(distPath),
+          indexExists: fs.existsSync(indexPath),
+          distPath: distPath,
+          filesInDist: fs.existsSync(distPath) ? fs.readdirSync(distPath).slice(0, 10) : []
+        },
+        server: {
+          port: process.env.PORT || "3000",
+          nodeEnv: process.env.NODE_ENV
+        }
+      };
+      
+      res.json(verification);
+    } else {
+      res.json({
+        environment: "development",
+        timestamp: new Date().toISOString(),
+        message: "Frontend served via Vite dev server"
+      });
+    }
+  });
+
   // Cache Status Endpoint for Scale Monitoring
   app.get("/api/cache/status", async (req, res) => {
     try {
