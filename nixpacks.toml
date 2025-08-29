@@ -9,7 +9,7 @@ PORT = "3000"
 nixPkgs = ["nodejs_18", "openssl"]
 
 [phases.install]
-cmds = ["npm ci --only=production", "npm install tsx typescript esbuild vite --save-dev"]
+cmds = ["npm install", "npm install tsx typescript esbuild vite --save-dev"]
 
 [phases.build]
 cmds = [
