@@ -11,9 +11,7 @@ VITE_HMR = "false"
 [phases.setup]
 nixPkgs = ["nodejs_18", "openssl"]
 
-# Explicitly disable caddy provider
-[providers]
-caddy = false
+# Note: Caddy should not auto-detect without Caddyfile
 
 [phases.install]
 cmds = [
