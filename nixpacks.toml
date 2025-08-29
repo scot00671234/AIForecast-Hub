@@ -1,9 +1,9 @@
-# Clean nixpacks setup for production
+# Simplified nixpacks setup - Node.js only
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
-PORT = "8080"
+PORT = "3000"
 
 [phases.setup]
 nixPkgs = ["nodejs_18", "openssl"]
