@@ -1,12 +1,19 @@
-# Simplified nixpacks setup - Node.js only
+# Simplified nixpacks setup - Node.js only, NO Caddy
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+# Database will be set by Dokploy secrets
+# Disable Vite HMR in production
+VITE_HMR = "false"
 
 [phases.setup]
 nixPkgs = ["nodejs_18", "openssl"]
+
+# Explicitly disable caddy provider
+[providers]
+caddy = false
 
 [phases.install]
 cmds = [
