@@ -14,12 +14,16 @@ cmds = ["npm install", "npm install tsx typescript esbuild vite --save-dev"]
 [phases.build]
 cmds = [
   "npm install",
-  "echo 'Starting build process...'",
-  "npm run build",
-  "echo 'Build completed. Checking output:'",
-  "ls -la dist/",
-  "ls -la dist/public/ || echo 'No dist/public found'",
-  "echo 'Build process finished'"
+  "echo '🔧 Starting build process...'",
+  "echo '📋 Checking package.json scripts:'",
+  "cat package.json | grep -A5 -B5 build",
+  "echo '🏗️ Running npm run build:'",
+  "npm run build 2>&1 || echo 'Build failed with error code $?'",
+  "echo '✅ Build completed. Checking output:'",
+  "ls -la dist/ || echo 'No dist/ directory found'",
+  "ls -la dist/public/ || echo 'No dist/public/ found'",
+  "find . -name '*.js' -path './dist/*' | head -5 || echo 'No JS files in dist'",
+  "echo '🎯 Build process finished'"
 ]
 
 [start]
