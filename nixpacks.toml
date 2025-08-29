@@ -12,7 +12,15 @@ nixPkgs = ["nodejs_18", "openssl"]
 cmds = ["npm install", "npm install tsx typescript esbuild vite --save-dev"]
 
 [phases.build]
-cmds = ["npm install", "npm run build"]
+cmds = [
+  "npm install",
+  "echo 'Starting build process...'",
+  "npm run build",
+  "echo 'Build completed. Checking output:'",
+  "ls -la dist/",
+  "ls -la dist/public/ || echo 'No dist/public found'",
+  "echo 'Build process finished'"
+]
 
 [start]
 cmd = "npm run start"
