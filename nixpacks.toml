@@ -9,12 +9,10 @@ PORT = "3000"
 nixPkgs = ["nodejs_18", "openssl"]
 
 [phases.install]
-cmds = ["npm install", "npm install tsx typescript esbuild vite --save-dev"]
-
-[phases.build]
 cmds = [
-  "npm install",
-  "echo '🔧 Starting build process...'",
+  "npm install", 
+  "npm install tsx typescript esbuild vite --save-dev",
+  "echo '🔧 FORCING BUILD IN INSTALL PHASE...'",
   "echo '📋 Checking package.json scripts:'",
   "cat package.json | grep -A5 -B5 build",
   "echo '🏗️ Running npm run build:'",
