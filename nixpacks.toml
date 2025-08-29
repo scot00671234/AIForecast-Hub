@@ -12,7 +12,10 @@ nixPkgs = ["nodejs_18", "openssl"]
 cmds = ["npm install", "npm install tsx typescript esbuild vite --save-dev"]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = [
+  "vite build",
+  "esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --target=node18"
+]
 
 [start]
-cmd = "NODE_ENV=production node dist/index.js"
+cmd = "NODE_ENV=production node dist/production.js"
