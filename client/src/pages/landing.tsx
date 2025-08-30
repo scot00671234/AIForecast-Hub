@@ -488,10 +488,10 @@ export default function Landing() {
               </div>
               
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                   {/* AI Composite Index Mock */}
-                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-3">
+                  <Card className="border-border/40 bg-background h-[260px] md:h-[280px] flex flex-col">
+                    <CardHeader className="pb-2 md:pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <ActivityIcon className="h-4 w-4 text-primary" />
@@ -501,51 +501,51 @@ export default function Landing() {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1 flex flex-col justify-center">
-                      <div className="text-center space-y-2">
-                        <div className="text-4xl font-bold text-foreground">68.0</div>
+                      <div className="text-center space-y-1 md:space-y-2">
+                        <div className="text-3xl md:text-4xl font-bold text-foreground">68.0</div>
                         <div className="text-sm text-muted-foreground font-medium">AI Bullish</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-6 mt-5">
+                      <div className="grid grid-cols-2 gap-4 md:gap-6 mt-3 md:mt-5">
                         <div className="text-center space-y-1">
-                          <div className="text-xl font-semibold text-foreground">68.2</div>
+                          <div className="text-lg md:text-xl font-semibold text-foreground">68.2</div>
                           <div className="text-xs text-muted-foreground font-medium">Hard Commodities</div>
                         </div>
                         <div className="text-center space-y-1">
-                          <div className="text-xl font-semibold text-foreground">67.8</div>
+                          <div className="text-lg md:text-xl font-semibold text-foreground">67.8</div>
                           <div className="text-xs text-muted-foreground font-medium">Soft Commodities</div>
                         </div>
                       </div>
-                      <div className="text-center mt-4">
+                      <div className="text-center mt-3 md:mt-4">
                         <div className="text-xs text-muted-foreground">336 predictions analyzed</div>
                       </div>
                     </CardContent>
                   </Card>
                   
                   {/* Prediction Stats Mock */}
-                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-3">
+                  <Card className="border-border/40 bg-background h-[260px] md:h-[280px] flex flex-col">
+                    <CardHeader className="pb-2 md:pb-3">
                       <div className="flex items-center gap-2">
                         <TargetIcon className="h-4 w-4 text-primary" />
                         <CardTitle className="text-sm font-medium text-foreground">Prediction Stats</CardTitle>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex flex-col space-y-5">
-                      <div className="grid grid-cols-2 gap-8">
+                    <CardContent className="pt-0 flex-1 flex flex-col space-y-4 md:space-y-5">
+                      <div className="grid grid-cols-2 gap-6 md:gap-8">
                         <div className="text-center space-y-1">
-                          <div className="text-4xl font-bold text-foreground">336</div>
+                          <div className="text-3xl md:text-4xl font-bold text-foreground">336</div>
                           <div className="text-xs text-muted-foreground font-medium">Total Predictions</div>
                         </div>
                         <div className="text-center space-y-1">
-                          <div className="text-4xl font-bold text-foreground">3</div>
+                          <div className="text-3xl md:text-4xl font-bold text-foreground">3</div>
                           <div className="text-xs text-muted-foreground font-medium">AI Models</div>
                         </div>
                       </div>
                       <div className="space-y-2 flex-1">
-                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <div className="flex justify-between items-center py-1.5 md:py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Coverage</span>
                           <span className="text-xs font-semibold text-foreground">14 Commodities</span>
                         </div>
-                        <div className="flex justify-between items-center py-2">
+                        <div className="flex justify-between items-center py-1.5 md:py-2">
                           <span className="text-xs text-muted-foreground font-medium">Recent Activity</span>
                           <div className="px-2 py-1 bg-muted/50 text-foreground text-xs rounded-full font-medium">Active</div>
                         </div>
@@ -554,32 +554,36 @@ export default function Landing() {
                   </Card>
                   
                   {/* Market Status Mock */}
-                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-3">
+                  <Card className="border-border/40 bg-background h-[260px] md:h-[280px] flex flex-col">
+                    <CardHeader className="pb-2 md:pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <BarChart3Icon className="h-4 w-4 text-primary" />
                           <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
                         </div>
                         <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-muted-foreground border border-border/50">
-                          <ClockIcon className="h-4 w-4" />
-                          Market Closed
+                          <ClockIcon className="h-3 md:h-4 w-3 md:w-4" />
+                          <span className="hidden sm:inline">Market Closed</span>
+                          <span className="sm:hidden">Closed</span>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1 flex flex-col justify-center">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                      <div className="space-y-2 md:space-y-3">
+                        <div className="flex justify-between items-center py-1.5 md:py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Data Source</span>
                           <span className="text-xs font-semibold text-foreground">Yahoo Finance</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                        <div className="flex justify-between items-center py-1.5 md:py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Freshness</span>
                           <span className="text-xs font-semibold text-foreground">Real-time</span>
                         </div>
-                        <div className="flex justify-between items-center py-2">
+                        <div className="flex justify-between items-center py-1.5 md:py-2">
                           <span className="text-xs text-muted-foreground font-medium">Schedule</span>
-                          <span className="text-xs font-semibold text-foreground">Market opens Monday 9 AM</span>
+                          <span className="text-xs font-semibold text-foreground">
+                            <span className="hidden sm:inline">Market opens Monday 9 AM</span>
+                            <span className="sm:hidden">Mon 9 AM</span>
+                          </span>
                         </div>
                       </div>
                     </CardContent>
