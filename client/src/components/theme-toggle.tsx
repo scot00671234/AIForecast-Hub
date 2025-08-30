@@ -14,7 +14,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={toggleTheme}
-      className="btn-minimal micro-transition h-9 w-9"
+      className="btn-minimal micro-transition h-9 w-9 border-0 shadow-none"
       data-testid="theme-toggle"
     >
       <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
