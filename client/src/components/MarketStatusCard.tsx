@@ -107,26 +107,28 @@ export default function MarketStatusCard() {
           <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-0 flex-1 flex flex-col justify-between">
-        <div className="text-center mb-4">
-          <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-foreground border border-border/50">
-            {getStatusIcon()}
-            {getStatusText()}
+      <CardContent className="pt-0 flex-1 flex flex-col justify-center">
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-foreground border border-border/50">
+              {getStatusIcon()}
+              {getStatusText()}
+            </div>
           </div>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-border/30">
-            <span className="text-xs text-muted-foreground font-medium">Data Source</span>
-            <span className="text-xs font-semibold text-foreground">Yahoo Finance</span>
-          </div>
-          <div className="flex justify-between items-center py-2 border-b border-border/30">
-            <span className="text-xs text-muted-foreground font-medium">Freshness</span>
-            <span className="text-xs font-semibold text-foreground">{status?.dataFreshness}</span>
-          </div>
-          <div className="flex justify-between items-center py-2">
-            <span className="text-xs text-muted-foreground font-medium">Schedule</span>
-            <span className="text-xs font-semibold text-foreground">{status?.nextUpdate}</span>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-xs text-muted-foreground font-medium">Data Source</span>
+              <span className="text-xs font-semibold text-foreground">Yahoo Finance</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-xs text-muted-foreground font-medium">Freshness</span>
+              <span className="text-xs font-semibold text-foreground">{status?.dataFreshness}</span>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <span className="text-xs text-muted-foreground font-medium">Schedule</span>
+              <span className="text-xs font-semibold text-foreground">{status?.nextUpdate}</span>
+            </div>
           </div>
         </div>
       </CardContent>
