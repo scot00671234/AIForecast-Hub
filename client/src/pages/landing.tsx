@@ -491,7 +491,7 @@ export default function Landing() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* AI Composite Index Mock */}
                   <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-4">
+                    <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <ActivityIcon className="h-4 w-4 text-primary" />
@@ -501,21 +501,21 @@ export default function Landing() {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1 flex flex-col justify-center">
-                      <div className="text-center space-y-4">
-                        <div className="text-5xl font-bold text-foreground">68.0</div>
+                      <div className="text-center space-y-2">
+                        <div className="text-4xl font-bold text-foreground">68.0</div>
                         <div className="text-sm text-muted-foreground font-medium">AI Bullish</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 mt-6">
+                      <div className="grid grid-cols-2 gap-6 mt-5">
                         <div className="text-center space-y-1">
-                          <div className="text-lg font-semibold text-foreground">68.2</div>
-                          <div className="text-xs text-muted-foreground">Hard Commodities</div>
+                          <div className="text-xl font-semibold text-foreground">68.2</div>
+                          <div className="text-xs text-muted-foreground font-medium">Hard Commodities</div>
                         </div>
                         <div className="text-center space-y-1">
-                          <div className="text-lg font-semibold text-foreground">67.8</div>
-                          <div className="text-xs text-muted-foreground">Soft Commodities</div>
+                          <div className="text-xl font-semibold text-foreground">67.8</div>
+                          <div className="text-xs text-muted-foreground font-medium">Soft Commodities</div>
                         </div>
                       </div>
-                      <div className="text-center mt-3">
+                      <div className="text-center mt-4">
                         <div className="text-xs text-muted-foreground">336 predictions analyzed</div>
                       </div>
                     </CardContent>
@@ -523,24 +523,24 @@ export default function Landing() {
                   
                   {/* Prediction Stats Mock */}
                   <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-4">
+                    <CardHeader className="pb-3">
                       <div className="flex items-center gap-2">
                         <TargetIcon className="h-4 w-4 text-primary" />
                         <CardTitle className="text-sm font-medium text-foreground">Prediction Stats</CardTitle>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex flex-col space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="text-center space-y-2">
-                          <div className="text-3xl font-bold text-foreground">336</div>
+                    <CardContent className="pt-0 flex-1 flex flex-col space-y-5">
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="text-center space-y-1">
+                          <div className="text-4xl font-bold text-foreground">336</div>
                           <div className="text-xs text-muted-foreground font-medium">Total Predictions</div>
                         </div>
-                        <div className="text-center space-y-2">
-                          <div className="text-3xl font-bold text-foreground">3</div>
+                        <div className="text-center space-y-1">
+                          <div className="text-4xl font-bold text-foreground">3</div>
                           <div className="text-xs text-muted-foreground font-medium">AI Models</div>
                         </div>
                       </div>
-                      <div className="space-y-3 flex-1">
+                      <div className="space-y-2 flex-1">
                         <div className="flex justify-between items-center py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Coverage</span>
                           <span className="text-xs font-semibold text-foreground">14 Commodities</span>
@@ -555,7 +555,7 @@ export default function Landing() {
                   
                   {/* Market Status Mock */}
                   <Card className="border-border/40 bg-background h-[280px] flex flex-col">
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <BarChart3Icon className="h-4 w-4 text-primary" />
@@ -567,7 +567,7 @@ export default function Landing() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex flex-col justify-between">
+                    <CardContent className="pt-0 flex-1 flex flex-col justify-center">
                       <div className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Data Source</span>
