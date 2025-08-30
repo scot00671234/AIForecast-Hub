@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useLocation, Link } from "wouter";
 import { 
@@ -15,7 +16,8 @@ import {
   BotIcon,
   TargetIcon,
   ActivityIcon,
-  PlayIcon
+  PlayIcon,
+  ClockIcon
 } from "lucide-react";
 import { ThemeToggle } from "../components/theme-toggle";
 import { AI_MODELS } from "@/lib/constants";
@@ -490,20 +492,31 @@ export default function Landing() {
                   {/* AI Composite Index Mock */}
                   <Card className="border-border/40 bg-background h-[280px] flex flex-col">
                     <CardHeader className="pb-4">
-                      <div className="flex items-center gap-2">
-                        <ActivityIcon className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm font-medium text-foreground">AI Composite Index</CardTitle>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <ActivityIcon className="h-4 w-4 text-primary" />
+                          <CardTitle className="text-sm font-medium text-foreground">AI Composite Index</CardTitle>
+                        </div>
+                        <Badge variant="secondary" className="text-xs font-medium px-2 py-1">BULLISH</Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex items-center justify-center">
-                      <div className="flex flex-col items-center space-y-4 text-center">
-                        <div className="w-16 h-16 rounded-full border-2 border-border/30 bg-muted/20 flex items-center justify-center">
-                          <span className="text-2xl font-light text-muted-foreground">!</span>
+                    <CardContent className="pt-0 flex-1 flex flex-col justify-center">
+                      <div className="text-center space-y-4">
+                        <div className="text-5xl font-bold text-foreground">68.0</div>
+                        <div className="text-sm text-muted-foreground font-medium">AI Bullish</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-6">
+                        <div className="text-center space-y-1">
+                          <div className="text-lg font-semibold text-foreground">68.2</div>
+                          <div className="text-xs text-muted-foreground">Hard Commodities</div>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground font-medium">No index data available</p>
-                          <p className="text-xs text-muted-foreground">Try again</p>
+                        <div className="text-center space-y-1">
+                          <div className="text-lg font-semibold text-foreground">67.8</div>
+                          <div className="text-xs text-muted-foreground">Soft Commodities</div>
                         </div>
+                      </div>
+                      <div className="text-center mt-3">
+                        <div className="text-xs text-muted-foreground">336 predictions analyzed</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -519,7 +532,7 @@ export default function Landing() {
                     <CardContent className="pt-0 flex-1 flex flex-col space-y-6">
                       <div className="grid grid-cols-2 gap-6">
                         <div className="text-center space-y-2">
-                          <div className="text-3xl font-bold text-foreground">0</div>
+                          <div className="text-3xl font-bold text-foreground">336</div>
                           <div className="text-xs text-muted-foreground font-medium">Total Predictions</div>
                         </div>
                         <div className="text-center space-y-2">
@@ -534,7 +547,7 @@ export default function Landing() {
                         </div>
                         <div className="flex justify-between items-center py-2">
                           <span className="text-xs text-muted-foreground font-medium">Recent Activity</span>
-                          <div className="px-2 py-1 bg-muted/50 text-muted-foreground text-xs rounded-full font-medium">Pending</div>
+                          <div className="px-2 py-1 bg-muted/50 text-foreground text-xs rounded-full font-medium">Active</div>
                         </div>
                       </div>
                     </CardContent>
@@ -543,18 +556,18 @@ export default function Landing() {
                   {/* Market Status Mock */}
                   <Card className="border-border/40 bg-background h-[280px] flex flex-col">
                     <CardHeader className="pb-2">
-                      <div className="flex items-center gap-2">
-                        <BarChart3Icon className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex flex-col justify-between">
-                      <div className="text-center mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <BarChart3Icon className="h-4 w-4 text-primary" />
+                          <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
+                        </div>
                         <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-muted-foreground border border-border/50">
                           <ClockIcon className="h-4 w-4" />
                           Market Closed
                         </div>
                       </div>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1 flex flex-col justify-between">
                       <div className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-border/30">
                           <span className="text-xs text-muted-foreground font-medium">Data Source</span>
