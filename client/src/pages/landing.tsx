@@ -487,108 +487,145 @@ export default function Landing() {
               
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Predictions Made</span>
-                        <ActivityIcon className="h-4 w-4 text-blue-500" />
+                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-2">
+                        <ActivityIcon className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm font-medium text-foreground">Predictions Made</CardTitle>
                       </div>
-                      <div className="text-3xl font-bold mb-1">1,247</div>
-                      <div className="text-xs text-green-600 font-medium">+23% this week</div>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1 flex flex-col space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="text-center space-y-2">
+                          <div className="text-3xl font-bold text-foreground">1,247</div>
+                          <div className="text-xs text-muted-foreground font-medium">This Week</div>
+                        </div>
+                        <div className="text-center space-y-2">
+                          <div className="text-3xl font-bold text-foreground">3</div>
+                          <div className="text-xs text-muted-foreground font-medium">AI Models</div>
+                        </div>
+                      </div>
+                      <div className="space-y-3 flex-1">
+                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                          <span className="text-xs text-muted-foreground font-medium">Coverage</span>
+                          <span className="text-xs font-semibold text-foreground">14 Commodities</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-xs text-muted-foreground font-medium">Status</span>
+                          <div className="px-2 py-1 bg-muted/50 text-foreground text-xs rounded-full font-medium">Active</div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Top Model</span>
-                        <TargetIcon className="h-4 w-4 text-green-500" />
+                  
+                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-2">
+                        <TargetIcon className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm font-medium text-foreground">Top Model</CardTitle>
                       </div>
-                      <div className="text-3xl font-bold mb-1">Deepseek</div>
-                      <div className="text-xs text-green-600 font-medium">87.4% accuracy</div>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1 flex flex-col justify-center">
+                      <div className="text-center mb-4">
+                        <div className="text-4xl font-bold text-foreground mb-2">Deepseek</div>
+                        <div className="text-lg font-semibold text-green-600">87.4% accuracy</div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                          <span className="text-xs text-muted-foreground font-medium">Rank</span>
+                          <span className="text-xs font-semibold text-foreground">#1 Overall</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-xs text-muted-foreground font-medium">Performance</span>
+                          <span className="text-xs font-semibold text-green-600">+2.1%</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                  <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-muted-foreground">Markets</span>
-                        <BarChart3Icon className="h-4 w-4 text-purple-500" />
+                  
+                  <Card className="border-border/40 bg-background h-[280px] flex flex-col">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2">
+                        <BarChart3Icon className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm font-medium text-foreground">Market Status</CardTitle>
                       </div>
-                      <div className="text-3xl font-bold mb-1">14</div>
-                      <div className="text-xs text-blue-600 font-medium">All active</div>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1 flex flex-col justify-between">
+                      <div className="text-center mb-4">
+                        <div className="text-xs font-semibold px-2 py-1 rounded-full inline-flex items-center gap-1.5 bg-muted/50 text-foreground border border-border/50">
+                          <ActivityIcon className="h-4 w-4" />
+                          Markets Active
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                          <span className="text-xs text-muted-foreground font-medium">Data Source</span>
+                          <span className="text-xs font-semibold text-foreground">Yahoo Finance</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-border/30">
+                          <span className="text-xs text-muted-foreground font-medium">Coverage</span>
+                          <span className="text-xs font-semibold text-foreground">14 Markets</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-xs text-muted-foreground font-medium">Freshness</span>
+                          <span className="text-xs font-semibold text-foreground">Real-time</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
                 
-                <Card className="border-border/30 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-semibold text-lg">AI Model Performance</h3>
-                      <div className="flex space-x-4 text-xs">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-muted-foreground">Claude</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-muted-foreground">ChatGPT</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span className="text-muted-foreground">Deepseek</span>
-                        </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-light text-foreground">AI Model Performance</h2>
+                    <div className="text-xs font-semibold px-2 py-1 rounded-md bg-background border border-border/40 text-muted-foreground">
+                      Last 30 Days
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted-foreground font-light">#1</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span className="text-sm font-light text-foreground">Deepseek</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base font-light text-foreground">87.4%</div>
+                        <div className="text-xs text-muted-foreground font-light">Accuracy</div>
                       </div>
                     </div>
-                    <div className="space-y-5">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="font-medium">Deepseek</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-green-600">87.4%</div>
-                            <div className="text-xs text-muted-foreground">#1 Overall</div>
-                          </div>
-                        </div>
-                        <div className="w-full bg-muted/40 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full transition-all duration-1000" style={{ width: '87.4%' }}></div>
-                        </div>
+                    
+                    <div className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted-foreground font-light">#2</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                        <span className="text-sm font-light text-foreground">Claude</span>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span className="font-medium">Claude</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-blue-600">84.2%</div>
-                            <div className="text-xs text-muted-foreground">#2 Overall</div>
-                          </div>
-                        </div>
-                        <div className="w-full bg-muted/40 rounded-full h-2">
-                          <div className="bg-blue-500 h-2 rounded-full transition-all duration-1000" style={{ width: '84.2%' }}></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                            <span className="font-medium">ChatGPT</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-purple-600">81.9%</div>
-                            <div className="text-xs text-muted-foreground">#3 Overall</div>
-                          </div>
-                        </div>
-                        <div className="w-full bg-muted/40 rounded-full h-2">
-                          <div className="bg-purple-500 h-2 rounded-full transition-all duration-1000" style={{ width: '81.9%' }}></div>
-                        </div>
+                      <div className="text-right">
+                        <div className="text-base font-light text-foreground">84.2%</div>
+                        <div className="text-xs text-muted-foreground font-light">Accuracy</div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    <div className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted-foreground font-light">#3</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                        <span className="text-sm font-light text-foreground">ChatGPT</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base font-light text-foreground">81.9%</div>
+                        <div className="text-xs text-muted-foreground font-light">Accuracy</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-muted-foreground font-light pt-2 border-t border-border/20">
+                    <span>Based on predictions across all commodities</span>
+                    <span>Best performer: 87.4% accuracy</span>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
