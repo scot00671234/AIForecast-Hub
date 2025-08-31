@@ -179,9 +179,14 @@ export default function BlogPost() {
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
               <span className="font-semibold text-foreground">AIForecast Hub</span>
             </div>
-            <div className="text-sm text-muted-foreground space-y-2">
-              <p>© Loremt ApS — Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.</p>
-              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+            <div className="text-sm text-muted-foreground space-y-3">
+              <div className="space-y-1">
+                <p>© 2025 AIForecast Hub</p>
+                <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
+              </div>
+              <p className="text-xs opacity-75 leading-relaxed max-w-2xl mx-auto">
+                Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.
+              </p>
             </div>
           </motion.div>
         </div>
