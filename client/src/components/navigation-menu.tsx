@@ -46,7 +46,7 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
     { path: "/about", label: "About", description: "Learn about our platform and methodology" },
     { path: "/faq", label: "FAQ", description: "Frequently asked questions" },
     { path: "/blog", label: "Blog", description: "Insights and market analysis" },
-    { path: "/policy", label: "Policy", description: "Terms and privacy policy" },
+    { path: "/policy", label: "Legal", description: "Legal disclaimer and terms" },
   ];
 
   const isActive = (path: string) => currentPath === path;
