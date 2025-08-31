@@ -528,7 +528,7 @@ export default function Analysis() {
               <span className="font-semibold text-lg text-foreground">AIForecast Hub</span>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">© 2025 AIForecast Hub</p>
+              <p className="text-sm text-muted-foreground">© Loremt ApS — Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.</p>
               <p className="text-sm text-muted-foreground">Loremt ApS CVR-nr 41691360</p>
             </div>
           </motion.div>

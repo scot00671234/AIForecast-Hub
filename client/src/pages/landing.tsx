@@ -720,7 +720,7 @@ export default function Landing() {
               </Link>
             </div>
             <div className="text-sm text-muted-foreground text-center md:text-right space-y-1">
-              <p>© 2025 AIForecast Hub</p>
+              <p>© Loremt ApS — Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.</p>
               <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
             </div>
           </div>
