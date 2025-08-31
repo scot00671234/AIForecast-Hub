@@ -697,7 +697,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-16 px-6 border-t border-border/40">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0 mb-8">
             <div className="flex items-center space-x-3">
               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-muted-foreground"></div>
               <span className="text-base font-semibold text-foreground">AIForecast Hub</span>
@@ -719,15 +719,17 @@ export default function Landing() {
                 Policy
               </Link>
             </div>
-            <div className="text-sm text-muted-foreground text-center md:text-right space-y-2">
-              <div className="space-y-1">
-                <p>© 2025 AIForecast Hub</p>
-                <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
-              </div>
-              <p className="text-xs opacity-75 leading-relaxed">
-                Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.
-              </p>
+            <div className="text-sm text-muted-foreground text-center md:text-right space-y-1">
+              <p>© 2025 AIForecast Hub</p>
+              <p className="text-xs">Loremt ApS CVR-nr 41691360</p>
             </div>
+          </div>
+          
+          {/* Legal Disclaimer - Centered Below */}
+          <div className="text-center border-t border-border/20 pt-6">
+            <p className="text-xs text-muted-foreground opacity-75 leading-relaxed max-w-3xl mx-auto">
+              Legal Disclaimer: Information provided is for general informational purposes only and does not constitute legal, financial, or professional advice. Loremt ApS accepts no responsibility or liability for decisions made based on this information.
+            </p>
           </div>
         </div>
       </footer>
