@@ -11,7 +11,7 @@ import About from "@/pages/about";
 import FAQ from "@/pages/faq";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
-import Policy from "@/pages/policy";
+import Policy from "@/pages/legal";
 import NotFound from "@/pages/not-found";
 
 function Router() {
