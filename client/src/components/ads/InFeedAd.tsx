@@ -7,7 +7,7 @@ export default function InFeedAd() {
       <AdBanner
         adSlot="0987654321" // You'll get this from AdSense dashboard
         adFormat="fluid"
-        style={{ display: 'block', minHeight: '200px' }}
+        style={{ display: 'block', minHeight: '80px' }}
         className="w-full"
       />
     </div>

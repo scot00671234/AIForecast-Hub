@@ -125,7 +125,7 @@ export default function EnhancedChartDialog({ isOpen, onClose, commodity, aiMode
               <UnifiedChart 
                 commodityId={commodity.id} 
                 period={selectedPeriod} 
-                height={320}
+                height={400}
               />
             </div>
 
