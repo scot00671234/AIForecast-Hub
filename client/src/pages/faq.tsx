@@ -83,7 +83,7 @@ export default function FAQ() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="text-lg font-medium text-foreground">AIForecast Hub</span>
+              <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </Link>
             
             <NavigationMenu currentPath={location} />
@@ -188,7 +188,7 @@ export default function FAQ() {
           >
             <div className="flex items-center justify-center space-x-3">
               <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="font-semibold text-foreground">AIForecast Hub</span>
+              <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </div>
             <div className="text-sm text-muted-foreground space-y-3">
               <div className="space-y-1">

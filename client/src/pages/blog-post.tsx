@@ -101,8 +101,8 @@ export default function BlogPost() {
         <div className="max-w-7xl mx-auto px-6 md:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-all duration-300">
-              <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[16px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="text-xl font-semibold text-foreground">AIForecast Hub</span>
+              <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="text-lg font-semibold text-foreground">AIForecast Hub</span>
             </Link>
             
             <NavigationMenu currentPath={location} />
