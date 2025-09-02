@@ -46,7 +46,7 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
     { path: "/about", label: "About", description: "Learn about our platform and methodology" },
     { path: "/faq", label: "FAQ", description: "Frequently asked questions" },
     { path: "/blog", label: "Blog", description: "Insights and market analysis" },
-    { path: "/policy", label: "Legal", description: "Legal disclaimer and terms" },
+    { path: "/legal", label: "Legal", description: "Legal disclaimer and terms" },
   ];
 
   const isActive = (path: string) => currentPath === path;
@@ -88,31 +88,21 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
 
       {/* Menu Panel */}
       <div
-        className={`fixed top-16 right-4 z-50 w-72 max-h-[calc(100vh-5rem)] bg-white dark:bg-gray-900 border border-border/20 rounded-xl shadow-2xl transition-all duration-500 ease-in-out flex flex-col ${
+        className={`fixed top-16 right-4 z-50 w-72 max-h-[calc(100vh-5rem)] bg-white dark:bg-gray-900 border border-border/20 rounded-xl shadow-2xl transition-opacity duration-300 flex flex-col ${
           isOpen
-            ? 'opacity-100 translate-x-0 scale-100'
-            : 'opacity-0 translate-x-full scale-95 pointer-events-none'
+            ? 'opacity-100'
+            : 'opacity-0 pointer-events-none'
         }`}
         style={{ 
           minHeight: '280px',
           maxHeight: 'min(520px, calc(100vh - 5rem))'
         }}
       >
-        {/* Menu Header with Close Button */}
+        {/* Menu Header */}
         <div className="flex-shrink-0 p-4 border-b border-border/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="font-medium text-foreground text-sm">AIForecast Hub</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0 hover:bg-muted/60 rounded-full"
-            >
-              <XIcon className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center space-x-3">
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+            <span className="font-medium text-foreground text-sm">AIForecast Hub</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             Navigate to different sections
