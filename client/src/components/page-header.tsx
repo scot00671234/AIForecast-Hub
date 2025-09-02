@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NavigationMenu } from "./navigation-menu";
+import { ThemeToggle } from "./theme-toggle";
 
 interface PageHeaderProps {
   currentPath?: string;
@@ -48,9 +49,15 @@ export function PageHeader({
               </div>
             )}
             
-            {/* Navigation menu for non-dashboard pages */}
+            {/* Theme toggle for dashboard */}
+            {showSearch && <ThemeToggle />}
+            
+            {/* Theme toggle and navigation menu for non-dashboard pages */}
             {!showSearch && (
-              <NavigationMenu currentPath={currentPath} />
+              <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                <NavigationMenu currentPath={currentPath} />
+              </div>
             )}
           </div>
         </div>
