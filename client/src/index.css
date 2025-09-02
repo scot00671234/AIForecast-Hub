@@ -221,6 +221,27 @@
   }
 }
 
+/* Force compact ad height - override AdSense defaults */
+.ad-container {
+  height: 2px !important;
+  max-height: 2px !important;
+  overflow: hidden !important;
+}
+
+.ad-container .adsbygoogle {
+  height: 2px !important;
+  max-height: 2px !important;
+  min-height: 2px !important;
+  overflow: hidden !important;
+}
+
+.ad-container ins {
+  height: 2px !important;
+  max-height: 2px !important;
+  min-height: 2px !important;
+  overflow: hidden !important;
+}
+
 @layer components {
   /* Minimal Glass Card - Inspired by Vercel aesthetic */
   .glass-card {
