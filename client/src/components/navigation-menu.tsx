@@ -88,21 +88,31 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
 
       {/* Menu Panel */}
       <div
-        className={`fixed top-16 right-4 z-50 w-72 max-h-[calc(100vh-5rem)] bg-background border border-border/50 rounded-xl shadow-2xl transition-all duration-300 ease-out flex flex-col ${
+        className={`fixed top-16 right-4 z-50 w-72 max-h-[calc(100vh-5rem)] bg-white dark:bg-gray-900 border border-border/20 rounded-xl shadow-2xl transition-all duration-500 ease-in-out flex flex-col ${
           isOpen
-            ? 'opacity-100 translate-y-0 scale-100'
-            : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
+            ? 'opacity-100 translate-x-0 scale-100'
+            : 'opacity-0 translate-x-full scale-95 pointer-events-none'
         }`}
         style={{ 
           minHeight: '280px',
           maxHeight: 'min(520px, calc(100vh - 5rem))'
         }}
       >
-        {/* Menu Header */}
-        <div className="flex-shrink-0 p-4 border-b border-border/30">
-          <div className="flex items-center space-x-3">
-            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-            <span className="font-medium text-foreground text-sm">AIForecast Hub</span>
+        {/* Menu Header with Close Button */}
+        <div className="flex-shrink-0 p-4 border-b border-border/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+              <span className="font-medium text-foreground text-sm">AIForecast Hub</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8 p-0 hover:bg-muted/60 rounded-full"
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             Navigate to different sections
@@ -110,7 +120,7 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
         </div>
 
         {/* Scrollable Menu Items */}
-        <div className="flex-1 overflow-y-auto p-2 nav-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3 nav-scrollbar">
           {menuItems.map((item, index) => (
             <Link key={item.path} href={item.path}>
               <div
@@ -154,7 +164,7 @@ export function NavigationMenu({ currentPath = "/" }: NavigationMenuProps) {
         </div>
 
         {/* Menu Footer */}
-        <div className="flex-shrink-0 p-4 border-t border-border/30">
+        <div className="flex-shrink-0 p-4 border-t border-border/20">
           <div className="flex items-center justify-center space-x-2">
             <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[6px] border-l-transparent border-r-transparent border-b-muted-foreground/60"></div>
             <p className="text-xs text-muted-foreground font-medium">
