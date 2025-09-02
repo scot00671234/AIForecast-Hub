@@ -9,7 +9,7 @@ export default function BottomBanner() {
           <AdBanner
             adSlot="1234567890" // You'll get this from AdSense dashboard
             adFormat="auto"
-            style={{ display: 'block', maxWidth: '728px', height: '5px' }}
+            style={{ display: 'block', maxWidth: '728px', height: '2px' }}
             className="w-full max-w-3xl"
           />
         </div>
