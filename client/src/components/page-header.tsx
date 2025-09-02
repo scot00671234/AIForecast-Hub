@@ -68,21 +68,16 @@ export function PageHeader({
             {/* Theme toggle for dashboard */}
             {showSearch && <ThemeToggle />}
             
-            {/* Theme toggle and navigation menu for non-dashboard pages */}
-            {!showSearch && (
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <NavigationMenu currentPath={currentPath} />
-              </div>
-            )}
+            {/* Theme toggle for non-dashboard pages */}
+            {!showSearch && <ThemeToggle />}
             
-            {/* Mobile menu button for all pages */}
+            {/* Menu button for all pages */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className=""
               onClick={() => setIsMobileMenuOpen(true)}
-              data-testid="button-mobile-menu"
+              data-testid="button-menu"
             >
               <MenuIcon className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
@@ -111,14 +106,10 @@ export function PageHeader({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-background/95 backdrop-blur-xl border-l border-border/40 shadow-2xl z-50"
+              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-background/98 backdrop-blur-xl border-l border-border/40 shadow-2xl z-50"
             >
               {/* Menu header */}
-              <div className="flex items-center justify-between p-6 border-b border-border/30">
-                <div className="flex items-center space-x-3">
-                  <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-                  <span className="font-semibold text-foreground">AIForecast Hub</span>
-                </div>
+              <div className="flex items-center justify-end p-6 border-b border-border/30">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -158,8 +149,7 @@ export function PageHeader({
 
               {/* Theme toggle in menu */}
               <div className="absolute bottom-6 left-6 right-6">
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                  <span className="text-sm font-medium text-foreground">Theme</span>
+                <div className="flex items-center justify-center p-4 bg-muted/30 rounded-lg">
                   <ThemeToggle />
                 </div>
               </div>
