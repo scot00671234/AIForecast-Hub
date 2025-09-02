@@ -1,6 +1,7 @@
 import { Link } from "wouter";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, MenuIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { NavigationMenu } from "./navigation-menu";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -59,6 +60,17 @@ export function PageHeader({
                 <NavigationMenu currentPath={currentPath} />
               </div>
             )}
+            
+            {/* Mobile menu button for all pages */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              data-testid="button-mobile-menu"
+            >
+              <MenuIcon className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
           </div>
         </div>
       </div>
