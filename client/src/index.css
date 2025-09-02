@@ -221,25 +221,18 @@
   }
 }
 
-/* Force compact ad height - override AdSense defaults */
+/* AdSense compliant mobile banner styling */
 .ad-container {
-  height: 2px !important;
-  max-height: 2px !important;
-  overflow: hidden !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
 }
 
 .ad-container .adsbygoogle {
-  height: 2px !important;
-  max-height: 2px !important;
-  min-height: 2px !important;
-  overflow: hidden !important;
-}
-
-.ad-container ins {
-  height: 2px !important;
-  max-height: 2px !important;
-  min-height: 2px !important;
-  overflow: hidden !important;
+  display: block;
+  width: 320px;
+  height: 50px;
 }
 
 @layer components {

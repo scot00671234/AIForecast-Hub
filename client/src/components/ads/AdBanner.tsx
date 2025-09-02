@@ -33,11 +33,11 @@ export default function AdBanner({
     <div className={`ad-container ${className}`}>
       <ins
         className="adsbygoogle"
-        style={{ ...style, height: '2px', maxHeight: '2px', minHeight: '2px', overflow: 'hidden' }}
+        style={{ display: 'block', width: '320px', height: '50px' }}
         data-ad-client="ca-pub-4669482504741834"
         data-ad-slot={adSlot}
-        data-ad-format="rectangle"
-        data-full-width-responsive="false"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
       />
     </div>
   );

@@ -502,18 +502,15 @@ export default function Analysis() {
       </Dialog>
 
       {/* Bottom Banner Ad */}
-      {/* Compact Ad Banner */}
-      <div className="w-full border-t border-border/20 bg-muted/10">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 py-0.5">
-          <div className="text-xs text-muted-foreground text-center">Advertisement</div>
-          <div className="flex justify-center">
-            <AdBanner
-              adSlot="1234567890"
-              adFormat="auto"
-              style={{ display: 'block', maxWidth: '728px', height: '1px' }}
-              className="w-full max-w-3xl"
-            />
-          </div>
+      {/* Mobile Banner Ad - AdSense Compliant */}
+      <div className="w-full border-t border-border/20 bg-muted/5">
+        <div className="max-w-6xl mx-auto px-4 py-2">
+          <div className="text-xs text-muted-foreground text-center mb-2">Advertisement</div>
+          <AdBanner
+            adSlot="1234567890"
+            adFormat="auto"
+            className=""
+          />
         </div>
       </div>
 
