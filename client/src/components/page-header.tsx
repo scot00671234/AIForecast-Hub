@@ -135,12 +135,6 @@ export function PageHeader({
               })}
             </div>
 
-            {/* Theme toggle in menu */}
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-center justify-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <ThemeToggle />
-              </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
