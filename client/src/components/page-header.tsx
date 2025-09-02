@@ -89,72 +89,59 @@ export function PageHeader({
       {/* Mobile slide-in menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              onClick={closeMobileMenu}
-            />
-            
-            {/* Slide-in menu */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-background/98 backdrop-blur-xl border-l border-border/40 shadow-2xl z-50"
-            >
-              {/* Menu header */}
-              <div className="flex items-center justify-end p-6 border-b border-border/30">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={closeMobileMenu}
-                  className="hover:bg-muted/50"
-                >
-                  <XIcon className="h-5 w-5" />
-                  <span className="sr-only">Close menu</span>
-                </Button>
-              </div>
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 shadow-2xl z-50"
+          >
+            {/* Menu header */}
+            <div className="flex items-center justify-end p-4 border-b border-gray-200 dark:border-gray-700">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeMobileMenu}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <XIcon className="h-5 w-5" />
+                <span className="sr-only">Close menu</span>
+              </Button>
+            </div>
 
-              {/* Menu items */}
-              <div className="flex flex-col p-4 space-y-2">
-                {menuItems.map((item, index) => {
-                  const IconComponent = item.icon;
-                  const isActive = currentPath === item.href;
-                  
-                  return (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                    >
-                      <Link href={item.href} onClick={closeMobileMenu}>
-                        <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 hover:bg-muted/50 ${
-                          isActive ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'
-                        }`}>
-                          <IconComponent className="h-5 w-5" />
-                          <span className="font-medium">{item.label}</span>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
+            {/* Menu items */}
+            <div className="flex flex-col p-2 space-y-1">
+              {menuItems.map((item, index) => {
+                const IconComponent = item.icon;
+                const isActive = currentPath === item.href;
+                
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                  >
+                    <Link href={item.href} onClick={closeMobileMenu}>
+                      <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                        isActive ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                      }`}>
+                        <IconComponent className="h-5 w-5" />
+                        <span className="font-medium">{item.label}</span>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
 
-              {/* Theme toggle in menu */}
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="flex items-center justify-center p-4 bg-muted/30 rounded-lg">
-                  <ThemeToggle />
-                </div>
+            {/* Theme toggle in menu */}
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="flex items-center justify-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <ThemeToggle />
               </div>
-            </motion.div>
-          </>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>

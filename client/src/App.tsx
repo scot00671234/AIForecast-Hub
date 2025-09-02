@@ -24,7 +24,7 @@ function Router() {
       <Route path="/faq" component={FAQ} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:id" component={BlogPost} />
-      <Route path="/policy" component={Policy} />
+      <Route path="/legal" component={Policy} />
       <Route component={NotFound} />
     </Switch>
   );
