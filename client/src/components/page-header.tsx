@@ -51,11 +51,6 @@ export function PageHeader({
               </div>
             )}
             
-            {/* Theme toggle for dashboard */}
-            {showSearch && <ThemeToggle />}
-            
-            {/* Theme toggle for non-dashboard pages */}
-            {!showSearch && <ThemeToggle />}
             
             {/* Navigation menu */}
             <NavigationMenu currentPath={currentPath} />
