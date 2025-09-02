@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { SearchIcon, MenuIcon } from "lucide-react";
+import { SearchIcon, MenuIcon, XIcon, HomeIcon, BarChart3Icon, InfoIcon, HelpCircleIcon, FileTextIcon, ScrollIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { NavigationMenu } from "./navigation-menu";
 import { ThemeToggle } from "./theme-toggle";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PageHeaderProps {
   currentPath?: string;
@@ -14,6 +16,15 @@ interface PageHeaderProps {
   children?: React.ReactNode; // For search results dropdown or other custom content
 }
 
+const menuItems = [
+  { href: "/", label: "Home", icon: HomeIcon },
+  { href: "/dashboard", label: "Dashboard", icon: BarChart3Icon },
+  { href: "/about", label: "About", icon: InfoIcon },
+  { href: "/faq", label: "FAQ", icon: HelpCircleIcon },
+  { href: "/blog", label: "Blog", icon: FileTextIcon },
+  { href: "/legal", label: "Legal", icon: ScrollIcon },
+];
+
 export function PageHeader({ 
   currentPath = "/", 
   showSearch = false,
@@ -22,6 +33,10 @@ export function PageHeader({
   searchPlaceholder = "Search...",
   children
 }: PageHeaderProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
     <header className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-6 py-4">
@@ -66,6 +81,7 @@ export function PageHeader({
               variant="ghost"
               size="icon"
               className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(true)}
               data-testid="button-mobile-menu"
             >
               <MenuIcon className="h-5 w-5" />
@@ -74,6 +90,83 @@ export function PageHeader({
           </div>
         </div>
       </div>
+
+      {/* Mobile slide-in menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={closeMobileMenu}
+            />
+            
+            {/* Slide-in menu */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-background/95 backdrop-blur-xl border-l border-border/40 shadow-2xl z-50"
+            >
+              {/* Menu header */}
+              <div className="flex items-center justify-between p-6 border-b border-border/30">
+                <div className="flex items-center space-x-3">
+                  <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
+                  <span className="font-semibold text-foreground">AIForecast Hub</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeMobileMenu}
+                  className="hover:bg-muted/50"
+                >
+                  <XIcon className="h-5 w-5" />
+                  <span className="sr-only">Close menu</span>
+                </Button>
+              </div>
+
+              {/* Menu items */}
+              <div className="flex flex-col p-4 space-y-2">
+                {menuItems.map((item, index) => {
+                  const IconComponent = item.icon;
+                  const isActive = currentPath === item.href;
+                  
+                  return (
+                    <motion.div
+                      key={item.href}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                    >
+                      <Link href={item.href} onClick={closeMobileMenu}>
+                        <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 hover:bg-muted/50 ${
+                          isActive ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'
+                        }`}>
+                          <IconComponent className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Theme toggle in menu */}
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium text-foreground">Theme</span>
+                  <ThemeToggle />
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
