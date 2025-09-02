@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { NavigationMenu } from "../components/navigation-menu";
+import { PageHeader } from "../components/page-header";
 import { SmartBackButton } from "../components/smart-back-button";
 import { useLocation, Link } from "wouter";
 import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon, DownloadIcon } from "lucide-react";
@@ -179,16 +179,7 @@ export default function Analysis() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-foreground"></div>
-            <span className="font-medium text-lg text-foreground">AIForecast Hub</span>
-          </Link>
-          
-          <NavigationMenu currentPath={location} />
-        </div>
-      </header>
+      <PageHeader currentPath={location} />
 
       {/* Main Content */}
       <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-16">

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { ArrowRightIcon, CalendarIcon, ClockIcon } from "lucide-react";
-import { NavigationMenu } from "../components/navigation-menu";
+import { PageHeader } from "../components/page-header";
 import { SmartBackButton } from "../components/smart-back-button";
 import { motion } from "framer-motion";
 
@@ -36,19 +36,8 @@ export default function Blog() {
       {/* Enhanced background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20 pointer-events-none" />
       
-      {/* Enhanced Header */}
-      <header className="sticky top-0 w-full z-50 border-b border-border/30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-7xl mx-auto px-6 md:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-all duration-300">
-              <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[16px] border-l-transparent border-r-transparent border-b-foreground"></div>
-              <span className="text-xl font-semibold text-foreground">AIForecast Hub</span>
-            </Link>
-            
-            <NavigationMenu currentPath={location} />
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <PageHeader currentPath={location} />
 
       {/* Main Content */}
       <main className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-24">
