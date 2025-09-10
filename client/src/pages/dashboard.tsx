@@ -7,7 +7,6 @@ import AllCommoditiesView from "@/components/dashboard/all-commodities-view";
 import { CompositeIndexGauge } from "@/components/CompositeIndexGauge";
 import PredictionStatsCard from "@/components/PredictionStatsCard";
 import MarketStatusCard from "@/components/MarketStatusCard";
-import AdBanner from "@/components/ads/AdBanner";
 import { motion } from "framer-motion";
 import type { Commodity } from "@shared/schema";
 
@@ -168,25 +167,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Bottom Banner Ad */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-      >
-        {/* Mobile Banner Ad - AdSense Compliant */}
-        <div className="w-full border-t border-border/20 bg-muted/5">
-          <div className="max-w-6xl mx-auto px-4 py-2">
-            <div className="text-xs text-muted-foreground text-center mb-2">Advertisement</div>
-            <AdBanner
-              adSlot="1234567890"
-              adFormat="auto"
-              className=""
-            />
-          </div>
-        </div>
-      </motion.div>
 
       {/* Modern Footer - matching landing page */}
       <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">

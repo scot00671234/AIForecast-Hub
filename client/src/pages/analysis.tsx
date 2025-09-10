@@ -6,7 +6,6 @@ import { SmartBackButton } from "../components/smart-back-button";
 import { useLocation, Link } from "wouter";
 import { TrendingUpIcon, TrendingDownIcon, ActivityIcon, InfoIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdBanner from "@/components/ads/AdBanner";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -501,18 +500,6 @@ export default function Analysis() {
         </DialogContent>
       </Dialog>
 
-      {/* Bottom Banner Ad */}
-      {/* Mobile Banner Ad - AdSense Compliant */}
-      <div className="w-full border-t border-border/20 bg-muted/5">
-        <div className="max-w-6xl mx-auto px-4 py-2">
-          <div className="text-xs text-muted-foreground text-center mb-2">Advertisement</div>
-          <AdBanner
-            adSlot="1234567890"
-            adFormat="auto"
-            className=""
-          />
-        </div>
-      </div>
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-border/30 mt-20 md:mt-32">
