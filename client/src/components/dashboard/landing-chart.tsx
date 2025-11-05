@@ -149,17 +149,18 @@ const LandingChart: React.FC<LandingChartProps> = ({
         secondsVisible: false,
       },
       crosshair: {
-        mode: 1,
-        vertLine: {
-          width: 1,
-          color: theme === 'dark' ? '#ffffff' : '#000000',
-          style: 2,
-        },
-        horzLine: {
-          width: 1,
-          color: theme === 'dark' ? '#ffffff' : '#000000',
-          style: 2,
-        },
+        mode: 0, // Disable crosshair to prevent toFixed errors during rendering
+        // mode: 1,
+        // vertLine: {
+        //   width: 1,
+        //   color: theme === 'dark' ? '#ffffff' : '#000000',
+        //   style: 2,
+        // },
+        // horzLine: {
+        //   width: 1,
+        //   color: theme === 'dark' ? '#ffffff' : '#000000',
+        //   style: 2,
+        // },
       },
       width: chartContainerRef.current.clientWidth,
       height: height,
