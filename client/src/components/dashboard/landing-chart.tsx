@@ -168,7 +168,9 @@ const LandingChart: React.FC<LandingChartProps> = ({
     const chart = createChart(chartContainerRef.current, chartOptions);
     chartRef.current = chart;
 
-    if (chartData && Array.isArray(chartData) && chartData.length > 0) {
+    // Wrap chart operations in try-catch to handle any internal errors
+    try {
+      if (chartData && Array.isArray(chartData) && chartData.length > 0) {
       // Separate historical and prediction data
       const historicalData: ChartDataPoint[] = [];
       const predictionData: { [modelName: string]: ChartDataPoint[] } = {};
@@ -241,24 +243,38 @@ const LandingChart: React.FC<LandingChartProps> = ({
         });
           const sortedHistoricalData = validHistoricalData.sort((a, b) => (a.time as number) - (b.time as number));
           
-          // Ensure all values are numbers before setting data
-          const safeHistoricalData = sortedHistoricalData.map(point => ({
-            time: point.time,
-            value: typeof point.value === 'number' && isFinite(point.value) && point.value > 0 ? point.value : 0
-          })).filter(point => point.value > 0);
+          // Ensure all values are numbers before setting data - double validation
+          const safeHistoricalData = sortedHistoricalData
+            .map(point => {
+              const val = typeof point.value === 'number' && isFinite(point.value) && !isNaN(point.value) && point.value > 0 
+                ? Number(point.value) 
+                : null;
+              if (val === null) return null;
+              return {
+                time: point.time,
+                value: val
+              };
+            })
+            .filter((point): point is { time: Time; value: number } => point !== null && point.value > 0);
           
-          historicalSeries.setData(safeHistoricalData);
-          
-          // Apply zoom focus if specified
-          if (focusRange) {
-            // Set visible range to focus on the selected period
-            chart.timeScale().setVisibleRange({
-              from: focusRange.from as Time,
-              to: focusRange.to as Time,
-            });
-          } else {
-            // Fit chart to all available data
-            chart.timeScale().fitContent();
+          if (safeHistoricalData.length > 0) {
+            try {
+              historicalSeries.setData(safeHistoricalData);
+              
+              // Apply zoom focus if specified
+              if (focusRange) {
+                // Set visible range to focus on the selected period
+                chart.timeScale().setVisibleRange({
+                  from: focusRange.from as Time,
+                  to: focusRange.to as Time,
+                });
+              } else {
+                // Fit chart to all available data
+                chart.timeScale().fitContent();
+              }
+            } catch (setDataError) {
+              console.error('Error setting historical data:', setDataError);
+            }
           }
         } else {
           console.warn('No valid historical data points after filtering');
@@ -305,13 +321,27 @@ const LandingChart: React.FC<LandingChartProps> = ({
           });
           const sortedPredictionData = validPredictionData.sort((a, b) => (a.time as number) - (b.time as number));
           
-          // Ensure all values are numbers before setting data
-          const safePredictionData = sortedPredictionData.map(point => ({
-            time: point.time,
-            value: typeof point.value === 'number' && isFinite(point.value) && point.value > 0 ? point.value : 0
-          })).filter(point => point.value > 0);
+          // Ensure all values are numbers before setting data - double validation
+          const safePredictionData = sortedPredictionData
+            .map(point => {
+              const val = typeof point.value === 'number' && isFinite(point.value) && !isNaN(point.value) && point.value > 0 
+                ? Number(point.value) 
+                : null;
+              if (val === null) return null;
+              return {
+                time: point.time,
+                value: val
+              };
+            })
+            .filter((point): point is { time: Time; value: number } => point !== null && point.value > 0);
           
-          predictionSeries.setData(safePredictionData);
+          if (safePredictionData.length > 0) {
+            try {
+              predictionSeries.setData(safePredictionData);
+            } catch (setDataError) {
+              console.error(`Error setting prediction data for ${modelName}:`, setDataError);
+            }
+          }
         }
       });
     } else {
