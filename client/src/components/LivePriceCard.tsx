@@ -32,15 +32,17 @@ export function LivePriceCard({ commodityId, name, symbol, unit, className = "" 
     return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const getTrendIcon = (change: number) => {
-    if (change > 0) return <TrendingUpIcon className="h-4 w-4 text-green-500" />;
-    if (change < 0) return <TrendingDownIcon className="h-4 w-4 text-red-500" />;
+  const getTrendIcon = (change: number | undefined) => {
+    const changeValue = typeof change === 'number' && !isNaN(change) ? change : 0;
+    if (changeValue > 0) return <TrendingUpIcon className="h-4 w-4 text-green-500" />;
+    if (changeValue < 0) return <TrendingDownIcon className="h-4 w-4 text-red-500" />;
     return <MinusIcon className="h-4 w-4 text-muted-foreground" />;
   };
 
-  const getTrendColor = (change: number) => {
-    if (change > 0) return "text-green-500";
-    if (change < 0) return "text-red-500";
+  const getTrendColor = (change: number | undefined) => {
+    const changeValue = typeof change === 'number' && !isNaN(change) ? change : 0;
+    if (changeValue > 0) return "text-green-500";
+    if (changeValue < 0) return "text-red-500";
     return "text-muted-foreground";
   };
 
@@ -91,18 +93,24 @@ export function LivePriceCard({ commodityId, name, symbol, unit, className = "" 
             <h3 className="font-semibold text-sm text-foreground">{name}</h3>
             <p className="text-xs text-muted-foreground">{symbol}</p>
           </div>
-          {getTrendIcon(priceData.change)}
+          {getTrendIcon(priceData.change || 0)}
         </div>
         <div>
           <p className="text-lg font-bold text-foreground">
             {formatPrice(priceData.price, unit)}
           </p>
           <div className="flex items-center space-x-2 text-xs">
-            <span className={getTrendColor(priceData.change)}>
-              {priceData.change > 0 ? '+' : ''}{priceData.change.toFixed(2)}
+            <span className={getTrendColor(priceData.change || 0)}>
+              {priceData.change > 0 ? '+' : ''}
+              {typeof priceData.change === 'number' && !isNaN(priceData.change) 
+                ? priceData.change.toFixed(2) 
+                : '0.00'}
             </span>
-            <span className={getTrendColor(priceData.changePercent)}>
-              ({priceData.changePercent > 0 ? '+' : ''}{priceData.changePercent.toFixed(2)}%)
+            <span className={getTrendColor(priceData.changePercent || 0)}>
+              ({priceData.changePercent > 0 ? '+' : ''}
+              {typeof priceData.changePercent === 'number' && !isNaN(priceData.changePercent) 
+                ? priceData.changePercent.toFixed(2) 
+                : '0.00'}%)
             </span>
           </div>
         </div>
