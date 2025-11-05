@@ -228,20 +228,26 @@ const LandingChart: React.FC<LandingChartProps> = ({
         );
         
         if (validHistoricalData.length > 0) {
-          const historicalSeries = chart.addSeries(LineSeries, {
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            lineWidth: 3,
-            title: 'Actual Price',
-            visible: true,
-            priceFormat: {
-              type: 'price',
-              precision: 2,
-              minMove: 0.01,
-            },
-          });
+        const historicalSeries = chart.addSeries(LineSeries, {
+          color: theme === 'dark' ? '#ffffff' : '#000000',
+          lineWidth: 3,
+          title: 'Actual Price',
+          visible: true,
+          priceFormat: {
+            type: 'price',
+            precision: 2,
+            minMove: 0.01,
+          },
+        });
           const sortedHistoricalData = validHistoricalData.sort((a, b) => (a.time as number) - (b.time as number));
           
-          historicalSeries.setData(sortedHistoricalData);
+          // Ensure all values are numbers before setting data
+          const safeHistoricalData = sortedHistoricalData.map(point => ({
+            time: point.time,
+            value: typeof point.value === 'number' && isFinite(point.value) && point.value > 0 ? point.value : 0
+          })).filter(point => point.value > 0);
+          
+          historicalSeries.setData(safeHistoricalData);
           
           // Apply zoom focus if specified
           if (focusRange) {
@@ -298,7 +304,14 @@ const LandingChart: React.FC<LandingChartProps> = ({
             },
           });
           const sortedPredictionData = validPredictionData.sort((a, b) => (a.time as number) - (b.time as number));
-          predictionSeries.setData(sortedPredictionData);
+          
+          // Ensure all values are numbers before setting data
+          const safePredictionData = sortedPredictionData.map(point => ({
+            time: point.time,
+            value: typeof point.value === 'number' && isFinite(point.value) && point.value > 0 ? point.value : 0
+          })).filter(point => point.value > 0);
+          
+          predictionSeries.setData(safePredictionData);
         }
       });
     } else {
