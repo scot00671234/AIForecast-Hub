@@ -417,9 +417,17 @@ const LandingChart: React.FC<LandingChartProps> = ({
           }
         }
       });
-    } else {
-      // Handle case where no data is available
-      console.log('No chart data available for period:', period);
+      } else {
+        // Handle case where no data is available
+        console.log('No chart data available for period:', period);
+      }
+    } catch (error) {
+      console.error('Error rendering chart:', error);
+      // Clean up chart on error
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+      }
     }
 
     // Handle resize
