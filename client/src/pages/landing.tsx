@@ -387,7 +387,6 @@ export default function Landing() {
             </Button>
           </motion.div>
         </div>
-        </div>
       </section>
 
       {/* Live Market Data Section */}
