@@ -165,6 +165,12 @@ const LandingChart: React.FC<LandingChartProps> = ({
       height: height,
     };
 
+    // Don't create chart if no valid data exists
+    if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+      console.log('No chart data available - skipping chart creation');
+      return;
+    }
+
     const chart = createChart(chartContainerRef.current, chartOptions);
     chartRef.current = chart;
 
