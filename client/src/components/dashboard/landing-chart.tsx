@@ -255,19 +255,31 @@ const LandingChart: React.FC<LandingChartProps> = ({
         });
           const sortedHistoricalData = validHistoricalData.sort((a, b) => (a.time as number) - (b.time as number));
           
-          // Ensure all values are numbers before setting data - double validation
+          // Ensure all values are numbers before setting data - triple validation with final check
           const safeHistoricalData = sortedHistoricalData
             .map(point => {
+              // Final validation before mapping
+              if (!point || typeof point.value === 'undefined' || point.value === null || point.value === '') {
+                return null;
+              }
               const val = typeof point.value === 'number' && isFinite(point.value) && !isNaN(point.value) && point.value > 0 
                 ? Number(point.value) 
                 : null;
-              if (val === null) return null;
+              if (val === null || !isFinite(val) || isNaN(val) || val <= 0) return null;
               return {
                 time: point.time,
                 value: val
               };
             })
-            .filter((point): point is { time: Time; value: number } => point !== null && point.value > 0);
+            .filter((point): point is { time: Time; value: number } => {
+              // Final filter - ensure no undefined values slip through
+              return point !== null && 
+                     point !== undefined && 
+                     typeof point.value === 'number' && 
+                     isFinite(point.value) && 
+                     !isNaN(point.value) && 
+                     point.value > 0;
+            });
           
           if (safeHistoricalData.length > 0) {
             try {
@@ -333,19 +345,31 @@ const LandingChart: React.FC<LandingChartProps> = ({
           });
           const sortedPredictionData = validPredictionData.sort((a, b) => (a.time as number) - (b.time as number));
           
-          // Ensure all values are numbers before setting data - double validation
+          // Ensure all values are numbers before setting data - triple validation with final check
           const safePredictionData = sortedPredictionData
             .map(point => {
+              // Final validation before mapping
+              if (!point || typeof point.value === 'undefined' || point.value === null || point.value === '') {
+                return null;
+              }
               const val = typeof point.value === 'number' && isFinite(point.value) && !isNaN(point.value) && point.value > 0 
                 ? Number(point.value) 
                 : null;
-              if (val === null) return null;
+              if (val === null || !isFinite(val) || isNaN(val) || val <= 0) return null;
               return {
                 time: point.time,
                 value: val
               };
             })
-            .filter((point): point is { time: Time; value: number } => point !== null && point.value > 0);
+            .filter((point): point is { time: Time; value: number } => {
+              // Final filter - ensure no undefined values slip through
+              return point !== null && 
+                     point !== undefined && 
+                     typeof point.value === 'number' && 
+                     isFinite(point.value) && 
+                     !isNaN(point.value) && 
+                     point.value > 0;
+            });
           
           if (safePredictionData.length > 0) {
             try {
