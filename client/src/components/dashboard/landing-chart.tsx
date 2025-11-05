@@ -178,7 +178,7 @@ const LandingChart: React.FC<LandingChartProps> = ({
       chartData.forEach((item: any, index: number) => {
         try {
           // Validate date exists
-          if (!item.date) return;
+          if (!item || !item.date) return;
           
           const timeStamp = Math.floor(new Date(item.date).getTime() / 1000); // Convert to Unix timestamp in seconds
           
@@ -189,26 +189,38 @@ const LandingChart: React.FC<LandingChartProps> = ({
           if (item.type === 'historical') {
             const price = item.actualPrice;
             // Check if price is valid: not null, not undefined, not NaN, and is a finite number
-            if (price !== null && price !== undefined && typeof price === 'number' && !isNaN(price) && isFinite(price)) {
+            if (price !== null && price !== undefined && price !== '' && typeof price === 'number' && !isNaN(price) && isFinite(price) && price > 0) {
               const numPrice = Number(price);
-              if (numPrice > 0) { // Only add positive prices
+              if (numPrice > 0 && isFinite(numPrice) && !isNaN(numPrice)) { // Only add positive prices
                 historicalData.push({
                   time: timeStamp as Time,
                   value: numPrice,
                 });
               }
             }
-          } else if (item.type === 'prediction' && item.predictions) {
+          } else if (item.type === 'prediction' && item.predictions && typeof item.predictions === 'object') {
             Object.entries(item.predictions).forEach(([modelName, price]) => {
               // More strict validation: must be a number, finite, and positive
-              if (typeof price === 'number' && !isNaN(price) && isFinite(price) && price > 0) {
-                if (!predictionData[modelName]) {
-                  predictionData[modelName] = [];
+              // Also check that price is not null, undefined, or empty string
+              if (
+                price !== null && 
+                price !== undefined && 
+                price !== '' && 
+                typeof price === 'number' && 
+                !isNaN(price) && 
+                isFinite(price) && 
+                price > 0
+              ) {
+                const numPrice = Number(price);
+                if (numPrice > 0 && isFinite(numPrice) && !isNaN(numPrice)) {
+                  if (!predictionData[modelName]) {
+                    predictionData[modelName] = [];
+                  }
+                  predictionData[modelName].push({
+                    time: timeStamp as Time,
+                    value: numPrice,
+                  });
                 }
-                predictionData[modelName].push({
-                  time: timeStamp as Time,
-                  value: Number(price),
-                });
               }
             });
           }
