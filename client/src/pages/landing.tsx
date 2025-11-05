@@ -24,7 +24,6 @@ import { AI_MODELS } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { LivePriceCard } from "@/components/LivePriceCard";
 import { useQuery } from "@tanstack/react-query";
-import LandingChart from "@/components/dashboard/landing-chart";
 
 export default function Landing() {
   const [, navigate] = useLocation();
@@ -370,78 +369,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Real Chart Preview Section */}
-      <section className="py-16 md:py-24 px-6 md:px-6 relative z-10 bg-black/5 dark:bg-black/10">
-        <div className="relative">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="text-center mb-12 md:mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">Live Predictions</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-medium text-foreground mb-4 tracking-tight">
-              Real AI Prediction Chart
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              See how our AI models compare with real market data and predictions
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className="max-w-5xl mx-auto"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true, margin: "-50px" }}
-          >
-            <Card className="border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden">
-              <CardContent className="p-0">
-                <div className="bg-gradient-to-r from-white/10 via-white/5 to-white/10 p-6 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                      <h3 className="text-lg font-semibold text-foreground">Gold Price Predictions</h3>
-                      <span className="text-sm text-muted-foreground bg-muted/40 px-3 py-1 rounded-full">Live Data</span>
-                    </div>
-                    <div className="flex items-center space-x-4 text-xs">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-white dark:bg-black rounded-full"></div>
-                        <span className="text-muted-foreground">Actual Price</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-muted-foreground">Claude</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-muted-foreground">ChatGPT</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span className="text-muted-foreground">Deepseek</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  {commodities.length > 0 && (
-                    <LandingChart 
-                      commodityId={commodities.find(c => c.name === 'Gold')?.id || commodities[0]?.id} 
-                      period="3mo" 
-                      height={400} 
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          
           <motion.div 
             className="text-center mt-12"
             initial={{ opacity: 0, y: 20 }}
