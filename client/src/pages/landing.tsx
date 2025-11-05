@@ -369,26 +369,6 @@ export default function Landing() {
         </div>
       </section>
 
-          <motion.div 
-            className="text-center mt-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            viewport={{ once: true, margin: "-50px" }}
-          >
-            <p className="text-muted-foreground mb-6">
-              Interactive charts with 14 commodities and real-time AI predictions
-            </p>
-            <Button
-              onClick={handleGetStarted}
-              className="px-8 py-3 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 rounded-xl font-normal transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm"
-            >
-              Explore All Charts
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Live Market Data Section */}
       <section className="py-16 md:py-24 px-6 md:px-6 relative z-10 bg-black/10 dark:bg-black/20">
         <div className="relative">
