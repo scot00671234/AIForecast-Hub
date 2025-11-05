@@ -290,7 +290,22 @@ const LandingChart: React.FC<LandingChartProps> = ({
           
           if (safeHistoricalData.length > 0) {
             try {
-              historicalSeries.setData(safeHistoricalData);
+              // Final sanity check - ensure every value is a valid number
+              const finalHistoricalData = safeHistoricalData.map(point => ({
+                time: point.time,
+                value: Number(point.value) // Ensure it's a number
+              })).filter(point => 
+                typeof point.value === 'number' && 
+                isFinite(point.value) && 
+                !isNaN(point.value) && 
+                point.value > 0 &&
+                point.value !== null &&
+                point.value !== undefined
+              );
+              
+              if (finalHistoricalData.length > 0) {
+                historicalSeries.setData(finalHistoricalData);
+              }
               
               // Apply zoom focus if specified
               if (focusRange) {
@@ -380,7 +395,22 @@ const LandingChart: React.FC<LandingChartProps> = ({
           
           if (safePredictionData.length > 0) {
             try {
-              predictionSeries.setData(safePredictionData);
+              // Final sanity check - ensure every value is a valid number
+              const finalPredictionData = safePredictionData.map(point => ({
+                time: point.time,
+                value: Number(point.value) // Ensure it's a number
+              })).filter(point => 
+                typeof point.value === 'number' && 
+                isFinite(point.value) && 
+                !isNaN(point.value) && 
+                point.value > 0 &&
+                point.value !== null &&
+                point.value !== undefined
+              );
+              
+              if (finalPredictionData.length > 0) {
+                predictionSeries.setData(finalPredictionData);
+              }
             } catch (setDataError) {
               console.error(`Error setting prediction data for ${modelName}:`, setDataError);
             }
