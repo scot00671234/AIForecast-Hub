@@ -9,7 +9,7 @@ PORT = "3000"
 VITE_HMR = "false"
 
 [phases.setup]
-nixPkgs = ["nodejs_18", "openssl"]
+nixPkgs = ["nodejs_18", "openssl", "bash"]
 
 # Note: Caddy should not auto-detect without Caddyfile
 
