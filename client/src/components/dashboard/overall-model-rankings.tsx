@@ -14,7 +14,7 @@ interface OverallModelRanking {
 }
 
 export default function OverallModelRankings() {
-  const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [selectedPeriod, setSelectedPeriod] = useState("90d");
 
   const { data: rankings, isLoading } = useQuery<OverallModelRanking[]>({
     queryKey: ["/api/league-table", selectedPeriod],
@@ -27,7 +27,7 @@ export default function OverallModelRankings() {
       <div className="glass-card hover-lift shimmer p-6 space-y-6 relative overflow-hidden group">
         {/* Enhanced glare effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
+
         <div className="flex items-center justify-between relative z-10">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-32" />
@@ -56,7 +56,7 @@ export default function OverallModelRankings() {
       <div className="glass-card hover-lift p-6 space-y-6 relative overflow-hidden group">
         {/* Subtle glare effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
+
         <div className="flex items-center justify-between relative z-10">
           <h2 className="text-lg font-light text-foreground">Model Rankings</h2>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -64,13 +64,11 @@ export default function OverallModelRankings() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-card border-white/20 bg-white/10 backdrop-blur-sm">
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
               <SelectItem value="90d">Last 90 Days</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="text-center py-8 relative z-10">
           <p className="text-sm text-muted-foreground font-light">No ranking data available</p>
           <p className="text-xs text-muted-foreground font-light">Start making predictions to see model rankings</p>
@@ -83,7 +81,7 @@ export default function OverallModelRankings() {
     <div className="glass-card hover-lift p-6 space-y-6 relative overflow-hidden group">
       {/* Subtle glare effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
+
       <div className="flex items-center justify-between relative z-10">
         <h2 className="text-lg font-light text-foreground">Model Rankings</h2>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -91,8 +89,6 @@ export default function OverallModelRankings() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="glass-card border-white/20 bg-white/10 backdrop-blur-sm">
-            <SelectItem value="7d">Last 7 Days</SelectItem>
-            <SelectItem value="30d">Last 30 Days</SelectItem>
             <SelectItem value="90d">Last 90 Days</SelectItem>
           </SelectContent>
         </Select>
@@ -100,24 +96,23 @@ export default function OverallModelRankings() {
 
       <div className="space-y-3 relative z-10">
         {rankings.map((ranking, index) => (
-          <motion.div 
+          <motion.div
             key={ranking.aiModel.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             className="flex items-center justify-between py-3 px-4 hover:bg-gray-50/50 transition-all duration-300 group/item"
           >
-            
+
             <div className="flex items-center space-x-3 relative z-10">
               <span className="text-sm text-muted-foreground font-light">
                 #{ranking.rank}
               </span>
-              <div className={`w-2 h-2 rounded-full shadow-sm ${
-                ranking.aiModel.name === 'Claude' ? 'bg-green-500 shadow-green-500/50' :
-                ranking.aiModel.name === 'ChatGPT' ? 'bg-blue-500 shadow-blue-500/50' :
-                ranking.aiModel.name === 'Deepseek' ? 'bg-purple-500 shadow-purple-500/50' :
-                'bg-gray-500 shadow-gray-500/50'
-              }`}></div>
+              <div className={`w-2 h-2 rounded-full shadow-sm ${ranking.aiModel.name === 'Claude' ? 'bg-green-500 shadow-green-500/50' :
+                  ranking.aiModel.name === 'ChatGPT' ? 'bg-blue-500 shadow-blue-500/50' :
+                    ranking.aiModel.name === 'Deepseek' ? 'bg-purple-500 shadow-purple-500/50' :
+                      'bg-gray-500 shadow-gray-500/50'
+                }`}></div>
               <span className="text-sm font-light text-foreground">{ranking.aiModel.name}</span>
             </div>
 
