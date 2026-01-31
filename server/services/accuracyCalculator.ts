@@ -146,9 +146,10 @@ export class AccuracyCalculator {
 
     console.log(`✅ Found ${matches.length} matches between predictions and actual prices`);
 
-    // Minimum sample size requirement
-    if (matches.length < 3) {
-      console.log(`⚠️ Insufficient matches (${matches.length} < 3 required)`);
+    // Minimum sample size requirement - Reduced to 1 to ensure we show rankings even with sparse data
+    // The user prefers seeing *some* number over 0% / empty string
+    if (matches.length < 1) {
+      console.log(`⚠️ Insufficient matches (${matches.length} < 1 required)`);
       return null;
     }
 
@@ -256,19 +257,11 @@ export class AccuracyCalculator {
     const correctPredictions = percentageErrors.filter(error => error <= threshold).length;
     const thresholdAccuracy = (correctPredictions / matches.length) * 100;
 
-    // === Final Composite Accuracy Score ===
-    // Enhanced weighting system
-    const mapeComponent = Math.max(0, 100 - mape);
-    const rmseNormalized = Math.max(0, 100 - (rmse / meanActual) * 100);
-    const rSquaredComponent = rSquared * 100;
-
-    const accuracy = (
-      mapeComponent * 0.30 +           // MAPE: 30%
-      directionalAccuracy * 0.25 +     // Directional: 25%
-      rSquaredComponent * 0.20 +       // R²: 20%
-      rmseNormalized * 0.15 +          // RMSE: 15%
-      thresholdAccuracy * 0.10         // Threshold: 10%
-    );
+    // === Final Accuracy Score ===
+    // SIMPLIFIED: Pure accuracy based on how close the prediction was to reality.
+    // Formula: 100% - Average Percentage Error
+    // Example: If average error is 5%, Accuracy is 95%.
+    const accuracy = Math.max(0, 100 - avgPercentageError);
 
     return {
       aiModelId: predictions[0].aiModelId,
