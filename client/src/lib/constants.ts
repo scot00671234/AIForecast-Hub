@@ -10,20 +10,20 @@ export const COMMODITY_CATEGORIES = {
 } as const;
 
 export const TIME_PERIODS = {
-  "7d": "Last 7 Days",
-  "30d": "Last 30 Days", 
+  // "7d": "Last 7 Days",
+  // "30d": "Last 30 Days", 
   "90d": "Last 90 Days",
   "all": "All Time"
 } as const;
 
 export const ALERT_TYPES = {
   VOLATILITY: "volatility",
-  DIVERGENCE: "divergence", 
+  DIVERGENCE: "divergence",
   MILESTONE: "milestone"
 } as const;
 
 export const ALERT_SEVERITIES = {
   INFO: "info",
-  WARNING: "warning", 
+  WARNING: "warning",
   ERROR: "error"
 } as const;
