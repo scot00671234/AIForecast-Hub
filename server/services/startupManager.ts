@@ -59,12 +59,24 @@ export class StartupManager {
           }
         }
 
-        // Update accuracy metrics based on latest data
+        // Update accuracy metrics and composite index based on latest data
         try {
-          console.log('🔄 Updating accuracy metrics on startup...');
+          console.log('🔄 Updating AI analytics on startup...');
+
+          // Import services
           const { accuracyCalculator } = await import('./accuracyCalculator');
+          const { compositeIndexService } = await import('./compositeIndexService');
+
+          // 1. Calculate Composite Index (ACCI)
+          console.log('📊 Recalculating Composite Index...');
+          await compositeIndexService.calculateAndStoreIndex();
+          console.log('✅ Composite Index updated');
+
+          // 2. Update Model Accuracy Metrics
+          console.log('🎯 Recalculating Accuracy Metrics...');
           await accuracyCalculator.updateAllAccuracyMetrics();
-          console.log('✅ Accuracy metrics updated on startup');
+          console.log('✅ Accuracy Metrics updated');
+
         } catch (error) {
           console.error('❌ Failed to update accuracy metrics on startup:', error);
         }

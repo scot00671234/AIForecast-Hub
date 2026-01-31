@@ -1336,6 +1336,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoints for manual triggers
+  app.post("/api/admin/recalculate-accuracy", async (req, res) => {
+    try {
+      console.log("🔄 Manual trigger: Recalculating all accuracy metrics...");
+      await accuracyCalculator.updateAllAccuracyMetrics();
+      console.log("✅ Manual accuracy update complete");
+      res.json({ success: true, message: "Accuracy metrics recalculated successfully" });
+    } catch (error) {
+      console.error("❌ Manual accuracy update failed:", error);
+      res.status(500).json({ error: "Failed to recalculate accuracy metrics" });
+    }
+  });
+
+  app.post("/api/admin/recalculate-index", async (req, res) => {
+    try {
+      console.log("🔄 Manual trigger: Recalculating composite index...");
+      await compositeIndexService.calculateAndStoreIndex();
+      console.log("✅ Manual composite index update complete");
+      res.json({ success: true, message: "Composite index recalculated successfully" });
+    } catch (error) {
+      console.error("❌ Manual composite index update failed:", error);
+      res.status(500).json({ error: "Failed to recalculate composite index" });
+    }
+  });
+
+  app.post("/api/admin/trigger-predictions", async (req, res) => {
+    try {
+      console.log("🔄 Manual trigger: Generating monthly predictions...");
+      await aiPredictionService.generateMonthlyPredictions();
+      console.log("✅ Manual prediction generation complete");
+      res.json({ success: true, message: "Monthly predictions generated successfully" });
+    } catch (error) {
+      console.error("❌ Manual prediction trigger failed:", error);
+      res.status(500).json({ error: "Failed to generate predictions" });
+    }
+  });
+
   // Professional startup management
   const { StartupManager } = await import('./services/startupManager');
   const startupManager = new StartupManager(storage);

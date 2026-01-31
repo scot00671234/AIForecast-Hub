@@ -90,11 +90,19 @@ export class AccuracyCalculator {
 
     console.log(`🔍 Attempting to match ${predictions.length} predictions with ${actualPrices.length} actual prices`);
 
-    // Match predictions with actual prices from the PREDICTION DATE (not target date)
-    // This allows us to evaluate predictions immediately against historical data
+    // Match predictions with actual prices from the TARGET DATE (what was predicted)
+    // This is the correct way to measure prediction accuracy
     predictions.forEach((pred, index) => {
-      const predictionDate = new Date(pred.predictionDate);
       const targetDate = new Date(pred.targetDate);
+      const predictionDate = new Date(pred.predictionDate);
+
+      // Only evaluate predictions where the target date has passed
+      if (targetDate > now) {
+        if (index < 3) {
+          console.log(`⏭️ Skipping future prediction ${index + 1}: target date ${targetDate.toISOString().split('T')[0]} is in the future`);
+        }
+        return; // Skip future predictions - we can't measure accuracy yet
+      }
 
       if (index < 3) {
         console.log(`📊 Sample prediction ${index + 1}:`, {
@@ -104,21 +112,21 @@ export class AccuracyCalculator {
         });
       }
 
-      // Find actual price closest to the prediction date (when prediction was made)
-      // This gives us a baseline to compare against
+      // Find actual price closest to the TARGET date (what was predicted)
+      // This is the correct comparison for measuring prediction accuracy
       const tolerance = 7; // ±7 days tolerance for finding matching price
 
       const candidatePrices = actualPrices.filter(price => {
         const priceDate = new Date(price.date);
-        const daysDiff = Math.abs((priceDate.getTime() - predictionDate.getTime()) / (24 * 60 * 60 * 1000));
+        const daysDiff = Math.abs((priceDate.getTime() - targetDate.getTime()) / (24 * 60 * 60 * 1000));
         return daysDiff <= tolerance;
       });
 
       if (candidatePrices.length > 0) {
-        // Select closest date to prediction date
+        // Select closest date to target date
         const actualPrice = candidatePrices.reduce((closest, current) => {
-          const closestDiff = Math.abs(new Date(closest.date).getTime() - predictionDate.getTime());
-          const currentDiff = Math.abs(new Date(current.date).getTime() - predictionDate.getTime());
+          const closestDiff = Math.abs(new Date(closest.date).getTime() - targetDate.getTime());
+          const currentDiff = Math.abs(new Date(current.date).getTime() - targetDate.getTime());
           return currentDiff < closestDiff ? current : closest;
         });
 
@@ -126,7 +134,13 @@ export class AccuracyCalculator {
         const actual = parseFloat(actualPrice.price);
         const error = actual - predicted;
 
-        matches.push({ predicted, actual, date: predictionDate, error });
+        if (index < 3) {
+          console.log(`✅ Match found: predicted ${predicted}, actual ${actual} on ${new Date(actualPrice.date).toISOString().split('T')[0]}`);
+        }
+
+        matches.push({ predicted, actual, date: targetDate, error });
+      } else if (index < 3) {
+        console.log(`❌ No matching actual price found for target date ${targetDate.toISOString().split('T')[0]}`);
       }
     });
 
