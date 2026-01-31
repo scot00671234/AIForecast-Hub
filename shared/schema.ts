@@ -48,10 +48,40 @@ export const accuracyMetrics = pgTable("accuracy_metrics", {
   aiModelId: varchar("ai_model_id").references(() => aiModels.id).notNull(),
   commodityId: varchar("commodity_id").references(() => commodities.id).notNull(),
   period: text("period").notNull(), // '7d', '30d', '90d', 'all'
+
+  // Primary accuracy score (weighted composite)
   accuracy: decimal("accuracy", { precision: 5, scale: 2 }).notNull(),
+
+  // Core metrics
   totalPredictions: integer("total_predictions").notNull(),
   correctPredictions: integer("correct_predictions").notNull(),
   avgError: decimal("avg_error", { precision: 10, scale: 4 }),
+
+  // Industry-standard metrics
+  mape: decimal("mape", { precision: 5, scale: 2 }), // Mean Absolute Percentage Error
+  rmse: decimal("rmse", { precision: 10, scale: 4 }), // Root Mean Square Error
+  mae: decimal("mae", { precision: 10, scale: 4 }), // Mean Absolute Error
+  rSquared: decimal("r_squared", { precision: 5, scale: 4 }), // Coefficient of Determination
+  theilsU: decimal("theils_u", { precision: 5, scale: 4 }), // Theil's U statistic
+  smape: decimal("smape", { precision: 5, scale: 2 }), // Symmetric MAPE
+
+  // Directional accuracy
+  directionalAccuracy: decimal("directional_accuracy", { precision: 5, scale: 2 }),
+
+  // Statistical significance
+  confidenceInterval95Lower: decimal("ci_95_lower", { precision: 5, scale: 2 }),
+  confidenceInterval95Upper: decimal("ci_95_upper", { precision: 5, scale: 2 }),
+  sampleSize: integer("sample_size").default(0),
+
+  // Error analysis
+  errorStdDev: decimal("error_std_dev", { precision: 10, scale: 4 }), // Standard deviation of errors
+  medianError: decimal("median_error", { precision: 10, scale: 4 }), // Median absolute error
+  outlierCount: integer("outlier_count").default(0), // Number of outlier predictions
+
+  // Metadata
+  calculationMethod: text("calculation_method").default("enhanced_v2"),
+  dataQualityScore: decimal("data_quality_score", { precision: 5, scale: 2 }), // 0-100 score
+
   lastUpdated: timestamp("last_updated").default(sql`now()`).notNull(),
 });
 

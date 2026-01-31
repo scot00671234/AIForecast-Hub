@@ -1,5 +1,11 @@
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined") return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + x + '" is not supported');
+});
 var __esm = (fn, res) => function __init() {
   return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
 };
@@ -78,10 +84,42 @@ var init_schema = __esm({
       commodityId: varchar("commodity_id").references(() => commodities.id).notNull(),
       period: text("period").notNull(),
       // '7d', '30d', '90d', 'all'
+      // Primary accuracy score (weighted composite)
       accuracy: decimal("accuracy", { precision: 5, scale: 2 }).notNull(),
+      // Core metrics
       totalPredictions: integer("total_predictions").notNull(),
       correctPredictions: integer("correct_predictions").notNull(),
       avgError: decimal("avg_error", { precision: 10, scale: 4 }),
+      // Industry-standard metrics
+      mape: decimal("mape", { precision: 5, scale: 2 }),
+      // Mean Absolute Percentage Error
+      rmse: decimal("rmse", { precision: 10, scale: 4 }),
+      // Root Mean Square Error
+      mae: decimal("mae", { precision: 10, scale: 4 }),
+      // Mean Absolute Error
+      rSquared: decimal("r_squared", { precision: 5, scale: 4 }),
+      // Coefficient of Determination
+      theilsU: decimal("theils_u", { precision: 5, scale: 4 }),
+      // Theil's U statistic
+      smape: decimal("smape", { precision: 5, scale: 2 }),
+      // Symmetric MAPE
+      // Directional accuracy
+      directionalAccuracy: decimal("directional_accuracy", { precision: 5, scale: 2 }),
+      // Statistical significance
+      confidenceInterval95Lower: decimal("ci_95_lower", { precision: 5, scale: 2 }),
+      confidenceInterval95Upper: decimal("ci_95_upper", { precision: 5, scale: 2 }),
+      sampleSize: integer("sample_size").default(0),
+      // Error analysis
+      errorStdDev: decimal("error_std_dev", { precision: 10, scale: 4 }),
+      // Standard deviation of errors
+      medianError: decimal("median_error", { precision: 10, scale: 4 }),
+      // Median absolute error
+      outlierCount: integer("outlier_count").default(0),
+      // Number of outlier predictions
+      // Metadata
+      calculationMethod: text("calculation_method").default("enhanced_v2"),
+      dataQualityScore: decimal("data_quality_score", { precision: 5, scale: 2 }),
+      // 0-100 score
       lastUpdated: timestamp("last_updated").default(sql`now()`).notNull()
     });
     marketAlerts = pgTable("market_alerts", {
@@ -156,6 +194,13 @@ var init_db = __esm({
     }
     if (!process.env.DATABASE_URL) {
       console.warn("DATABASE_URL not set, using default development database");
+    } else {
+      try {
+        const url = new URL(process.env.DATABASE_URL);
+        console.log(`\u{1F50C} Configuring database connection to host: ${url.hostname}`);
+      } catch (e) {
+        console.log("\u{1F50C} Configuring database connection (URL parsing failed, check format)");
+      }
     }
     pool = new Pool({
       connectionString: databaseUrl,
@@ -197,38 +242,49 @@ var init_storage = __esm({
         await this.initializeDefaultData();
       }
       async testConnection() {
-        try {
-          await db.execute(sql2`SELECT 1`);
-          console.log("\u2705 Database connection established");
-          if (process.env.NODE_ENV === "production") {
-            console.log("\u{1F527} Production environment detected - ensuring database schema...");
-            await this.runProductionMigration();
-          } else {
-            await this.ensureDatabaseSchema();
-          }
-          await db.select().from(aiModels).limit(1);
-          this.isDbConnected = true;
-          console.log("\u2705 Database connection verified");
-        } catch (error) {
-          console.error("\u274C Database connection failed:", error.message);
-          if (process.env.NODE_ENV === "production") {
-            console.log("\u{1F6A8} Emergency migration attempt...");
-            try {
-              await this.runEmergencyMigration();
-              await db.select().from(aiModels).limit(1);
-              this.isDbConnected = true;
-              console.log("\u2705 Database connection successful after emergency migration");
-              return;
-            } catch (migrationError) {
-              console.error("\u274C Emergency migration failed:", migrationError.message);
+        const maxRetries = 20;
+        let retries = 0;
+        while (retries < maxRetries) {
+          try {
+            console.log(`\u{1F50C} Database connection attempt ${retries + 1}/${maxRetries}...`);
+            await db.execute(sql2`SELECT 1`);
+            console.log("\u2705 Database connection established");
+            if (process.env.NODE_ENV === "production") {
+              console.log("\u{1F527} Production environment detected - ensuring database schema...");
+              await this.runProductionMigration();
+            } else {
+              await this.ensureDatabaseSchema();
             }
-          }
-          this.isDbConnected = false;
-          if (process.env.NODE_ENV === "production") {
-            throw new Error(`Database connection required for production deployment: ${error.message}`);
-          } else {
-            console.warn(`\u26A0\uFE0F Database connection failed in development mode: ${error.message}`);
-            console.warn("\u26A0\uFE0F Application will continue without database functionality");
+            await db.select().from(aiModels).limit(1);
+            this.isDbConnected = true;
+            console.log("\u2705 Database connection verified and fully operational");
+            return;
+          } catch (error) {
+            const message = error.message;
+            console.error(`\u274C Database connection failed (Attempt ${retries + 1}):`, message);
+            if (process.env.NODE_ENV === "production" && retries === 0) {
+              console.log("\u{1F6A8} Attemping emergency checks...");
+              try {
+                await this.runEmergencyMigration();
+                console.log("\u2705 Emergency migration ran, retrying connection...");
+              } catch (e) {
+                console.log("\u26A0\uFE0F Emergency checks failed, continuing retry loop");
+              }
+            }
+            retries++;
+            if (retries >= maxRetries) {
+              console.error("\u{1F480} Exhausted all database connection retries");
+              this.isDbConnected = false;
+              if (process.env.NODE_ENV === "production") {
+                throw new Error(`Critical: Could not connect to database after ${maxRetries} attempts: ${message}`);
+              } else {
+                console.warn(`\u26A0\uFE0F Database connection failed in development: ${message}`);
+                return;
+              }
+            }
+            const delay = Math.min(1e3 * Math.pow(1.5, retries), 1e4);
+            console.log(`\u23F3 Waiting ${Math.round(delay / 1e3)}s before retry...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
           }
         }
       }
@@ -1096,13 +1152,28 @@ var init_yahooFinance = __esm({
         }
       }
       async getCurrentPrice(yahooSymbol) {
-        const data = await this.fetchHistoricalData(yahooSymbol, "1d");
-        if (data?.chart?.result?.[0]?.meta) {
-          const meta = data.chart.result[0].meta;
+        const data = await this.fetchHistoricalData(yahooSymbol, "5d", "1d");
+        if (data?.chart?.result?.[0]) {
+          const result = data.chart.result[0];
+          const meta = result.meta;
+          const currentPrice = meta.regularMarketPrice;
+          let change = meta.regularMarketChange;
+          let changePercent = meta.regularMarketChangePercent;
+          if ((change === void 0 || change === 0) && result.indicators?.quote?.[0]?.close) {
+            const prices = result.indicators.quote[0].close;
+            const timestamps = result.timestamp || [];
+            if (prices.length >= 2 && timestamps.length >= 2) {
+              const previousClose = prices[prices.length - 2];
+              if (previousClose && !isNaN(previousClose) && currentPrice && !isNaN(currentPrice)) {
+                change = currentPrice - previousClose;
+                changePercent = change / previousClose * 100;
+              }
+            }
+          }
           return {
-            price: meta.regularMarketPrice,
-            change: meta.regularMarketChange || 0,
-            changePercent: meta.regularMarketChangePercent || 0
+            price: currentPrice,
+            change: change || 0,
+            changePercent: changePercent || 0
           };
         }
         return null;
@@ -1174,6 +1245,348 @@ var init_yahooFinance = __esm({
       }
     };
     yahooFinanceService = new YahooFinanceService();
+  }
+});
+
+// server/services/accuracyCalculator.ts
+var accuracyCalculator_exports = {};
+__export(accuracyCalculator_exports, {
+  AccuracyCalculator: () => AccuracyCalculator,
+  accuracyCalculator: () => accuracyCalculator
+});
+var AccuracyCalculator, accuracyCalculator;
+var init_accuracyCalculator = __esm({
+  "server/services/accuracyCalculator.ts"() {
+    "use strict";
+    init_storage();
+    AccuracyCalculator = class {
+      /**
+       * Determine appropriate date matching tolerance based on prediction timeframe
+       */
+      getToleranceWindow(prediction) {
+        const predictionDate = new Date(prediction.predictionDate);
+        const targetDate = new Date(prediction.targetDate);
+        const daysBetween = (targetDate.getTime() - predictionDate.getTime()) / (24 * 60 * 60 * 1e3);
+        if (daysBetween <= 30) return 2;
+        if (daysBetween <= 90) return 7;
+        if (daysBetween <= 180) return 14;
+        return 21;
+      }
+      /**
+       * Enhanced accuracy calculation with comprehensive metrics:
+       * - MAPE, RMSE, MAE, R², Theil's U, sMAPE
+       * - Directional accuracy
+       * - Statistical significance (confidence intervals)
+       * - Error analysis (std dev, median, outliers)
+       */
+      async calculateAccuracy(predictions2, actualPrices2) {
+        if (predictions2.length === 0 || actualPrices2.length === 0) return null;
+        const now = /* @__PURE__ */ new Date();
+        const matches = [];
+        const eligiblePredictions = predictions2.filter((pred) => {
+          const targetDate = new Date(pred.targetDate);
+          return targetDate <= now;
+        });
+        if (eligiblePredictions.length === 0) {
+          return null;
+        }
+        eligiblePredictions.forEach((pred) => {
+          const targetDate = new Date(pred.targetDate);
+          const tolerance = this.getToleranceWindow(pred);
+          let actualPrice = actualPrices2.find((price) => {
+            const priceDate = new Date(price.date);
+            return Math.abs(targetDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1e3;
+          });
+          if (!actualPrice) {
+            const candidatePrices = actualPrices2.filter((price) => {
+              const priceDate = new Date(price.date);
+              const daysDiff = Math.abs((priceDate.getTime() - targetDate.getTime()) / (24 * 60 * 60 * 1e3));
+              return daysDiff <= tolerance;
+            });
+            if (candidatePrices.length > 0) {
+              actualPrice = candidatePrices.reduce((closest, current) => {
+                const closestDiff = Math.abs(new Date(closest.date).getTime() - targetDate.getTime());
+                const currentDiff = Math.abs(new Date(current.date).getTime() - targetDate.getTime());
+                return currentDiff < closestDiff ? current : closest;
+              });
+            }
+          }
+          if (actualPrice) {
+            const predicted = parseFloat(pred.predictedPrice);
+            const actual = parseFloat(actualPrice.price);
+            const error = actual - predicted;
+            matches.push({ predicted, actual, date: new Date(pred.targetDate), error });
+          }
+        });
+        if (matches.length < 3) return null;
+        const absoluteErrors = matches.map((m) => Math.abs(m.error));
+        const percentageErrors = matches.map(
+          (m) => Math.abs(m.error / m.actual) * 100
+        );
+        const avgAbsoluteError = absoluteErrors.reduce((a, b) => a + b, 0) / absoluteErrors.length;
+        const avgPercentageError = percentageErrors.reduce((a, b) => a + b, 0) / percentageErrors.length;
+        const mape = avgPercentageError;
+        const mae = avgAbsoluteError;
+        const squaredErrors = matches.map((m) => m.error * m.error);
+        const mse = squaredErrors.reduce((a, b) => a + b, 0) / squaredErrors.length;
+        const rmse = Math.sqrt(mse);
+        const actualValues = matches.map((m) => m.actual);
+        const predictedValues = matches.map((m) => m.predicted);
+        const meanActual = actualValues.reduce((a, b) => a + b, 0) / actualValues.length;
+        const ssTotal = actualValues.reduce((sum, actual) => sum + Math.pow(actual - meanActual, 2), 0);
+        const ssResidual = matches.reduce((sum, m) => sum + Math.pow(m.error, 2), 0);
+        const rSquared = ssTotal > 0 ? Math.max(0, 1 - ssResidual / ssTotal) : 0;
+        const naiveMSE = matches.length > 1 ? matches.slice(1).reduce((sum, m, i) => {
+          const naiveError = m.actual - matches[i].actual;
+          return sum + naiveError * naiveError;
+        }, 0) / (matches.length - 1) : mse;
+        const theilsU = naiveMSE > 0 ? Math.sqrt(mse / naiveMSE) : 1;
+        const smape = matches.reduce((sum, m) => {
+          const denominator = (Math.abs(m.actual) + Math.abs(m.predicted)) / 2;
+          return denominator > 0 ? sum + Math.abs(m.error) / denominator * 100 : sum;
+        }, 0) / matches.length;
+        let correctDirections = 0;
+        const sortedMatches = matches.sort((a, b) => a.date.getTime() - b.date.getTime());
+        for (let i = 1; i < sortedMatches.length; i++) {
+          const actualTrend = sortedMatches[i].actual - sortedMatches[i - 1].actual;
+          const predictedTrend = sortedMatches[i].predicted - sortedMatches[i - 1].predicted;
+          if (actualTrend > 0 && predictedTrend > 0 || actualTrend < 0 && predictedTrend < 0 || Math.abs(actualTrend) < 0.01 && Math.abs(predictedTrend) < 0.01) {
+            correctDirections++;
+          }
+        }
+        const directionalAccuracy = sortedMatches.length > 1 ? correctDirections / (sortedMatches.length - 1) * 100 : 0;
+        const errors = matches.map((m) => m.error);
+        const meanError = errors.reduce((a, b) => a + b, 0) / errors.length;
+        const errorStdDev = Math.sqrt(
+          errors.reduce((sum, e) => sum + Math.pow(e - meanError, 2), 0) / errors.length
+        );
+        const standardError = errorStdDev / Math.sqrt(matches.length);
+        const tValue = 1.96;
+        const marginOfError = tValue * standardError / meanActual * 100;
+        const confidenceInterval95Lower = Math.max(0, mape - marginOfError);
+        const confidenceInterval95Upper = Math.min(100, mape + marginOfError);
+        const sortedAbsErrors = [...absoluteErrors].sort((a, b) => a - b);
+        const medianError = sortedAbsErrors.length % 2 === 0 ? (sortedAbsErrors[sortedAbsErrors.length / 2 - 1] + sortedAbsErrors[sortedAbsErrors.length / 2]) / 2 : sortedAbsErrors[Math.floor(sortedAbsErrors.length / 2)];
+        const q1Index = Math.floor(sortedAbsErrors.length * 0.25);
+        const q3Index = Math.floor(sortedAbsErrors.length * 0.75);
+        const q1 = sortedAbsErrors[q1Index];
+        const q3 = sortedAbsErrors[q3Index];
+        const iqr = q3 - q1;
+        const outlierThreshold = q3 + 1.5 * iqr;
+        const outlierCount = absoluteErrors.filter((e) => e > outlierThreshold).length;
+        const sampleSizeScore = Math.min(100, matches.length / 30 * 100);
+        const outlierPenalty = outlierCount / matches.length * 100;
+        const coverageScore = matches.length / eligiblePredictions.length * 100;
+        const dataQualityScore = Math.max(
+          0,
+          sampleSizeScore * 0.4 + coverageScore * 0.4 + (100 - outlierPenalty) * 0.2
+        );
+        const threshold = 5;
+        const correctPredictions = percentageErrors.filter((error) => error <= threshold).length;
+        const thresholdAccuracy = correctPredictions / matches.length * 100;
+        const mapeComponent = Math.max(0, 100 - mape);
+        const rmseNormalized = Math.max(0, 100 - rmse / meanActual * 100);
+        const rSquaredComponent = rSquared * 100;
+        const accuracy = mapeComponent * 0.3 + // MAPE: 30%
+        directionalAccuracy * 0.25 + // Directional: 25%
+        rSquaredComponent * 0.2 + // R²: 20%
+        rmseNormalized * 0.15 + // RMSE: 15%
+        thresholdAccuracy * 0.1;
+        return {
+          aiModelId: predictions2[0].aiModelId,
+          commodityId: predictions2[0].commodityId,
+          totalPredictions: matches.length,
+          correctPredictions,
+          // Core metrics
+          avgAbsoluteError: Math.round(avgAbsoluteError * 1e4) / 1e4,
+          avgPercentageError: Math.round(avgPercentageError * 100) / 100,
+          // Industry-standard metrics
+          mape: Math.round(mape * 100) / 100,
+          rmse: Math.round(rmse * 1e4) / 1e4,
+          mae: Math.round(mae * 1e4) / 1e4,
+          rSquared: Math.round(rSquared * 1e4) / 1e4,
+          theilsU: Math.round(theilsU * 1e4) / 1e4,
+          smape: Math.round(smape * 100) / 100,
+          // Directional accuracy
+          directionalAccuracy: Math.round(directionalAccuracy * 100) / 100,
+          // Statistical significance
+          confidenceInterval95Lower: Math.round(confidenceInterval95Lower * 100) / 100,
+          confidenceInterval95Upper: Math.round(confidenceInterval95Upper * 100) / 100,
+          sampleSize: matches.length,
+          // Error analysis
+          errorStdDev: Math.round(errorStdDev * 1e4) / 1e4,
+          medianError: Math.round(medianError * 1e4) / 1e4,
+          outlierCount,
+          // Metadata
+          dataQualityScore: Math.round(dataQualityScore * 100) / 100,
+          // Final score
+          accuracy: Math.round(accuracy * 100) / 100,
+          lastUpdated: /* @__PURE__ */ new Date()
+        };
+      }
+      /**
+       * Calculate comprehensive model rankings across all commodities
+       */
+      async calculateModelRankings(period = "all") {
+        const aiModels2 = await storage.getAiModels();
+        const commodities2 = await storage.getCommodities();
+        const rankings = [];
+        for (const model of aiModels2) {
+          let totalAccuracy = 0;
+          let totalPredictions = 0;
+          let totalAbsoluteError = 0;
+          let totalPercentageError = 0;
+          const commodityPerformance = [];
+          for (const commodity of commodities2) {
+            const predictions2 = await storage.getPredictions(commodity.id, model.id);
+            const actualPrices2 = await storage.getActualPrices(commodity.id, 1e3);
+            const filteredPredictions = this.filterByPeriod(predictions2, period);
+            if (filteredPredictions.length > 0) {
+              const accuracyResult = await this.calculateAccuracy(filteredPredictions, actualPrices2);
+              if (accuracyResult && accuracyResult.totalPredictions > 0) {
+                totalAccuracy += accuracyResult.accuracy * accuracyResult.totalPredictions;
+                totalPredictions += accuracyResult.totalPredictions;
+                totalAbsoluteError += accuracyResult.avgAbsoluteError * accuracyResult.totalPredictions;
+                totalPercentageError += accuracyResult.avgPercentageError * accuracyResult.totalPredictions;
+                commodityPerformance.push({
+                  commodity,
+                  accuracy: accuracyResult.accuracy,
+                  predictions: accuracyResult.totalPredictions
+                });
+              }
+            }
+          }
+          const overallAccuracy = totalPredictions > 0 ? totalAccuracy / totalPredictions : 0;
+          const avgAbsoluteError = totalPredictions > 0 ? totalAbsoluteError / totalPredictions : 0;
+          const avgPercentageError = totalPredictions > 0 ? totalPercentageError / totalPredictions : 0;
+          rankings.push({
+            aiModel: model,
+            overallAccuracy,
+            totalPredictions,
+            avgAbsoluteError,
+            avgPercentageError,
+            commodityPerformance: commodityPerformance.sort((a, b) => b.accuracy - a.accuracy),
+            rank: 0,
+            // Will be set after sorting
+            trend: 0
+            // Will be calculated based on historical comparison
+          });
+        }
+        rankings.sort((a, b) => b.overallAccuracy - a.overallAccuracy);
+        const previousRankings = await this.getPreviousRankings();
+        rankings.forEach((ranking, index) => {
+          ranking.rank = index + 1;
+          const previousRank = previousRankings.find((p) => p.aiModelId === ranking.aiModel.id)?.rank;
+          if (previousRank) {
+            if (ranking.rank < previousRank) {
+              ranking.trend = 1;
+            } else if (ranking.rank > previousRank) {
+              ranking.trend = -1;
+            } else {
+              ranking.trend = 0;
+            }
+          }
+        });
+        await this.storePreviousRankings(rankings);
+        return rankings;
+      }
+      filterByPeriod(predictions2, period) {
+        if (period === "all") return predictions2;
+        const now = /* @__PURE__ */ new Date();
+        let cutoffDate;
+        switch (period) {
+          case "7d":
+            cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1e3);
+            break;
+          case "30d":
+            cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1e3);
+            break;
+          case "90d":
+            cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1e3);
+            break;
+          default:
+            return predictions2;
+        }
+        return predictions2.filter((p) => {
+          const targetDate = new Date(p.targetDate);
+          return targetDate >= cutoffDate && targetDate <= now;
+        });
+      }
+      async getPreviousRankings() {
+        return [];
+      }
+      async storePreviousRankings(rankings) {
+      }
+      /**
+       * Calculate model-specific accuracy for a commodity with realistic variations
+       */
+      calculateModelAccuracy(modelName, commodityId) {
+        const modelBaseAccuracies = {
+          "Claude": 86.4,
+          "ChatGPT": 84.1,
+          "Deepseek": 88.2
+        };
+        const commodityModifiers = {
+          "c1": 0,
+          // Crude Oil - baseline
+          "c2": 2,
+          // Gold - easier to predict, stable
+          "c3": -3,
+          // Natural Gas - very volatile, harder
+          "c4": -1,
+          // Copper - industrial, moderate difficulty
+          "c5": 1,
+          // Silver - precious metal, relatively stable
+          "c6": -2,
+          // Coffee - agricultural, weather dependent
+          "c7": -4,
+          // Sugar - very volatile, weather/policy dependent
+          "c8": -2,
+          // Corn - agricultural, seasonal
+          "c9": -1,
+          // Soybeans - agricultural, trade dependent
+          "c10": -3
+          // Cotton - agricultural, very volatile
+        };
+        const baseAccuracy = modelBaseAccuracies[modelName] || 80;
+        const commodityModifier = commodityModifiers[commodityId] || 0;
+        const randomVariation = (Math.random() - 0.5) * 4;
+        return Math.max(70, Math.min(95, baseAccuracy + commodityModifier + randomVariation));
+      }
+      /**
+       * Update accuracy metrics for all models and commodities
+       */
+      async updateAllAccuracyMetrics() {
+        const aiModels2 = await storage.getAiModels();
+        const commodities2 = await storage.getCommodities();
+        for (const model of aiModels2) {
+          for (const commodity of commodities2) {
+            const predictions2 = await storage.getPredictions(commodity.id, model.id);
+            const actualPrices2 = await storage.getActualPrices(commodity.id, 1e3);
+            const accuracyResult = await this.calculateAccuracy(predictions2, actualPrices2);
+            if (accuracyResult) {
+              const periods = ["7d", "30d", "90d", "all"];
+              for (const period of periods) {
+                const filteredPredictions = this.filterByPeriod(predictions2, period);
+                const periodAccuracy = await this.calculateAccuracy(filteredPredictions, actualPrices2);
+                if (periodAccuracy) {
+                  await storage.updateAccuracyMetric({
+                    aiModelId: model.id,
+                    commodityId: commodity.id,
+                    period,
+                    accuracy: periodAccuracy.accuracy.toString(),
+                    totalPredictions: periodAccuracy.totalPredictions,
+                    correctPredictions: periodAccuracy.correctPredictions,
+                    avgError: periodAccuracy.avgAbsoluteError.toString()
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    accuracyCalculator = new AccuracyCalculator();
   }
 });
 
@@ -2056,11 +2469,13 @@ var init_compositeIndexService = __esm({
           const overallComponents = await this.calculateIndexComponents(commodityPredictions);
           const overallIndex = this.combineComponents(overallComponents);
           const hardCommodities = commodityPredictions.filter((cp) => cp.category === "hard");
+          console.log(`\u{1F4CA} Hard commodities found: ${hardCommodities.length} (${hardCommodities.map((h) => h.commodity).join(", ")})`);
           const hardComponents = await this.calculateIndexComponents(hardCommodities);
-          const hardIndex = this.combineComponents(hardComponents);
+          const hardIndex = hardCommodities.length > 0 ? this.combineComponents(hardComponents) : 50;
           const softCommodities = commodityPredictions.filter((cp) => cp.category === "soft");
+          console.log(`\u{1F4CA} Soft commodities found: ${softCommodities.length} (${softCommodities.map((s) => s.commodity).join(", ")})`);
           const softComponents = await this.calculateIndexComponents(softCommodities);
-          const softIndex = this.combineComponents(softComponents);
+          const softIndex = softCommodities.length > 0 ? this.combineComponents(softComponents) : 50;
           const sentiment = this.determineSentiment(overallIndex);
           const totalPredictions = commodityPredictions.reduce((sum, cp) => sum + cp.predictions.length, 0);
           const indexRecord = {
@@ -2202,6 +2617,7 @@ var init_predictionScheduler = __esm({
     init_aiPredictionService();
     init_cachedPredictionService();
     init_compositeIndexService();
+    init_accuracyCalculator();
     PredictionScheduler = class {
       isScheduled = false;
       start() {
@@ -2222,12 +2638,15 @@ var init_predictionScheduler = __esm({
           }
         });
         cron.schedule("0 2 * * *", async () => {
-          console.log("Recalculating AI Composite Index with existing predictions...");
+          console.log("Recalculating AI Composite Index and Accuracy Metrics with existing predictions...");
           try {
             await compositeIndexService.calculateAndStoreIndex();
             console.log("Daily composite index recalculation completed successfully");
+            console.log("Updating accuracy metrics...");
+            await accuracyCalculator.updateAllAccuracyMetrics();
+            console.log("Accuracy metrics update completed successfully");
           } catch (error) {
-            console.error("Daily composite index recalculation failed:", error);
+            console.error("Daily maintenance tasks failed:", error);
           }
         });
         this.isScheduled = true;
@@ -2321,6 +2740,14 @@ var init_startupManager = __esm({
               } catch (error) {
                 console.log(`\u26A0\uFE0F Could not initialize prices for ${commodity.name}:`, error.message);
               }
+            }
+            try {
+              console.log("\u{1F504} Updating accuracy metrics on startup...");
+              const { accuracyCalculator: accuracyCalculator2 } = await Promise.resolve().then(() => (init_accuracyCalculator(), accuracyCalculator_exports));
+              await accuracyCalculator2.updateAllAccuracyMetrics();
+              console.log("\u2705 Accuracy metrics updated on startup");
+            } catch (error) {
+              console.error("\u274C Failed to update accuracy metrics on startup:", error);
             }
             const { predictionScheduler: predictionScheduler2 } = await Promise.resolve().then(() => (init_predictionScheduler(), predictionScheduler_exports));
             predictionScheduler2.start();
@@ -2686,247 +3113,8 @@ var HistoricalDataService = class {
 };
 var historicalDataService = new HistoricalDataService();
 
-// server/services/accuracyCalculator.ts
-init_storage();
-var AccuracyCalculator = class {
-  /**
-   * Calculate accuracy using multiple methodologies:
-   * 1. Mean Absolute Percentage Error (MAPE)
-   * 2. Directional Accuracy (correct trend prediction)
-   * 3. Root Mean Square Error (RMSE)
-   * 4. Theil's U statistic for forecasting accuracy
-   */
-  async calculateAccuracy(predictions2, actualPrices2) {
-    if (predictions2.length === 0 || actualPrices2.length === 0) return null;
-    const now = /* @__PURE__ */ new Date();
-    const matches = [];
-    const eligiblePredictions = predictions2.filter((pred) => {
-      const targetDate = new Date(pred.targetDate);
-      return targetDate <= now;
-    });
-    if (eligiblePredictions.length === 0) {
-      return null;
-    }
-    eligiblePredictions.forEach((pred) => {
-      const targetDate = new Date(pred.targetDate);
-      let actualPrice = actualPrices2.find((price) => {
-        const priceDate = new Date(price.date);
-        const daysDiff = (priceDate.getTime() - targetDate.getTime()) / (24 * 60 * 60 * 1e3);
-        return daysDiff >= 0 && daysDiff <= 7;
-      });
-      if (!actualPrice) {
-        actualPrice = actualPrices2.find((price) => {
-          const priceDate = new Date(price.date);
-          return Math.abs(targetDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1e3;
-        });
-      }
-      if (actualPrice) {
-        matches.push({
-          predicted: parseFloat(pred.predictedPrice),
-          actual: parseFloat(actualPrice.price),
-          date: new Date(pred.targetDate)
-        });
-      }
-    });
-    if (matches.length === 0) return null;
-    const absoluteErrors = matches.map((m) => Math.abs(m.actual - m.predicted));
-    const percentageErrors = matches.map(
-      (m) => Math.abs((m.actual - m.predicted) / m.actual) * 100
-    );
-    const avgAbsoluteError = absoluteErrors.reduce((a, b) => a + b, 0) / absoluteErrors.length;
-    const avgPercentageError = percentageErrors.reduce((a, b) => a + b, 0) / percentageErrors.length;
-    let correctDirections = 0;
-    for (let i = 1; i < matches.length; i++) {
-      const actualTrend = matches[i].actual - matches[i - 1].actual;
-      const predictedTrend = matches[i].predicted - matches[i - 1].predicted;
-      if (actualTrend > 0 && predictedTrend > 0 || actualTrend < 0 && predictedTrend < 0 || actualTrend === 0 && predictedTrend === 0) {
-        correctDirections++;
-      }
-    }
-    const directionalAccuracy = matches.length > 1 ? correctDirections / (matches.length - 1) * 100 : 0;
-    const threshold = 5;
-    const correctPredictions = percentageErrors.filter((error) => error <= threshold).length;
-    const thresholdAccuracy = correctPredictions / matches.length * 100;
-    const accuracy = (100 - Math.min(avgPercentageError, 100)) * 0.4 + // MAPE component (40%)
-    directionalAccuracy * 0.35 + // Directional accuracy (35%)
-    thresholdAccuracy * 0.25;
-    return {
-      aiModelId: predictions2[0].aiModelId,
-      commodityId: predictions2[0].commodityId,
-      totalPredictions: matches.length,
-      correctPredictions,
-      avgAbsoluteError,
-      avgPercentageError,
-      accuracy: Math.round(accuracy * 100) / 100,
-      // Round to 2 decimal places
-      lastUpdated: /* @__PURE__ */ new Date()
-    };
-  }
-  /**
-   * Calculate comprehensive model rankings across all commodities
-   */
-  async calculateModelRankings(period = "all") {
-    const aiModels2 = await storage.getAiModels();
-    const commodities2 = await storage.getCommodities();
-    const rankings = [];
-    for (const model of aiModels2) {
-      let totalAccuracy = 0;
-      let totalPredictions = 0;
-      let totalAbsoluteError = 0;
-      let totalPercentageError = 0;
-      const commodityPerformance = [];
-      for (const commodity of commodities2) {
-        const predictions2 = await storage.getPredictions(commodity.id, model.id);
-        const actualPrices2 = await storage.getActualPrices(commodity.id, 1e3);
-        const filteredPredictions = this.filterByPeriod(predictions2, period);
-        if (filteredPredictions.length > 0) {
-          const accuracyResult = await this.calculateAccuracy(filteredPredictions, actualPrices2);
-          if (accuracyResult && accuracyResult.totalPredictions > 0) {
-            totalAccuracy += accuracyResult.accuracy * accuracyResult.totalPredictions;
-            totalPredictions += accuracyResult.totalPredictions;
-            totalAbsoluteError += accuracyResult.avgAbsoluteError * accuracyResult.totalPredictions;
-            totalPercentageError += accuracyResult.avgPercentageError * accuracyResult.totalPredictions;
-            commodityPerformance.push({
-              commodity,
-              accuracy: accuracyResult.accuracy,
-              predictions: accuracyResult.totalPredictions
-            });
-          }
-        }
-      }
-      const overallAccuracy = totalPredictions > 0 ? totalAccuracy / totalPredictions : 0;
-      const avgAbsoluteError = totalPredictions > 0 ? totalAbsoluteError / totalPredictions : 0;
-      const avgPercentageError = totalPredictions > 0 ? totalPercentageError / totalPredictions : 0;
-      rankings.push({
-        aiModel: model,
-        overallAccuracy,
-        totalPredictions,
-        avgAbsoluteError,
-        avgPercentageError,
-        commodityPerformance: commodityPerformance.sort((a, b) => b.accuracy - a.accuracy),
-        rank: 0,
-        // Will be set after sorting
-        trend: 0
-        // Will be calculated based on historical comparison
-      });
-    }
-    rankings.sort((a, b) => b.overallAccuracy - a.overallAccuracy);
-    const previousRankings = await this.getPreviousRankings();
-    rankings.forEach((ranking, index) => {
-      ranking.rank = index + 1;
-      const previousRank = previousRankings.find((p) => p.aiModelId === ranking.aiModel.id)?.rank;
-      if (previousRank) {
-        if (ranking.rank < previousRank) {
-          ranking.trend = 1;
-        } else if (ranking.rank > previousRank) {
-          ranking.trend = -1;
-        } else {
-          ranking.trend = 0;
-        }
-      }
-    });
-    await this.storePreviousRankings(rankings);
-    return rankings;
-  }
-  filterByPeriod(predictions2, period) {
-    if (period === "all") return predictions2;
-    const now = /* @__PURE__ */ new Date();
-    let cutoffDate;
-    switch (period) {
-      case "7d":
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1e3);
-        break;
-      case "30d":
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1e3);
-        break;
-      case "90d":
-        cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1e3);
-        break;
-      default:
-        return predictions2;
-    }
-    return predictions2.filter((p) => {
-      const targetDate = new Date(p.targetDate);
-      return targetDate >= cutoffDate && targetDate <= now;
-    });
-  }
-  async getPreviousRankings() {
-    return [];
-  }
-  async storePreviousRankings(rankings) {
-  }
-  /**
-   * Calculate model-specific accuracy for a commodity with realistic variations
-   */
-  calculateModelAccuracy(modelName, commodityId) {
-    const modelBaseAccuracies = {
-      "Claude": 86.4,
-      "ChatGPT": 84.1,
-      "Deepseek": 88.2
-    };
-    const commodityModifiers = {
-      "c1": 0,
-      // Crude Oil - baseline
-      "c2": 2,
-      // Gold - easier to predict, stable
-      "c3": -3,
-      // Natural Gas - very volatile, harder
-      "c4": -1,
-      // Copper - industrial, moderate difficulty
-      "c5": 1,
-      // Silver - precious metal, relatively stable
-      "c6": -2,
-      // Coffee - agricultural, weather dependent
-      "c7": -4,
-      // Sugar - very volatile, weather/policy dependent
-      "c8": -2,
-      // Corn - agricultural, seasonal
-      "c9": -1,
-      // Soybeans - agricultural, trade dependent
-      "c10": -3
-      // Cotton - agricultural, very volatile
-    };
-    const baseAccuracy = modelBaseAccuracies[modelName] || 80;
-    const commodityModifier = commodityModifiers[commodityId] || 0;
-    const randomVariation = (Math.random() - 0.5) * 4;
-    return Math.max(70, Math.min(95, baseAccuracy + commodityModifier + randomVariation));
-  }
-  /**
-   * Update accuracy metrics for all models and commodities
-   */
-  async updateAllAccuracyMetrics() {
-    const aiModels2 = await storage.getAiModels();
-    const commodities2 = await storage.getCommodities();
-    for (const model of aiModels2) {
-      for (const commodity of commodities2) {
-        const predictions2 = await storage.getPredictions(commodity.id, model.id);
-        const actualPrices2 = await storage.getActualPrices(commodity.id, 1e3);
-        const accuracyResult = await this.calculateAccuracy(predictions2, actualPrices2);
-        if (accuracyResult) {
-          const periods = ["7d", "30d", "90d", "all"];
-          for (const period of periods) {
-            const filteredPredictions = this.filterByPeriod(predictions2, period);
-            const periodAccuracy = await this.calculateAccuracy(filteredPredictions, actualPrices2);
-            if (periodAccuracy) {
-              await storage.updateAccuracyMetric({
-                aiModelId: model.id,
-                commodityId: commodity.id,
-                period,
-                accuracy: periodAccuracy.accuracy.toString(),
-                totalPredictions: periodAccuracy.totalPredictions,
-                correctPredictions: periodAccuracy.correctPredictions,
-                avgError: periodAccuracy.avgAbsoluteError.toString()
-              });
-            }
-          }
-        }
-      }
-    }
-  }
-};
-var accuracyCalculator = new AccuracyCalculator();
-
 // server/routes.ts
+init_accuracyCalculator();
 init_aiPredictionService();
 init_predictionScheduler();
 init_cachedPredictionService();
@@ -3130,6 +3318,37 @@ async function registerRoutes(app2) {
       });
     }
   });
+  app2.get("/api/deployment/verify", (req, res) => {
+    const isProduction = process.env.NODE_ENV === "production";
+    if (isProduction) {
+      const fs3 = __require("fs");
+      const path4 = __require("path");
+      const distPath = path4.resolve(process.cwd(), "dist", "public");
+      const indexPath = path4.resolve(distPath, "index.html");
+      const verification = {
+        environment: "production",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        cacheBust: Date.now(),
+        frontend: {
+          distExists: fs3.existsSync(distPath),
+          indexExists: fs3.existsSync(indexPath),
+          distPath,
+          filesInDist: fs3.existsSync(distPath) ? fs3.readdirSync(distPath).slice(0, 10) : []
+        },
+        server: {
+          port: process.env.PORT || "3000",
+          nodeEnv: process.env.NODE_ENV
+        }
+      };
+      res.json(verification);
+    } else {
+      res.json({
+        environment: "development",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        message: "Frontend served via Vite dev server"
+      });
+    }
+  });
   app2.get("/api/cache/status", async (req, res) => {
     try {
       const cacheStats = yahooFinanceCacheService.getCacheStats();
@@ -3243,15 +3462,45 @@ async function registerRoutes(app2) {
           });
           console.log(`\u{1F4C8} Model ${model.name}: ${filteredPredictions.length} predictions after period filter`);
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices2);
-          console.log(`\u{1F3AF} Model ${model.name} accuracy result:`, accuracyResult ? `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches)` : "No matches");
+          if (accuracyResult) {
+            console.log(
+              `\u{1F3AF} Model ${model.name} accuracy result:`,
+              `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches, quality: ${accuracyResult.dataQualityScore})`
+            );
+          } else {
+            console.log(`\u26A0\uFE0F Model ${model.name}: No accuracy result (insufficient data)`);
+          }
           return {
             aiModel: model,
             accuracy: accuracyResult ? Math.round(accuracyResult.accuracy * 10) / 10 : 0,
             totalPredictions: accuracyResult ? accuracyResult.totalPredictions : 0,
             trend: 0,
             // Could be calculated based on historical data
-            rank: 0
+            rank: 0,
             // Will be set after sorting
+            // Comprehensive metrics (only if we have results)
+            ...accuracyResult && {
+              metrics: {
+                mape: accuracyResult.mape,
+                rmse: accuracyResult.rmse,
+                mae: accuracyResult.mae,
+                rSquared: accuracyResult.rSquared,
+                theilsU: accuracyResult.theilsU,
+                smape: accuracyResult.smape,
+                directionalAccuracy: accuracyResult.directionalAccuracy
+              },
+              confidenceInterval: {
+                lower: accuracyResult.confidenceInterval95Lower,
+                upper: accuracyResult.confidenceInterval95Upper
+              },
+              errorAnalysis: {
+                stdDev: accuracyResult.errorStdDev,
+                median: accuracyResult.medianError,
+                outliers: accuracyResult.outlierCount
+              },
+              dataQuality: accuracyResult.dataQualityScore >= 70 ? "high" : accuracyResult.dataQualityScore >= 40 ? "medium" : "low",
+              sampleSize: accuracyResult.sampleSize
+            }
           };
         })
       );
@@ -3562,6 +3811,16 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Error fetching accuracy metrics:", error);
       res.status(500).json({ message: "Failed to fetch accuracy metrics" });
+    }
+  });
+  app2.post("/api/accuracy/update", async (req, res) => {
+    try {
+      console.log("\u{1F504} Manual accuracy metrics update triggered");
+      await accuracyCalculator.updateAllAccuracyMetrics();
+      res.json({ message: "Accuracy metrics updated successfully" });
+    } catch (error) {
+      console.error("Error updating accuracy metrics:", error);
+      res.status(500).json({ message: "Failed to update accuracy metrics" });
     }
   });
   app2.get("/api/predictions/all", async (req, res) => {
@@ -4160,11 +4419,25 @@ app.use((req, res, next) => {
     const distPath = path3.resolve(process.cwd(), "dist", "public");
     console.log(`\u{1F4C1} Looking for frontend files at: ${distPath}`);
     if (!fs2.existsSync(distPath)) {
+      console.error(`\u274C Frontend build not found at: ${distPath}`);
+      console.log("\u{1F4CB} Current working directory:", process.cwd());
+      console.log("\u{1F4CB} Directory contents:", fs2.readdirSync(process.cwd()));
+      if (fs2.existsSync(path3.join(process.cwd(), "dist"))) {
+        console.log("\u{1F4CB} Dist directory contents:", fs2.readdirSync(path3.join(process.cwd(), "dist")));
+      }
       throw new Error(`Frontend build not found at: ${distPath}`);
     }
-    app.use(express2.static(distPath));
-    app.use("*", (_req, res) => {
-      res.sendFile(path3.resolve(distPath, "index.html"));
+    console.log("\u{1F4C1} Frontend files found:", fs2.readdirSync(distPath));
+    app.use(express2.static(distPath, {
+      maxAge: "1h",
+      etag: true,
+      index: false
+    }));
+    app.get("*", (req, res) => {
+      if (!req.path.startsWith("/api")) {
+        console.log(`\u{1F4C4} Serving index.html for: ${req.path}`);
+        res.sendFile(path3.resolve(distPath, "index.html"));
+      }
     });
     console.log("\u2705 Production static file serving configured");
   } else {

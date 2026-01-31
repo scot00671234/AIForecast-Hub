@@ -239,15 +239,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Calculate accuracy using improved date matching
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices);
 
-          console.log(`🎯 Model ${model.name} accuracy result:`, accuracyResult ?
-            `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches)` : 'No matches');
+          if (accuracyResult) {
+            console.log(`🎯 Model ${model.name} accuracy result:`,
+              `${accuracyResult.accuracy}% (${accuracyResult.totalPredictions} matches, quality: ${accuracyResult.dataQualityScore})`);
+          } else {
+            console.log(`⚠️ Model ${model.name}: No accuracy result (insufficient data)`);
+          }
 
           return {
             aiModel: model,
             accuracy: accuracyResult ? Math.round(accuracyResult.accuracy * 10) / 10 : 0,
             totalPredictions: accuracyResult ? accuracyResult.totalPredictions : 0,
             trend: 0, // Could be calculated based on historical data
-            rank: 0 // Will be set after sorting
+            rank: 0, // Will be set after sorting
+
+            // Comprehensive metrics (only if we have results)
+            ...(accuracyResult && {
+              metrics: {
+                mape: accuracyResult.mape,
+                rmse: accuracyResult.rmse,
+                mae: accuracyResult.mae,
+                rSquared: accuracyResult.rSquared,
+                theilsU: accuracyResult.theilsU,
+                smape: accuracyResult.smape,
+                directionalAccuracy: accuracyResult.directionalAccuracy
+              },
+              confidenceInterval: {
+                lower: accuracyResult.confidenceInterval95Lower,
+                upper: accuracyResult.confidenceInterval95Upper
+              },
+              errorAnalysis: {
+                stdDev: accuracyResult.errorStdDev,
+                median: accuracyResult.medianError,
+                outliers: accuracyResult.outlierCount
+              },
+              dataQuality: accuracyResult.dataQualityScore >= 70 ? 'high' :
+                accuracyResult.dataQualityScore >= 40 ? 'medium' : 'low',
+              sampleSize: accuracyResult.sampleSize
+            })
           };
         })
       );
