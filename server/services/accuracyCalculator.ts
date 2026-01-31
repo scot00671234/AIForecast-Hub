@@ -232,7 +232,7 @@ export class AccuracyCalculator {
     // === Data Quality Score ===
     const sampleSizeScore = Math.min(100, (matches.length / 30) * 100); // Full score at 30+ predictions
     const outlierPenalty = (outlierCount / matches.length) * 100;
-    const coverageScore = (matches.length / eligiblePredictions.length) * 100; // How many predictions matched
+    const coverageScore = (matches.length / predictions.length) * 100; // How many predictions matched
     const dataQualityScore = Math.max(0,
       (sampleSizeScore * 0.4 + coverageScore * 0.4 + (100 - outlierPenalty) * 0.2)
     );
