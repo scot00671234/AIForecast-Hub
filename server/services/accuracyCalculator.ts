@@ -331,7 +331,14 @@ export class AccuracyCalculator {
         const actualPrices = await storage.getActualPrices(commodity.id, 1000);
 
         // Filter by period if specified
-        const filteredPredictions = this.filterByPeriod(predictions, period);
+        let filteredPredictions = this.filterByPeriod(predictions, period);
+
+        // Smart Fallback: If strict period yielded no results, try using ALL completed predictions
+        // This ensures the leaderboard is never empty if data exists anywhere
+        if (filteredPredictions.length < 5 && predictions.length >= 5) {
+          const now = new Date();
+          filteredPredictions = predictions.filter(p => new Date(p.targetDate) <= now);
+        }
 
         if (filteredPredictions.length > 0) {
           const accuracyResult = await this.calculateAccuracy(filteredPredictions, actualPrices);

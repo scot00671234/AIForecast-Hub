@@ -238,6 +238,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const targetDate = new Date(p.targetDate);
               return targetDate > cutoffDate && targetDate <= now;
             });
+
+            // Smart Fallback: If strict period filtering leaves us with too few predictions (e.g. < 5),
+            // fall back to ALL predictions to ensure we show a valid ranking.
+            // This prioritizes "showing a score" over "strict time window" when data is sparse.
+            if (filteredPredictions.length < 5 && predictions.length >= 5) {
+              console.log(`⚠️ Period ${period} has insufficient data (${filteredPredictions.length} preds). Falling back to ALL data to ensure ranking.`);
+              filteredPredictions = predictions.filter(p => new Date(p.targetDate) <= now);
+            }
           }
 
           console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions for accuracy calculation (period: ${period})`);
