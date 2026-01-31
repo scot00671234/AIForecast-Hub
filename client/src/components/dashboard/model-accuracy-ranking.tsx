@@ -91,9 +91,9 @@ export default function ModelAccuracyRanking({
           <div key={data.aiModel.id} className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200">
             <div className="flex items-center space-x-3">
               <div className={`w-1.5 h-1.5 rounded-full ${data.aiModel.name === 'Claude' ? 'bg-green-500' :
-                  data.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
-                    data.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
-                      'bg-gray-500'
+                data.aiModel.name === 'ChatGPT' ? 'bg-blue-500' :
+                  data.aiModel.name === 'Deepseek' ? 'bg-purple-500' :
+                    'bg-gray-500'
                 }`}></div>
               <span className="text-sm font-light text-foreground">
                 {data.aiModel.name}
@@ -110,14 +110,6 @@ export default function ModelAccuracyRanking({
                 )}
               </span>
               <span className="text-xs font-light text-muted-foreground">#{data.rank}</span>
-              {data.dataQuality && (
-                <span className={`text-xs px-1.5 py-0.5 rounded ${data.dataQuality === 'high' ? 'bg-green-500/10 text-green-600' :
-                    data.dataQuality === 'medium' ? 'bg-yellow-500/10 text-yellow-600' :
-                      'bg-red-500/10 text-red-600'
-                  }`}>
-                  {data.dataQuality}
-                </span>
-              )}
             </div>
           </div>
         ))}
