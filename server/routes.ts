@@ -211,30 +211,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`🔍 Model ${model.name}: ${predictions.length} predictions, ${actualPrices.length} actual prices`);
 
-          // Filter by period
-          const filteredPredictions = period === "all" ? predictions :
-            predictions.filter(pred => {
-              const createdAt = new Date(pred.createdAt!);
-              const cutoffDate = new Date();
+          // Use all predictions for accuracy calculation (period filtering removed)
+          // This ensures we calculate accuracy based on all available prediction data
+          const filteredPredictions = predictions;
 
-              switch (period) {
-                case "7d":
-                  cutoffDate.setDate(cutoffDate.getDate() - 7);
-                  break;
-                case "30d":
-                  cutoffDate.setDate(cutoffDate.getDate() - 30);
-                  break;
-                case "90d":
-                  cutoffDate.setDate(cutoffDate.getDate() - 90);
-                  break;
-                default:
-                  return true;
-              }
-
-              return createdAt >= cutoffDate;
-            });
-
-          console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions after period filter`);
+          console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions for accuracy calculation`);
 
           // Calculate accuracy using improved date matching
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices);
