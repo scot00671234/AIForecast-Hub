@@ -326,12 +326,8 @@ export class AccuracyCalculator {
         // Filter by period if specified
         let filteredPredictions = this.filterByPeriod(predictions, period);
 
-        // Smart Fallback: If strict period yielded no results, try using ALL completed predictions
-        // This ensures the leaderboard is never empty if data exists anywhere
-        if (filteredPredictions.length < 5 && predictions.length >= 5) {
-          const now = new Date();
-          filteredPredictions = predictions.filter(p => new Date(p.targetDate) <= now);
-        }
+        // Fallback removed to strictly respect the requested period
+        // If "7d" is selected but no data exists, we should return empty/0 rather than old data
 
         if (filteredPredictions.length > 0) {
           const accuracyResult = await this.calculateAccuracy(filteredPredictions, actualPrices);
