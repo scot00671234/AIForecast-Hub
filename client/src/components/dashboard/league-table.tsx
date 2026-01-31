@@ -49,7 +49,7 @@ export default function LeagueTable() {
     <div className="space-y-4" data-testid="league-table">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-light text-foreground">
-          Model Rankings
+          Model Rankings (90d)
         </h2>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
           <SelectTrigger className="w-32 h-8 bg-transparent border border-border/40 text-sm rounded-md font-light" data-testid="select-period">
