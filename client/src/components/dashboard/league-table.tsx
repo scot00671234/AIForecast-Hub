@@ -6,7 +6,7 @@ import type { LeagueTableEntry } from "@shared/schema";
 import { TIME_PERIODS } from "@/lib/constants";
 
 export default function LeagueTable() {
-  const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [selectedPeriod, setSelectedPeriod] = useState("90d");
 
   const { data: leagueTable, isLoading } = useQuery<LeagueTableEntry[]>({
     queryKey: ["/api/league-table", selectedPeriod],
@@ -38,6 +38,12 @@ export default function LeagueTable() {
     );
   }
 
+  // Filter periods to only show 90d and All Time
+  const allowedPeriods = {
+    "90d": TIME_PERIODS["90d"],
+    "all": TIME_PERIODS["all"]
+  };
+
   return (
     <div className="space-y-4" data-testid="league-table">
       <div className="flex items-center justify-between">
@@ -49,7 +55,7 @@ export default function LeagueTable() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(TIME_PERIODS).map(([key, label]) => (
+            {Object.entries(allowedPeriods).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}
               </SelectItem>
@@ -57,7 +63,7 @@ export default function LeagueTable() {
           </SelectContent>
         </Select>
       </div>
-      
+
       {!leagueTable || leagueTable.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-sm text-muted-foreground font-light">No ranking data available</p>
@@ -70,14 +76,14 @@ export default function LeagueTable() {
             const getModelColor = (modelName: string) => {
               switch (modelName) {
                 case 'Claude': return 'bg-green-500';
-                case 'ChatGPT': return 'bg-blue-500'; 
+                case 'ChatGPT': return 'bg-blue-500';
                 case 'Deepseek': return 'bg-purple-500';
                 default: return 'bg-gray-500';
               }
             };
 
             return (
-              <div 
+              <div
                 key={entry.aiModel.id}
                 className="flex items-center justify-between py-2 hover:bg-muted/20 -mx-2 px-2 rounded-md transition-colors duration-200"
                 data-testid={`league-entry-${entry.rank}`}
@@ -91,10 +97,10 @@ export default function LeagueTable() {
                     {entry.aiModel.name}
                   </span>
                 </div>
-                
+
                 <div className="text-right">
-                  <div className="text-base font-light text-foreground" 
-                       data-testid={`accuracy-${entry.rank}`}>
+                  <div className="text-base font-light text-foreground"
+                    data-testid={`accuracy-${entry.rank}`}>
                     {entry.accuracy.toFixed(1)}%
                   </div>
                   <div className="text-xs text-muted-foreground font-light">Accuracy</div>
@@ -104,7 +110,7 @@ export default function LeagueTable() {
           })}
         </div>
       )}
-      
+
       <div className="flex items-center justify-between text-xs text-muted-foreground font-light pt-2 border-t border-border/20">
         <span>Based on predictions across all commodities</span>
         <span>Best performer: {leagueTable?.[0]?.accuracy?.toFixed(1) || '0.0'}% accuracy</span>
