@@ -232,12 +232,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 cutoffDate = new Date(0); // Include all if unknown period
             }
 
-            // Filter by prediction creation date (when prediction was made)
-            // This matches the logic in calculateAccuracy
-            // Use > instead of >= to include predictions from exactly N days ago
+            // Filter by target date (when the prediction matures/is verifiable)
+            // This ensures we measure accuracy for predictions that closed in this period
             filteredPredictions = predictions.filter(p => {
-              const predictionDate = new Date(p.predictionDate);
-              return predictionDate > cutoffDate && predictionDate <= now;
+              const targetDate = new Date(p.targetDate);
+              return targetDate > cutoffDate && targetDate <= now;
             });
           }
 

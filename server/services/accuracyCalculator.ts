@@ -415,12 +415,11 @@ export class AccuracyCalculator {
         return predictions;
     }
 
-    // Filter by prediction creation date (when prediction was made)
-    // This matches the logic in calculateAccuracy
-    // Use > instead of >= to include predictions from exactly N days ago
+    // Filter by target date (when the prediction matures/is verifiable)
+    // This allows us to score predictions created long ago but maturing recently
     return predictions.filter(p => {
-      const predictionDate = new Date(p.predictionDate);
-      return predictionDate > cutoffDate && predictionDate <= now;
+      const targetDate = new Date(p.targetDate);
+      return targetDate > cutoffDate && targetDate <= now;
     });
   }
 
