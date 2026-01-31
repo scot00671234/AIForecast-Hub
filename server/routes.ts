@@ -211,11 +211,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`🔍 Model ${model.name}: ${predictions.length} predictions, ${actualPrices.length} actual prices`);
 
-          // Use all predictions for accuracy calculation (period filtering removed)
-          // This ensures we calculate accuracy based on all available prediction data
-          const filteredPredictions = predictions;
+          // Filter predictions by period (consistent with league table methodology)
+          let filteredPredictions = predictions;
 
-          console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions for accuracy calculation`);
+          if (period !== "all") {
+            const now = new Date();
+            let cutoffDate: Date;
+
+            switch (period) {
+              case "7d":
+                cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                break;
+              case "30d":
+                cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                break;
+              case "90d":
+                cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                break;
+              default:
+                cutoffDate = new Date(0); // Include all if unknown period
+            }
+
+            // Filter by prediction creation date (when prediction was made)
+            filteredPredictions = predictions.filter(p => {
+              const predictionDate = new Date(p.predictionDate);
+              return predictionDate >= cutoffDate && predictionDate <= now;
+            });
+          }
+
+          console.log(`📈 Model ${model.name}: ${filteredPredictions.length} predictions for accuracy calculation (period: ${period})`);
 
           // Calculate accuracy using improved date matching
           const accuracyResult = await accuracyCalculator.calculateAccuracy(filteredPredictions, actualPrices);
