@@ -401,11 +401,11 @@ export class AccuracyCalculator {
         return predictions;
     }
 
-    // Filter by target date completion, not prediction creation date
-    // Only include predictions whose targets have been reached within the period
+    // Filter by prediction creation date (when prediction was made)
+    // This matches the logic in calculateAccuracy
     return predictions.filter(p => {
-      const targetDate = new Date(p.targetDate);
-      return targetDate >= cutoffDate && targetDate <= now;
+      const predictionDate = new Date(p.predictionDate);
+      return predictionDate >= cutoffDate && predictionDate <= now;
     });
   }
 
