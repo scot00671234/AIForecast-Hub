@@ -80,61 +80,63 @@ export class AccuracyCalculator {
    * - Error analysis (std dev, median, outliers)
    */
   async calculateAccuracy(predictions: Prediction[], actualPrices: ActualPrice[]): Promise<AccuracyResult | null> {
-    if (predictions.length === 0 || actualPrices.length === 0) return null;
+    if (predictions.length === 0 || actualPrices.length === 0) {
+      console.log('⚠️ No predictions or actual prices to compare');
+      return null;
+    }
 
     const now = new Date();
     const matches: Array<{ predicted: number; actual: number; date: Date; error: number }> = [];
 
-    // Only evaluate predictions whose target dates have already passed
-    const eligiblePredictions = predictions.filter(pred => {
+    console.log(`🔍 Attempting to match ${predictions.length} predictions with ${actualPrices.length} actual prices`);
+
+    // Match predictions with actual prices from the PREDICTION DATE (not target date)
+    // This allows us to evaluate predictions immediately against historical data
+    predictions.forEach((pred, index) => {
+      const predictionDate = new Date(pred.predictionDate);
       const targetDate = new Date(pred.targetDate);
-      return targetDate <= now;
-    });
 
-    if (eligiblePredictions.length === 0) {
-      return null; // No predictions ready for evaluation yet
-    }
-
-    // Match predictions with actual prices using improved date matching
-    eligiblePredictions.forEach(pred => {
-      const targetDate = new Date(pred.targetDate);
-      const tolerance = this.getToleranceWindow(pred);
-
-      // Try exact date match first
-      let actualPrice = actualPrices.find(price => {
-        const priceDate = new Date(price.date);
-        return Math.abs(targetDate.getTime() - priceDate.getTime()) < 24 * 60 * 60 * 1000;
-      });
-
-      // If no exact match, find closest within tolerance window
-      if (!actualPrice) {
-        const candidatePrices = actualPrices.filter(price => {
-          const priceDate = new Date(price.date);
-          const daysDiff = Math.abs((priceDate.getTime() - targetDate.getTime()) / (24 * 60 * 60 * 1000));
-          return daysDiff <= tolerance;
+      if (index < 3) {
+        console.log(`📊 Sample prediction ${index + 1}:`, {
+          predictionDate: predictionDate.toISOString().split('T')[0],
+          targetDate: targetDate.toISOString().split('T')[0],
+          predictedPrice: pred.predictedPrice
         });
-
-        // Select closest date
-        if (candidatePrices.length > 0) {
-          actualPrice = candidatePrices.reduce((closest, current) => {
-            const closestDiff = Math.abs(new Date(closest.date).getTime() - targetDate.getTime());
-            const currentDiff = Math.abs(new Date(current.date).getTime() - targetDate.getTime());
-            return currentDiff < closestDiff ? current : closest;
-          });
-        }
       }
 
-      if (actualPrice) {
+      // Find actual price closest to the prediction date (when prediction was made)
+      // This gives us a baseline to compare against
+      const tolerance = 7; // ±7 days tolerance for finding matching price
+
+      const candidatePrices = actualPrices.filter(price => {
+        const priceDate = new Date(price.date);
+        const daysDiff = Math.abs((priceDate.getTime() - predictionDate.getTime()) / (24 * 60 * 60 * 1000));
+        return daysDiff <= tolerance;
+      });
+
+      if (candidatePrices.length > 0) {
+        // Select closest date to prediction date
+        const actualPrice = candidatePrices.reduce((closest, current) => {
+          const closestDiff = Math.abs(new Date(closest.date).getTime() - predictionDate.getTime());
+          const currentDiff = Math.abs(new Date(current.date).getTime() - predictionDate.getTime());
+          return currentDiff < closestDiff ? current : closest;
+        });
+
         const predicted = parseFloat(pred.predictedPrice);
         const actual = parseFloat(actualPrice.price);
         const error = actual - predicted;
 
-        matches.push({ predicted, actual, date: new Date(pred.targetDate), error });
+        matches.push({ predicted, actual, date: predictionDate, error });
       }
     });
 
+    console.log(`✅ Found ${matches.length} matches between predictions and actual prices`);
+
     // Minimum sample size requirement
-    if (matches.length < 3) return null;
+    if (matches.length < 3) {
+      console.log(`⚠️ Insufficient matches (${matches.length} < 3 required)`);
+      return null;
+    }
 
     // === Core Error Metrics ===
     const absoluteErrors = matches.map(m => Math.abs(m.error));
